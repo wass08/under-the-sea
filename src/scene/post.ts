@@ -51,7 +51,7 @@ export function createPost(renderer: WebGPURenderer, scene: Scene, camera: Persp
         // Several crisp shafts: a coarse fan pattern multiplied by a finer one, both drifting slowly.
         const coarse = mx_noise_float(vec3(ps.mul(0.13), simTime.mul(0.11))).mul(0.5).add(0.5);
         const fine = mx_noise_float(vec3(ps.mul(0.42).add(5.1), simTime.mul(0.2))).mul(0.5).add(0.5);
-        const beam = smoothstep(0.45, 0.56, coarse).mul(smoothstep(0.3, 0.7, fine).mul(0.7).add(0.3));
+        const beam = smoothstep(0.5, 0.58, coarse).mul(smoothstep(0.3, 0.7, fine).mul(0.7).add(0.3));
         const q = p.add(toSun.mul(4));
         const open = smoothstep(-0.05, 0.3, q.y.sub(texture(heightTexture, q.xz.div(R * 2).add(0.5)).level(float(0)).r));
         acc.addAssign(beam.mul(open).mul(smoothstep(-0.02, 0.4, under)).mul(under.mul(-0.05).exp()).mul(stepLen));
@@ -70,7 +70,7 @@ export function createPost(renderer: WebGPURenderer, scene: Scene, camera: Persp
       const bright = mix(veilColor, vec3(0.04, 0.55, 0.85), smoothstep(0.0, 0.85, rd.y).mul(0.75));
       const veil = bright.mul(float(1).sub(exp(dist.mul(-0.05))));
       const phase = float(0.7).add(rd.dot(toSun).max(0).pow(3).mul(2.2));
-      const rays = vec3(0.55, 0.92, 1.0).mul(godRays(min(dist, 55))).mul(phase).mul(godRayStrength).mul(0.3);
+      const rays = vec3(0.55, 0.92, 1.0).mul(godRays(min(dist, 55))).mul(phase).mul(godRayStrength).mul(0.11);
       out.assign(mix(color, absorbed.add(veil).add(rays), view.underwater));
     });
     return out;
