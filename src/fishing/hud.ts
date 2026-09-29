@@ -29,7 +29,7 @@ export function createHud() {
     plus.animate([{ opacity: 0, transform: 'translateY(4px) scale(.7)' }, { opacity: 1, transform: 'translateY(-10px) scale(1)', offset: 0.25 }, { opacity: 0, transform: 'translateY(-26px) scale(1)' }], { duration: 900, easing: 'ease-out' }).onfinish = () => plus.remove();
   }
   return {
-    update(game: Game) {
+    update(game: Game, anchor?: { x: number; y: number }) {
       if (game.caught !== shownCount) { const up = game.caught > shownCount; shownCount = game.caught; n.textContent = String(shownCount); if (up) pop(); }
       const text = game.hint;
       if (text !== shownStatus) {
@@ -38,6 +38,11 @@ export function createHud() {
       }
       const on = game.phase === 'bite';
       if (on !== promptOn) { promptOn = on; prompt.classList.toggle('on', on); }
+      if (on && anchor) {
+        const w = prompt.offsetWidth || 170, mx = w / 2 + 12;
+        const x = Math.min(innerWidth - mx, Math.max(mx, anchor.x)), y = Math.min(innerHeight - w / 2 - 12, Math.max(w / 2 + 120, anchor.y - w * 0.95));
+        prompt.style.left = x + 'px'; prompt.style.top = y + 'px';
+      }
       if (on) ring.style.strokeDashoffset = String(100 - game.hookLeft * 100);
       root.classList.toggle('busy', game.phase !== 'idle');
     },

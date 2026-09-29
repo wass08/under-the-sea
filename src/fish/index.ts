@@ -149,6 +149,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       predMeshes.mesh.visible = predator.scale > 0.01;
       env.predPos.value.copy(predator.pos); env.predVel.value.copy(predator.dir); env.predActive.value = predator.active ? 1 : 0;
 
+      env.hooked.value = stats.biter === 'hooked' ? 1 : 0;
       env.strike.value = pend.strike; env.land.value = pend.land;
       if (!noSim) mainSim.step(pend.strike > 0);
       if (angelOn()) angelSim.step(false);
@@ -184,11 +185,16 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   let attT = 0;
   function updateAttractor(dt: number) {
     attT += dt;
-    const t = attT, a = env.attractor.value;
-    let x = 3.4 * Math.sin(t * 0.075 + 0.5) + 1.2 * Math.sin(t * 0.19), z = 3.4 * Math.sin(t * 0.058 + 2.0) + 1.2 * Math.cos(t * 0.17);
-    const dx = x - homeXZ[0], dz = z - homeXZ[1], d = Math.hypot(dx, dz);
-    if (ic > 10 && d < 4.2) { x = homeXZ[0] + dx / d * 4.2; z = homeXZ[1] + dz / d * 4.2; }
-    a.set(Math.max(-4.2, Math.min(4.2, x)), 4.1 + 1.0 * Math.sin(t * 0.13 + 1) + 0.5 * Math.sin(t * 0.31), Math.max(-4.2, Math.min(4.2, z)));
+    const t = attT;
+    // three sub-group attractors: a shared wandering centre plus offsets whose spread breathes, so groups split and merge
+    const cx = 2.2 * Math.sin(t * 0.06 + 0.5), cz = 2.2 * Math.sin(t * 0.047 + 2.0), spread = 0.5 + 3.0 * (0.5 + 0.5 * Math.sin(t * 0.09 + 1.0));
+    for (let k = 0; k < 3; k++) {
+      const ph = k * 2.094 + t * (0.07 + k * 0.03);
+      let x = cx + Math.cos(ph) * spread + 0.8 * Math.sin(t * (0.11 + k * 0.05) + k), z = cz + Math.sin(ph) * spread + 0.8 * Math.cos(t * (0.13 + k * 0.04) + k * 2);
+      const dx = x - homeXZ[0], dz = z - homeXZ[1], d = Math.hypot(dx, dz);
+      if (ic > 10 && d < 4.4) { x = homeXZ[0] + dx / d * 4.4; z = homeXZ[1] + dz / d * 4.4; }
+      env.attractors[k].value.set(Math.max(-4.3, Math.min(4.3, x)), 4.2 + (1.3 + 0.5 * Math.sin(t * 0.05)) * Math.sin(t * (0.12 + k * 0.07) + k * 2.1), Math.max(-4.3, Math.min(4.3, z)));
+    }
   }
   const noSim = query.get('fishNoSim') === '1';
   const follow = query.has('fishFollow'), fd = Number(query.get('fishFollow')) || 1, followOffset = new Vector3(2.5 * fd, 2.2 * fd, 3.5 * fd);

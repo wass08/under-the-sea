@@ -156,7 +156,7 @@ export function createFisherman(boat: Boat, game: Game) {
       let rate = 6;
       // ---- choose the pose from the game state ----
       switch (ph) {
-        case 'idle': setGoal(game.auto ? 'wait' : 'idle'); rate = 4; break;
+        case 'idle': setGoal(game.auto ? 'wait' : 'idle'); rate = 7; break;
         case 'casting': {
           const wind = game.castWind;
           if (t < wind * 0.62) { setGoal('windup'); rate = 9; }

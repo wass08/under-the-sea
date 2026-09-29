@@ -36,9 +36,9 @@ export function buildTerrain() {
   // Variable density: finer around the island where the silhouette matters.
   const density = (x: number, z: number) => {
     const d = Math.hypot(x - ISLAND.x, z - ISLAND.z);
-    return 0.62 - 0.30 * smooth(6.2, 1.8, d);
+    return 0.62 - 0.38 * smooth(6.2, 1.8, d);
   };
-  const interior = poissonDisk({ bounds: [-R, -R, R, R], radius: density, minRadius: 0.30, maxRadius: 0.65, seed: 17 });
+  const interior = poissonDisk({ bounds: [-R, -R, R, R], radius: density, minRadius: 0.24, maxRadius: 0.65, seed: 17 });
   for (const p of interior) if (Math.abs(p[0]) < R - 0.27 && Math.abs(p[1]) < R - 0.27) points.push(p);
   const delaunay = delaunayFrom(points);
   const heights = Float32Array.from(points, ([x, z]) => terrainHeight(x, z));

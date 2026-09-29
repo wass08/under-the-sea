@@ -88,7 +88,7 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   const sp = new Vector3();
   function surfacePoint(p: Vector3) { return sp.set(p.x, world.heightAt(p.x, p.z), p.z); }
 
-  const aim = new Vector3(), tmpO = new Vector3(), tmpL = new Vector3();
+  const proj = new Vector3(), aim = new Vector3(), tmpO = new Vector3(), tmpL = new Vector3();
   let dripT = 0;
   const lureAir = new Vector3();
 
@@ -112,7 +112,8 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
       if (dripT <= 0) { dripT = 0.045; fx.drip(lureAir.copy(game.lure).setY(game.lure.y - 0.08)); }
     }
     fx.update(dt);
-    hud.update(game);
+    proj.copy(game.bobber).project(camera);
+    hud.update(game, { x: (proj.x * 0.5 + 0.5) * innerWidth, y: (-proj.y * 0.5 + 0.5) * innerHeight });
     if (camOverride) {
       const o = camOverride.relative ? tmpO.set(boat.state.x, boat.group.position.y, boat.state.z) : tmpO.set(0, 0, 0);
       camera.position.copy(camOverride.pos).add(o);

@@ -21,15 +21,15 @@ export function createEnv() {
     // boids
     speed: u(1), sepW: u(1.2), aliW: u(1.0), cohW: u(1.0), sepR: u(0.27), neighR: u(0.5), scanCap: u(5, 'int'),
     // milling
-    millBlend: u(0), millStrength: u(1), millRadius: u(2.9), millHeight: u(0.8), millDir: u(1), millCenter: u(new Vector3(0.4, 4.5, 0.3)), attractor: u(new Vector3(0, 4, 0)), attractW: u(1),
+    millBlend: u(0), millStrength: u(1), millRadius: u(2.9), millHeight: u(0.8), millDir: u(1), millCenter: u(new Vector3(0.4, 4.5, 0.3)), attractors: [0, 1, 2].map(() => u(new Vector3(0, 4, 0))), attractW: u(1),
     // predator / fountain
     predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(3.2), fountain: u(1),
     // panic
     panicOrigin: [0, 1, 2, 3].map(() => u(new Vector4(0, 0, 0, -1000))),
     panicStrength: u(new Vector4(0, 0, 0, 0)),
-    panicSpeed: u(6.5), burst: u(6.0), calm: u(0.55), transmission: u(0.96),
+    panicSpeed: u(5.0), burst: u(7.0), calm: u(0.8), transmission: u(0.96),
     // lure
-    lurePos: u(new Vector3(0, 5, 0)), lureActive: u(0), curiosity: u(0), curiosityRadius: u(3.5),
+    lurePos: u(new Vector3(0, 5, 0)), lureActive: u(0), curiosity: u(0), curiosityRadius: u(3.5), inspectors: u(100), hooked: u(0),
     strike: u(0), land: u(0), respawn: u(10),
     // misc
     seabedRes: 64,
@@ -187,7 +187,7 @@ export function createSim(o: SimOptions) {
       const thrash = vec3(sin(w), sin(w.mul(1.31).add(1.7)).mul(0.6), cos(w.mul(0.87))).mul(0.07);
       P.assign(env.lurePos.add(thrash));
       V.assign(normalize(vec3(sin(w.mul(0.41)), 0.25, cos(w.mul(0.37)))).mul(3.2));
-      fear.assign(1); flash.assign(max(flash.mul(0.9), sin(w.mul(0.7)).mul(0.5).add(0.5).mul(0.7)));
+      fear.assign(1); flash.assign(0);
       phaseRate.assign(9);
       statsWrite.element(6).assign(uint(2)); statsWrite.element(7).assign(uint(0));
       If(env.land.greaterThan(1.5), () => {
@@ -270,7 +270,8 @@ export function createSim(o: SimOptions) {
       }
 
       // --- large-scale flow: follow the wandering attractor loosely + coherent flow field (density waves, curling edges)
-      const ad = env.attractor.sub(P), al2 = length(ad);
+      const grp = floor(rnd(31).mul(3)), myAtt = select(grp.lessThan(0.5), env.attractors[0], select(grp.lessThan(1.5), env.attractors[1], env.attractors[2]));
+      const ad = myAtt.sub(P), al2 = length(ad);
       acc.addAssign(ad.div(max(al2, 0.01)).mul(smoothstep(2.6, 5.5, al2)).mul(2.6).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))));
       acc.addAssign(vec3(sin(P.y.mul(1.7).add(clock.mul(0.6))).add(sin(P.z.mul(1.1).sub(clock.mul(0.4)))), sin(P.x.mul(1.3).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(1.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.9).add(clock.mul(0.3))))).mul(1.0));
 
@@ -311,7 +312,13 @@ export function createSim(o: SimOptions) {
       // --- lure curiosity
       if (o.lureInfluence > 0) {
         const toL = env.lurePos.sub(P), d = length(toL), dirL = toL.div(max(d, 0.001));
-        const curious = env.lureActive.mul(step(trait, env.curiosity.mul(o.lureInfluence))).mul(step(d, env.curiosityRadius)).mul(step(fear, 0.25));
+        const bold = step(rnd(11), min(env.curiosity.mul(env.inspectors).div(N), 0.03));
+        const startle = env.hooked.mul(bold).mul(step(d, 1.8));
+        fear.assign(max(fear, startle.mul(0.45)));
+        acc.subAssign(dirL.mul(startle).mul(8));
+        // the school just drifts a little closer
+        acc.addAssign(dirL.mul(env.lureActive).mul(env.curiosity).mul(0.5).mul(step(1.5, d)).mul(smoothstep(6, 3, d)));
+        const curious = env.lureActive.mul(bold).mul(step(d, env.curiosityRadius)).mul(step(fear, 0.25));
         const orbit = rB.mul(0.6).add(0.4);
         const tang = normalize(cross(vec3(0, 1, 0), dirL)).mul(rA.sub(0.5).sign());
         const want = dirL.mul(clamp(d.sub(orbit).mul(1.2), -0.6, 1.3)).add(tang.mul(0.45));
@@ -345,7 +352,7 @@ export function createSim(o: SimOptions) {
         fear.assign(max(fear, target.mul(0.95)));
         const away = normalize(fearDir.add(randDir(7).mul(0.2)).add(dirV.mul(0.5)));
         V.assign(mix(V, away.mul(env.burst).mul(0.75).mul(rB.mul(0.3).add(0.85)), 0.8));
-        flash.assign(1);
+        flash.assign(0.45);
       });
 
       // --- integrate (turn rate limited)
@@ -358,6 +365,8 @@ export function createSim(o: SimOptions) {
       const vmin = spd.mul(o.minSpeed).mul(float(1).sub(fear.mul(0.8)));
       const sp2c = clamp(sp2, vmin, vmax);
       V.assign(V.mul(sp2c.div(max(sp2, 0.001))));
+      // after an explosive burst fish decelerate back toward cruise speed
+      V.mulAssign(float(1).sub(clamp(dt.mul(1.6), 0, 1).mul(step(spd.mul(o.cruise).mul(1.6), sp2c))));
       // flatten the pitch when calm
       const pitchLim = mix(float(0.55), float(0.95), clamp(fear.mul(1.5), 0, 1));
       const spN = max(length(V), 0.001);
@@ -387,7 +396,7 @@ export function createSim(o: SimOptions) {
       bank.assign(mix(bank, clamp(lat.mul(0.11), -1.0, 1.0), clamp(dt.mul(7), 0, 1)));
       const ang = length(cross(dirV, dirN)).div(max(dt, 0.0005));
       turnS.assign(mix(turnS, ang, clamp(dt.mul(10), 0, 1)));
-      flash.assign(max(flash.mul(exp(dt.mul(-11.0))), smoothstep(4.0, 11.0, turnS).mul(fear.mul(0.9).add(0.1)).min(1).mul(0.4)));
+      flash.assign(max(flash.mul(exp(dt.mul(-14.0))), smoothstep(4.0, 11.0, turnS).mul(fear.mul(0.9).add(0.1)).min(1).mul(0.4)));
       phaseRate.assign(float(0.9).add(speedNow.mul(0.85)).add(fear.mul(1.2)));
       alive.assign(1);
     });
@@ -404,7 +413,7 @@ export function createSim(o: SimOptions) {
   const select_ = Fn(() => {
     const i = instanceIndex, p = pos.element(i), a = aux.element(i), fear = vel.element(i).w;
     const d = length(p.xyz.sub(env.lurePos));
-    If(a.w.lessThan(0.5).and(fear.lessThan(0.35)).and(d.lessThan(env.curiosityRadius)).and(env.lureActive.greaterThan(0.5)), () => {
+    If(a.w.lessThan(0.5).and(fear.lessThan(0.25)).and(step(rnd(11), min(env.curiosity.mul(env.inspectors).div(N), 0.03)).greaterThan(0.5)).and(d.lessThan(env.curiosityRadius)).and(env.lureActive.greaterThan(0.5)), () => {
       const dq = clamp(d.div(env.curiosityRadius).mul(16383), 0, 16383).toUint();
       atomicMin(statsAtomic.element(8), dq.shiftLeft(uint(18)).bitOr(i));
     });
@@ -420,7 +429,7 @@ export function createSim(o: SimOptions) {
       atomicAdd(statsAtomic.element(2), p.y.add(CENTROID_OFFSET).mul(CENTROID_SCALE).toUint());
       atomicAdd(statsAtomic.element(3), p.z.add(CENTROID_OFFSET).mul(CENTROID_SCALE).toUint());
       atomicAdd(statsAtomic.element(4), clamp(v.w, 0, 1).mul(FEAR_SCALE).toUint());
-      If(a.w.lessThan(0.5).and(env.lureActive.greaterThan(0.5)).and(length(p.xyz.sub(env.lurePos)).lessThan(env.curiosityRadius)), () => { atomicAdd(statsAtomic.element(0), uint(1)); });
+      If(a.w.lessThan(0.5).and(v.w.lessThan(0.25)).and(step(rnd(11), min(env.curiosity.mul(env.inspectors).div(N), 0.03)).greaterThan(0.5)).and(env.lureActive.greaterThan(0.5)).and(length(p.xyz.sub(env.lurePos)).lessThan(env.curiosityRadius)), () => { atomicAdd(statsAtomic.element(0), uint(1)); });
     });
   })().compute(N).setName('fishAccumulate');
 

@@ -11,14 +11,14 @@
 .fh-status-text { display:inline-block; }
 .fishing-hud:not(.busy) .fh-status-text { color:#9fe6ff; }
 
-.fh-prompt { position:absolute; left:50%; top:36%; width:min(240px, 60vw); aspect-ratio:1; transform:translate(-50%,-50%) scale(.6); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .16s, transform .32s cubic-bezier(.2,1.2,.4,1); }
+.fh-prompt { position:absolute; left:50%; top:36%; width:min(158px, 42vw); aspect-ratio:1; transform:translate(-50%,-50%) scale(.6); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .16s, transform .32s cubic-bezier(.2,1.2,.4,1); }
 .fh-prompt.on { opacity:1; transform:translate(-50%,-50%) scale(1); animation:fh-throb .5s ease-in-out infinite alternate; }
 .fh-prompt::before { content:''; position:absolute; inset:9%; border-radius:50%; background:radial-gradient(circle, #0a1a2be6 0%, #0a1a2bb3 62%, #0a1a2b00 100%); }
 .fh-ring { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
 .fh-ring circle { fill:none; stroke-width:4; }
 .fh-ring-bg { stroke:#9fe6ff33; }
 .fh-ring-fg { stroke:#ffdf7a; stroke-linecap:round; stroke-dasharray:100; stroke-dashoffset:0; filter:drop-shadow(0 0 5px #ffdf7aaa); }
-.fh-prompt-text { position:relative; font-family:Manrope,sans-serif; font-weight:600; font-size:clamp(22px,4.4vw,30px); letter-spacing:-.02em; text-align:center; line-height:1.1; text-shadow:0 2px 14px #000a; padding:0 22px; }
+.fh-prompt-text { position:relative; font-family:Manrope,sans-serif; font-weight:600; font-size:clamp(15px,3vw,20px); letter-spacing:-.02em; text-align:center; line-height:1.1; text-shadow:0 2px 14px #000a; padding:0 16px; }
 @keyframes fh-throb { from { filter:brightness(1); } to { filter:brightness(1.25) drop-shadow(0 0 18px #ffdf7a55); } }
 
 @media (max-width:1100px) { .fh-pill { top:16px; } }

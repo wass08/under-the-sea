@@ -194,18 +194,18 @@ export function createFlora(scene: Scene) {
     return m;
   };
   const rockSpots: { x: number; z: number; y: number; s: number }[] = [];
-  for (let tries = 0; tries < 4000 && rockSpots.length < 46; tries++) {
+  for (let tries = 0; tries < 4000 && rockSpots.length < 64; tries++) {
     const x = (rng() * 2 - 1) * (R - 0.3), z = (rng() * 2 - 1) * (R - 0.3), y = terrainHeight(x, z);
     const dBasin = Math.hypot(x - BASIN.x, z - BASIN.z);
     const nearIsland = Math.hypot(x - ISLAND.x, z - ISLAND.z);
     if (y > level + 2.0) continue;
     if (dBasin < 3.4 && y < level) continue;
-    if (nearIsland < 2.0) continue;
+    if (nearIsland < 1.6) continue;
     if (y < level && slopeAt(x, z) > 0.9) continue;
     // Bias toward the edges and toward the beach.
-    const bias = Math.max(smooth01(3.5, 8, dBasin), Math.exp(-((nearIsland - 3.0) ** 2) / 1.5));
+    const bias = Math.max(smooth01(3.5, 8, dBasin), Math.exp(-((nearIsland - 3.3) ** 2) / 1.6) * 1.4);
     if (rng() > bias * 0.9) continue;
-    rockSpots.push({ x, z, y, s: 0.25 + Math.pow(rng(), 2.2) * 0.95 });
+    rockSpots.push({ x, z, y, s: (0.25 + Math.pow(rng(), 2.2) * 0.95) * (nearIsland < 4.4 && y < level ? 1.7 : 1) });
   }
   [rockA, rockB].forEach((g, k) => {
     const list = rockSpots.filter((_, i) => i % 2 === k);

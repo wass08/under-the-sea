@@ -48,3 +48,6 @@ export const damp = (current: number, target: number, rate: number, dt: number) 
 export const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 export const smooth = (x: number) => { const t = clamp(x, 0, 1); return t * t * (3 - 2 * t); };
 export const rand = (a: number, b: number) => a + Math.random() * (b - a);
+
+/** Uniform scale of boat + fisherman + rod rig (world units). */
+export const RIG_SCALE = 1.35;

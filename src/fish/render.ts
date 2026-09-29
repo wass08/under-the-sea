@@ -91,7 +91,8 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
 
   const N = normalW.normalize();
   material.normalNode = transformNormalToView(N).mul(faceDirection).normalize();
-  material.roughnessNode = float(look.roughness).mul(mix(1.0, 0.7, isBody));
+  const above = smoothstep(0.0, 0.3, positionNode.y.sub(waterLevel)); // fish lifted out of the water: dry lighting + wet sheen
+  material.roughnessNode = float(look.roughness).mul(mix(1.0, 0.7, isBody)).mul(mix(1.0, 0.5, above));
 
   // --- emissive: sun-flank sheen, caustics on the back, panic flash
   const toSun = sunDirection.negate(), Vw = normalize(cameraPosition.sub(positionNode));
@@ -99,16 +100,17 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
   const flank = float(1).sub(abs(N.y)).clamp(0, 1);
   const spec = pow(max(dot(N, H), 0), 22).mul(0.35).add(pow(max(dot(N, H), 0), 160).mul(1.4));
   const flicker = sin(seedV.mul(60).add(simTime.mul(2.2)).add(N.x.mul(6))).mul(0.25).add(0.75);
-  const sheen = vec3(0.75, 0.92, 1.0).mul(spec).mul(flank.mul(0.8).add(0.2)).mul(isBody).mul(flicker).mul(visuals.sheen).mul(look.sparkle);
+  const sheen = mix(vec3(0.75, 0.92, 1.0), vec3(1.0, 0.98, 0.94), above).mul(spec.mul(above.mul(1.2).add(1))).mul(flank.mul(0.8).add(0.2)).mul(isBody).mul(flicker).mul(visuals.sheen).mul(look.sparkle);
 
   const proj = positionNode.xz.sub(sunDirection.xz.mul(positionNode.y.div(sunDirection.y.min(-0.2))));
   const cau = causticsField(proj, simTime, { ...causticParams, level: 2, depth } as any);
   const sunFacing = smoothstep(-0.1, 0.6, dot(N, toSun));
   const caustic = cau.mul(vec3(0.55, 0.88, 1.0)).mul(exp(depth.mul(-0.32))).mul(smoothstep(0, 0.2, depth)).mul(sunFacing).mul(visuals.causticsAmount).mul(look.sparkle);
 
-  const glint = flashV.mul(visuals.flashGain).mul(abs(dot(N, Vw)).mul(0.5).add(0.5)).mul(isBody);
+  const glint = flashV.mul(visuals.flashGain).mul(float(1).sub(above)).mul(abs(dot(N, Vw)).mul(0.5).add(0.5)).mul(isBody);
   // silvery cyan flank glint that keeps a hint of the texture (feeds the bloom above 1)
-  const glintColor = mix(vec3(0.45, 0.85, 1.0).mul(1.25), tinted.mul(2.0), 0.3).mul(glint).add(vec3(0.7, 0.95, 1.0).mul(glint.mul(glint).mul(glint).mul(0.9)));
+  // short metallic glint: white-silver-cyan highlight, peak well below a full white fish
+  const glintColor = vec3(0.62, 0.86, 1.0).mul(glint.mul(0.85)).add(vec3(0.95, 1.0, 1.0).mul(pow(glint, 3).mul(0.6)));
   const dbg = new URLSearchParams(location.search).get('fishLite');
   material.emissiveNode = dbg === '1' ? glintColor : dbg === '2' ? glintColor.add(sheen) : tinted.mul(caustic).mul(0.9).add(sheen).add(glintColor);
 

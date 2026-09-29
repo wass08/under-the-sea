@@ -33,7 +33,7 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
     mk(new SphereGeometry(0.014, 6, 4), '#ffef7a', [0, 0.24, 0]),
     mk(new CylinderGeometry(0.006, 0.006, 0.12, 5), '#333', [0, -0.12, 0]),
   ]), flatMaterial(0.5));
-  bobberMesh.castShadow = true; bobber.add(bobberMesh); scene.add(bobber);
+  bobberMesh.castShadow = true; bobber.add(bobberMesh); bobber.scale.setScalar(1.15); scene.add(bobber);
 
   // ---- lure (spoon + hook + glint) ----
   const lure = new Group();
@@ -45,7 +45,7 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
   bead.position.y = 0.045;
   const glowMat = new MeshBasicNodeMaterial({ color: new Color(1.8, 1.9, 1.6), transparent: true, opacity: 0.3, depthWrite: false });
   const glow = new Mesh(new SphereGeometry(0.045, 8, 6), glowMat);
-  lure.add(spoon, hook, bead, glow); scene.add(lure);
+  lure.add(spoon, hook, bead, glow); lure.scale.setScalar(1.25); scene.add(lure);
   spoon.castShadow = true;
 
   // ---- placeholder fish (used only with the mock school) ----
@@ -59,7 +59,7 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
     mk(new SphereGeometry(1, 6, 4), '#111', [0.13, 0.02, -0.035], [0, 0, 0], [0.012, 0.012, 0.012], 0),
   ]), flatMaterial(0.5));
   fishMesh.position.x = -0.17;
-  fishMesh.castShadow = true; fish.add(fishMesh); fish.visible = false; scene.add(fish);
+  fish.scale.setScalar(1.3); fishMesh.castShadow = true; fish.add(fishMesh); fish.visible = false; scene.add(fish);
 
   // ---- debug markers ----
   const debug = new Group(); debug.visible = false; scene.add(debug);

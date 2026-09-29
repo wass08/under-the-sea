@@ -79,7 +79,11 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const refracted = refract(rd, normal, float(1 / 1.333));
     const target = entry.add(rd.mul(path)).add(refracted.sub(rd).mul(path.min(2.5)));
     const clip = cameraProjectionMatrix.mul(cameraViewMatrix.mul(vec4(target, 1)));
-    const uvR = clip.xy.div(clip.w).mul(vec2(0.5, -0.5)).add(0.5).clamp(0.002, 0.998);
+    const uvRaw = clip.xy.div(clip.w).mul(vec2(0.5, -0.5)).add(0.5);
+    // Limit the offset: shrink it at grazing angles and clamp its length so nothing gets stretched into streaks.
+    const facing = dot(normal, rd.negate()).abs();
+    const delta = uvRaw.sub(screenUV), deltaLen = delta.length().max(1e-5);
+    const uvR = screenUV.add(delta.mul(min(float(1), float(0.02).div(deltaLen))).mul(smoothstep(0.12, 0.55, facing))).clamp(0.002, 0.998);
     const depthR = getViewPosition(uvR, viewportDepthTexture(uvR).r, cameraProjectionMatrixInverse).length();
     const mismatch = depthR.sub(opaque).abs().div(opaque.sub(d0).max(0.5));
     const weight = float(1).sub(smoothstep(0.12, 0.45, mismatch)).mul(depthR.greaterThan(d0.add(0.05)).select(float(1), float(0)));
@@ -123,7 +127,9 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const reflected = mix(analytic, planar, 0.85);
     // Sun glitter: tight lobe on the detailed normal plus a soft lobe on the base wave normal.
     const sunDot = dot(R3, toSun).max(0);
-    const glint = pow(sunDot, 700).mul(170).add(pow(sunDot, 70).mul(2.2));
+    const facet = normalize(N.add(vec3(mx_noise_float(vec3(positionWorld.xz.mul(34).add(simTime.mul(0.6)), simTime.mul(0.9))), 0, mx_noise_float(vec3(positionWorld.xz.mul(41).sub(simTime.mul(0.5)), 3.7))).mul(0.16)));
+    const sparkle = pow(dot(reflect(body.rd, facet), toSun).max(0), 1400);
+    const glint = sparkle.mul(140).add(pow(sunDot, 40).mul(0.22)).min(7);
     // Shoreline foam from the depth below the surface.
     const depthBelow = body.path.mul(body.rd.y.abs());
     const swirl = mx_noise_float(vec3(positionWorld.xz.mul(4.2), simTime.mul(0.35))).mul(0.5).add(0.5);
@@ -198,7 +204,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const lines = edgeLines(positionWorld, topY);
     const rim = vec3(0.86, 1.0, 0.96);
     const sunDot = dot(R3, toSun).max(0);
-    const glint = pow(sunDot, 600).mul(25);
+    const glint = pow(sunDot, 600).mul(6).min(4);
     const rimFresnel = pow(float(1).sub(dot(n0, body.rd.negate()).abs()), 3).mul(0.25);
     return body.color.mul(float(1).sub(F)).add(refl.mul(F.max(rimFresnel).mul(0.7))).add(rim.mul(lines.meniscus.mul(0.55).add(lines.corner.mul(0.35)))).add(vec3(1, 0.85, 0.6).mul(glint).mul(F));
   })();

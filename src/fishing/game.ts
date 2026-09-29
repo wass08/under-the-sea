@@ -1,7 +1,7 @@
 import { Vector3 } from 'three/webgpu';
 import type { School } from '../contracts';
 import { WORLD } from '../config';
-import { clamp, damp, rand, smooth } from './build';
+import { RIG_SCALE as K, clamp, damp, rand, smooth } from './build';
 
 /**
  * Game state machine (no rendering). All timers run on the sim dt handed to update(), so slow motion slows
@@ -83,13 +83,13 @@ export class Game {
   get auto() { return settings.auto; }
 
   get hint(): string {
-    const n = this.school.stats.nearLure;
+    const n = Math.round(this.school.stats.nearLure);
     switch (this.phase) {
       case 'idle': return settings.auto ? 'Auto-fishing…' : 'Click the water to cast';
       case 'casting': return 'Casting…';
       case 'scared': return 'The school scatters…';
       case 'calm': return 'Calm returns…';
-      case 'curious': return n > 0 ? `Curious… ${n} fish inspecting` : 'Curious… waiting for fish';
+      case 'curious': return n > 0 ? `Curious… ${n === 1 ? '1 fish' : new Intl.NumberFormat('en').format(n) + ' fish'} inspecting the lure` : 'Curious… waiting for fish';
       case 'approaching': return 'Something is coming…';
       case 'bite': return 'Bite!';
       case 'reeling': return 'Reeling in…';
@@ -146,8 +146,8 @@ export class Game {
   }
   private hangLure() {
     const tip = this.env.tip, w = this.clock;
-    this.bobber.set(tip.x + Math.sin(w * 1.7) * 0.03, tip.y - 0.55, tip.z + Math.cos(w * 1.3) * 0.03);
-    this.lure.set(tip.x + Math.sin(w * 1.9 + 1) * 0.06, tip.y - 0.95, tip.z + Math.cos(w * 1.5) * 0.06);
+    this.bobber.set(tip.x + Math.sin(w * 1.7) * 0.03, tip.y - 0.55 * K, tip.z + Math.cos(w * 1.3) * 0.03);
+    this.lure.set(tip.x + Math.sin(w * 1.9 + 1) * 0.06, tip.y - 0.95 * K, tip.z + Math.cos(w * 1.5) * 0.06);
   }
   private beginWait() { this.biteAcc = 0; this.biteAt = rand(settings.biteMin, Math.max(settings.biteMin, settings.biteMax)); this.retry = 0; }
 
@@ -177,7 +177,7 @@ export class Game {
           const s = clamp((this.t - wind) / flight, 0, 1);
           this.target.y = env.heightAt(this.target.x, this.target.z);
           const dist = Math.hypot(this.target.x - this.rel0.x, this.target.z - this.rel0.z);
-          const arc = 0.9 + dist * 0.16;
+          const arc = (0.9 + dist * 0.16) * K;
           this.lure.lerpVectors(this.rel0, this.target, s); this.lure.y += arc * 4 * s * (1 - s);
           this.bobber.copy(this.lure);
           if (s >= 1) {
@@ -248,7 +248,7 @@ export class Game {
         curiosity = 1; this.fishVisible = true;
         const t = this.t;
         this.tensionT = t < JERK ? 1 : t < JERK + PULL ? 0.95 : 0.7;
-        env.bucket(this.H); this.H.y += 0.85;
+        env.bucket(this.H); this.H.y += 0.85 * K;
         if (t < JERK) {
           this.lure.copy(this.rel0); this.lure.x += Math.sin(t * 60) * 0.05; this.lure.y += Math.sin(t * 47) * 0.04;
           this.bobber.copy(this.bob0); this.dipBase = 1;
@@ -260,7 +260,7 @@ export class Game {
           this.school.setLure(this.lure);
         } else if (t < JERK + PULL + OUT) {
           const e = smooth((t - JERK - PULL) / OUT);
-          this.lure.lerpVectors(this.S, this.H, e); this.lure.y += 0.8 * Math.sin(Math.PI * e) * (1 - e * 0.4);
+          this.lure.lerpVectors(this.S, this.H, e); this.lure.y += 0.8 * K * Math.sin(Math.PI * e) * (1 - e * 0.4);
           this.lure.x += Math.sin(t * 17) * 0.05 * (1 - e);
           this.bobber.lerpVectors(this.tmp.lerpVectors(env.tip, this.S, 0.35), this.tmp2.lerpVectors(env.tip, this.H, 0.3), e);
         } else { this.enter('celebrate'); }
@@ -273,7 +273,7 @@ export class Game {
 
       case 'celebrate': {
         curiosity = 1; this.tensionT = 0.45; this.fishVisible = true;
-        env.bucket(this.H); const bucketTop = this.tmp2.copy(this.H); bucketTop.y += 0.05; this.H.y += 0.85;
+        env.bucket(this.H); const bucketTop = this.tmp2.copy(this.H); bucketTop.y += 0.05 * K; this.H.y += 0.85 * K;
         const t = this.t;
         if (t < HOLD) {
           this.lure.copy(this.H); this.lure.y += Math.sin(t * 11) * 0.03; this.lure.x += Math.sin(t * 15) * 0.02;
@@ -298,7 +298,7 @@ export class Game {
         const e = smooth(this.t / RETRIEVE);
         this.tensionT = 0.35;
         const tip = env.tip;
-        const hb = this.tmp.set(tip.x, tip.y - 0.55, tip.z), hl = this.tmp2.set(tip.x, tip.y - 0.95, tip.z);
+        const hb = this.tmp.set(tip.x, tip.y - 0.55 * K, tip.z), hl = this.tmp2.set(tip.x, tip.y - 0.95 * K, tip.z);
         this.bobber.lerpVectors(this.bob0, hb, e); this.lure.lerpVectors(this.rel0, hl, e); this.lure.y += Math.sin(Math.PI * e) * 0.4;
         this.inWater = this.lure.y < env.heightAt(this.lure.x, this.lure.z);
         if (this.t >= RETRIEVE) {

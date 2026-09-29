@@ -11,7 +11,7 @@ export const BASIN = { x: 2.0, z: 1.9 };
 
 // Radius (from island centre) -> height above the seabed. Monotone cubic (PCHIP) through the anchors.
 const ANCHORS: [number, number][] = [
-  [0, 8.1], [1.0, 7.9], [1.7, 7.5], [2.3, 6.8], [2.7, 5.9], [3.0, 4.3], [3.25, 2.6], [3.55, 1.1], [3.9, 0.25], [4.4, 0],
+  [0, 8.1], [1.0, 7.9], [1.7, 7.5], [2.3, 6.8], [2.7, 5.9], [3.0, 4.3], [3.35, 2.7], [3.85, 1.4], [4.45, 0.45], [5.1, 0],
 ];
 const xs = ANCHORS.map(a => a[0]), ys = ANCHORS.map(a => a[1]);
 const deltas = xs.slice(1).map((x, i) => (ys[i + 1] - ys[i]) / (x - xs[i]));
@@ -41,8 +41,12 @@ export function islandBump(x: number, z: number) {
   const dx = x - ISLAND.x, dz = z - ISLAND.z;
   let r = Math.hypot(dx / 1.04, dz / 0.93) * (1 + 0.15 * noiseB(dx * 0.33 + 3, dz * 0.33 - 1));
   r += 0.42 * fbm(dx * 0.55, dz * 0.55, { noise: noiseC, octaves: 3 });
-  const crag = noiseA(x * 1.05 + 4, z * 1.05) * 0.32 * smooth(4.2, 1.6, r) + noiseC(x * 2.6, z * 2.6) * 0.09 * smooth(3.6, 1.0, r);
-  return profile(Math.max(0, r)) + crag * (r < 4.6 ? 1 : 0);
+  const crag = noiseA(x * 1.05 + 4, z * 1.05) * 0.4 * smooth(4.2, 1.6, r) + noiseC(x * 2.6, z * 2.6) * 0.12 * smooth(3.6, 1.0, r);
+  // Ledges and buttresses on the flank so the underwater column is not a smooth pillar.
+  const flank = smooth(5.0, 4.0, r) * smooth(1.8, 2.8, r);
+  const base = profile(Math.max(0, r));
+  const ledge = Math.sin(base * 2.6 + noiseB(x * 0.8, z * 0.8) * 3) * 0.5 * flank + noiseB(x * 1.7 + 8, z * 1.7) * 0.7 * flank * flank;
+  return base + (crag + ledge) * (r < 5.2 ? 1 : 0);
 }
 
 export function terrainHeight(x: number, z: number) {

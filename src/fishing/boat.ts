@@ -1,7 +1,7 @@
 import { BoxGeometry, BufferGeometry, Color, CylinderGeometry, Float32BufferAttribute, Group, Mesh, MeshStandardNodeMaterial, Quaternion, SphereGeometry, TorusGeometry, Vector3 } from 'three/webgpu';
 import type { World } from '../contracts';
 import { BOAT } from '../config';
-import { clamp, damp, flatMaterial, merge, mk, rnd } from './build';
+import { RIG_SCALE, clamp, damp, flatMaterial, merge, mk, rnd } from './build';
 
 /**
  * Procedural rowboat. Local frame: +x = bow, +y = up, +z = starboard, y = 0 is the waterline.
@@ -111,6 +111,7 @@ function buildProps() {
 export function createBoat(world: World) {
   const group = new Group();
   group.rotation.order = 'YZX';
+  group.scale.setScalar(RIG_SCALE);
   const hull = new Mesh(buildProps(), flatMaterial(0.85));
   hull.castShadow = hull.receiveShadow = true;
   group.add(hull);
@@ -127,6 +128,7 @@ export function createBoat(world: World) {
 
   const sample = (lx: number, lz: number) => {
     const c = Math.cos(p.yaw), s = Math.sin(p.yaw);
+    lx *= RIG_SCALE; lz *= RIG_SCALE;
     return world.heightAt(p.x + lx * c + lz * s, p.z - lx * s + lz * c);
   };
 
@@ -148,8 +150,8 @@ export function createBoat(world: World) {
       p.x = damp(p.x, px, 2, dt); p.z = damp(p.z, pz, 2, dt); p.yaw = damp(p.yaw, yaw, 2, dt);
       // sample the waves under the hull
       const hb = sample(0.9, 0), hs = sample(-0.9, 0), hr = sample(0, 0.4), hl = sample(0, -0.4), hc = sample(0, 0);
-      const target = (hb + hs + hr + hl + hc * 2) / 6 - 0.035;
-      const pitchT = Math.atan2(hb - hs, 1.8), rollT = -Math.atan2(hr - hl, 0.8);
+      const target = (hb + hs + hr + hl + hc * 2) / 6 + 0.15 * RIG_SCALE;
+      const pitchT = Math.atan2(hb - hs, 1.8 * RIG_SCALE), rollT = -Math.atan2(hr - hl, 0.8 * RIG_SCALE);
       const k = 1 - Math.exp(-dt * 6);
       p.y += (target - p.y) * k; p.pitch += (pitchT - p.pitch) * k; p.roll += (rollT - p.roll) * k;
       // kick springs (underdamped so the hull rocks back)
