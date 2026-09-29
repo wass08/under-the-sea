@@ -2,7 +2,7 @@ import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CylinderGeometry, Euler,
 import type { Node } from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { attribute, color, float, mix, mx_noise_float, normalWorldGeometry, positionLocal, positionWorld, smoothstep, vec3, vertexColor } from 'three/tsl';
-import { BOAT, WORLD } from '../config';
+import { BASIN, BOAT, WORLD } from '../config';
 import { simTime } from '../state';
 import { random } from '../lib/random';
 import { emitRipple, oceanHeightCpu } from '../lib/ocean';
@@ -146,13 +146,13 @@ export function createFloatingProps(scene: Scene) {
   void metal;
   const rng = random(77);
   const defs: { geo: BufferGeometry; mat: MeshStandardNodeMaterial; at: [number, number]; draft: number; size: number; spread: number; yaw: number }[] = [
-    { geo: crateGeometry(2), mat: wood, at: [-12, 9], draft: 0.34, size: 1, spread: 2.6, yaw: 0.06 },
-    { geo: crateGeometry(5), mat: wood, at: [-9.2, 11.4], draft: 0.4, size: 0.9, spread: 2.2, yaw: -0.05 },
-    { geo: crateGeometry(7), mat: wood, at: [12.5, -8], draft: 0.36, size: 1.05, spread: 2.8, yaw: 0.04 },
-    { geo: crateGeometry(4), mat: wood, at: [3, -13.5], draft: 0.38, size: 0.85, spread: 2.4, yaw: -0.07 },
-    { geo: lifebuoyGeometry(), mat: painted, at: [-4.5, 13], draft: 0.12, size: 1.1, spread: 2.0, yaw: 0.08 },
-    { geo: barrelGeometry(), mat: wood, at: [13.5, 1.5], draft: 0.55, size: 1, spread: 2.2, yaw: 0.03 },
-    { geo: driftwoodGeometry(), mat: wood, at: [-13.5, -8], draft: 0.08, size: 1.3, spread: 3.0, yaw: 0.05 },
+    { geo: crateGeometry(2), mat: wood, at: [-13, 8], draft: 0.34, size: 1, spread: 2.6, yaw: 0.06 },
+    { geo: crateGeometry(5), mat: wood, at: [-10.5, 11.8], draft: 0.4, size: 0.9, spread: 2.2, yaw: -0.05 },
+    { geo: crateGeometry(7), mat: wood, at: [13, -9], draft: 0.36, size: 1.05, spread: 2.8, yaw: 0.04 },
+    { geo: crateGeometry(4), mat: wood, at: [6, -14], draft: 0.38, size: 0.85, spread: 2.4, yaw: -0.07 },
+    { geo: lifebuoyGeometry(), mat: painted, at: [-4, 14], draft: 0.12, size: 1.1, spread: 2.0, yaw: 0.08 },
+    { geo: barrelGeometry(), mat: wood, at: [14.5, 4], draft: 0.55, size: 1, spread: 2.2, yaw: 0.03 },
+    { geo: driftwoodGeometry(), mat: wood, at: [-14.5, -1], draft: 0.08, size: 1.3, spread: 3.0, yaw: 0.05 },
   ];
   const props: Prop[] = defs.map((d, i) => {
     const mesh = new Mesh(d.geo, d.mat); mesh.castShadow = true; mesh.receiveShadow = true; mesh.layers.enable(1); mesh.frustumCulled = false; mesh.scale.setScalar(d.size * 1.7);
@@ -162,6 +162,7 @@ export function createFloatingProps(scene: Scene) {
   });
   // Keep clear of the boat's mooring.
   props.forEach(p => { if (Math.hypot(p.home.x - BOAT.x, p.home.z - BOAT.z) < 6) p.home.x -= 8; });
+  void BASIN;
 
   const grad = { gx: 0, gz: 0 }, up = new Vector3(0, 1, 0), q = new Quaternion(), qy = new Quaternion(), normal = new Vector3();
   return {

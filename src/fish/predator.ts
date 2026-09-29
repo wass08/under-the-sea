@@ -9,7 +9,7 @@ const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
  * proportional to N). It cruises around the school, then periodically charges straight through its centroid.
  */
 export class Predator {
-  pos = new Vector3(12, 6.5, 10); dir = new Vector3(-1, 0, -0.3).normalize();
+  pos = new Vector3(12, 6.5, 9); dir = new Vector3(-1, 0, -0.3).normalize();
   speed = 10.0; interval = 22; cruiseSpeed = 3.0;
   phase = 0; bank = 0; scale = 0; active = false;
   mode: 'cruise' | 'charge' = 'cruise';

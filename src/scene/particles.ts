@@ -36,7 +36,7 @@ export function createPlankton(scene: Scene, count = 3000) {
 
 /** A few bubble streams rising from the seabed; each pops on the surface with a tiny ripple. */
 export function createBubbles(scene: Scene) {
-  const vents = [[-13, 9], [14, -8], [-4, -15], [3, 14], [-15, -10]].map(([x, z]) => ({ x, z, y: terrainHeight(x, z) }));
+  const vents = [[-13, 9], [14, -8], [5, -15], [12, 13], [-3, 14]].map(([x, z]) => ({ x, z, y: terrainHeight(x, z) }));
   const perVent = 22, count = vents.length * perVent, rng = random(77);
   const origin = new Float32Array(count * 3), params = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {

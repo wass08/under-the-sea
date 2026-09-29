@@ -5,6 +5,7 @@ import { color, cos, float, hash, instanceIndex, mix, mx_noise_float, normalWorl
 import { WORLD } from '../config';
 import { simTime } from '../state';
 import { random } from '../lib/random';
+import { BASIN } from '../config';
 import { ISLAND, terrainHeight } from './field';
 import { underwaterShading } from './materials';
 
@@ -59,7 +60,7 @@ export function createFlora(scene: Scene) {
     for (let tries = 0; tries < 12000 && out.length < count; tries++) {
       const x = (rng() * 2 - 1) * (R - 0.8), z = (rng() * 2 - 1) * (R - 0.8), y = terrainHeight(x, z);
       if (y > level - 2 || slopeAt(x, z) > 0.45) continue;
-      if (!accept(x, z, y) || out.some(o => Math.hypot(o.x - x, o.z - z) < minGap)) continue;
+      if (Math.hypot(x - BASIN.x, z - BASIN.z) < 8 || !accept(x, z, y) || out.some(o => Math.hypot(o.x - x, o.z - z) < minGap)) continue;
       out.push({ x, z, y });
     }
     return out;
@@ -180,7 +181,7 @@ export function createFlora(scene: Scene) {
   const spots: { x: number; z: number; y: number; s: number }[] = [];
   for (let tries = 0; tries < 6000 && spots.length < 26; tries++) {
     const x = (rng() * 2 - 1) * (R - 1), z = (rng() * 2 - 1) * (R - 1), y = terrainHeight(x, z), d = fromIsland(x, z);
-    if (d < 12.5 || y > level - 2 || slopeAt(x, z) > 0.6 || spots.some(o => Math.hypot(o.x - x, o.z - z) < 4)) continue;
+    if (d < 12.5 || Math.hypot(x - BASIN.x, z - BASIN.z) < 8 || y > level - 2 || slopeAt(x, z) > 0.6 || spots.some(o => Math.hypot(o.x - x, o.z - z) < 4)) continue;
     if (rng() > 0.3 + 0.7 * smooth01(12, 17, Math.max(Math.abs(x), Math.abs(z)))) continue;
     spots.push({ x, z, y, s: 0.5 + Math.pow(rng(), 1.8) * 1.5 });
   }

@@ -5,7 +5,7 @@ import { chromium } from 'playwright';
 const args = process.argv.slice(2);
 const flag = (name, fallback) => { const i = args.indexOf(name); if (i < 0) return fallback; const v = args[i + 1]; args.splice(i, 2); return v; };
 const bool = name => { const i = args.indexOf(name); if (i < 0) return false; args.splice(i, 1); return true; };
-const pre = flag('--eval', null), tx = Number(flag('--tx', 13)), tz = Number(flag('--tz', 1)), width = Number(flag('--w', 1600)), height = Number(flag('--h', 900)), miss = bool('--miss');
+const pre = flag('--eval', null), txArg = flag('--tx', null), tzArg = flag('--tz', null), width = Number(flag('--w', 1600)), height = Number(flag('--h', 900)), miss = bool('--miss');
 const [url, prefix = 'shots/fishing-seq'] = args;
 const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
@@ -23,6 +23,8 @@ const waitPhase = async (phase, timeout = 40000) => {
   return false;
 };
 if (pre) await page.evaluate(pre);
+let tx = Number(txArg), tz = Number(tzArg);
+if (txArg === null || tzArg === null) { const c = await page.evaluate(() => window.school.stats.centroid); tx = c.x; tz = c.z; console.log('target = school centroid', tx.toFixed(1), tz.toFixed(1)); }
 console.log('cast accepted:', await page.evaluate(([X, Z]) => window.fishing.cast(X, Z), [tx, tz]));
 await page.waitForTimeout(250); await shot('1-windup'); console.log(JSON.stringify(await state()));
 await page.waitForTimeout(450); await shot('2-flight'); console.log(JSON.stringify(await state()));

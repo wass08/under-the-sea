@@ -4,7 +4,7 @@ import * as TSL from 'three/tsl';
 const { float, uniform, vec3, hash, instanceIndex } = TSL as any;
 import type { FolderApi } from 'tweakpane';
 import type { Ctx, School, SchoolStats, World } from '../contracts';
-import { QUERY, SWIM_BOUNDS, WORLD } from '../config';
+import { BASIN, ISLAND, QUERY, SWIM_BOUNDS, WORLD } from '../config';
 import { loadFishAsset } from './geometry';
 import { createEnv, createSim, sampleHeight, CENTROID_OFFSET, CENTROID_SCALE, FEAR_SCALE } from './sim';
 import { createFishMesh, instanceFromSim, visuals } from './render';
@@ -49,14 +49,14 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   let ix = 0, iz = 0, ic = 0;
   const { heights, resolution } = seabed;
   for (let z = 0; z < resolution; z++) for (let x = 0; x < resolution; x++) if (heights[z * resolution + x] > WORLD.surface) { ix += -WORLD.half + (x + 0.5) / resolution * 2 * WORLD.half; iz += -WORLD.half + (z + 0.5) / resolution * 2 * WORLD.half; ic++; }
-  const homeXZ: [number, number] = ic > 10 ? [ix / ic, iz / ic] : [0, 0];
+  const homeXZ: [number, number] = ic > 10 ? [ix / ic, iz / ic] : [ISLAND.x, ISLAND.z];
 
-  env.millCenter.value.x = homeXZ[0]; env.millCenter.value.z = homeXZ[1]; // circle the island
+  env.millCenter.value.x = BASIN.x; env.millCenter.value.z = BASIN.z; env.millRadius.value = 6; // milling ring / tornado in the open basin
   // ------------------------------------------------------------------ simulations
   const mainSim = createSim({
     renderer, env, count: N, seabed, cruise: 3.0, minSpeed: 1.4, maxSpeed: 5.0, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
     homeClear: 0, homeStrength: 0, homeXZ: [0, 0], homeRadius: 99, clusters: 3, clusterRadius: 3.0, seed: 1, main: true,
-    groupCenters: [0, 1, 2].map(k => [homeXZ[0] + Math.cos(k * 2.094) * 12, 6.4, homeXZ[1] + Math.sin(k * 2.094) * 12] as [number, number, number]),
+    groupCenters: [0, 1, 2].map(k => [BASIN.x + Math.cos(k * 2.094) * 6, 6.4, BASIN.z + Math.sin(k * 2.094) * 6] as [number, number, number]),
   });
   const angelSim = createSim({
     renderer, env, count: ANGEL_COUNT, seabed, cruise: 1.1, minSpeed: 0.45, maxSpeed: 2.4, millInfluence: 0.25, lureInfluence: 0, fearSensitivity: 0.7,
@@ -253,8 +253,13 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     }
     const lim = WORLD.half - 5, path = (k: number, tt: number, out: number[]) => {
       const spread = (2.0 * (0.5 + 0.5 * Math.sin(tt * 0.05 + 1.0)) + kick[k]) * (1 - ballW) * (1 + 0.6 * splitW);
-      const th = tt * 0.11 + 0.7 + (k - 1) * spread + 0.2 * Math.sin(tt * (0.09 + k * 0.03) + k), r = 12 + 2.5 * Math.sin(tt * (0.04 + k * 0.017) + k * 2.0);
-      out[0] = Math.max(-lim, Math.min(lim, homeXZ[0] + Math.cos(th) * r)); out[2] = Math.max(-lim, Math.min(lim, homeXZ[1] + Math.sin(th) * r));
+      const th = tt * 0.11 + 0.7 + (k - 1) * spread + 0.2 * Math.sin(tt * (0.09 + k * 0.03) + k), r = 7 + 2.5 * Math.sin(tt * (0.04 + k * 0.017) + k * 2.0);
+      // the schools wander around a centre that itself drifts inside the open basin, and never head for the island
+      const bx = BASIN.x + 4 * Math.sin(tt * 0.031 + 1), bz = BASIN.z + 3.5 * Math.sin(tt * 0.043);
+      let x = bx + Math.cos(th) * r, z = bz + Math.sin(th) * r;
+      const ddx = x - homeXZ[0], ddz = z - homeXZ[1], dd = Math.hypot(ddx, ddz);
+      if (dd < 11.5) { x = homeXZ[0] + ddx / dd * 11.5; z = homeXZ[1] + ddz / dd * 11.5; }
+      out[0] = Math.max(-lim, Math.min(lim, x)); out[2] = Math.max(-lim, Math.min(lim, z));
       out[1] = 6.4 + 1.2 * Math.sin(tt * (0.11 + k * 0.05) + k * 2.1);
     };
     const a: number[] = [0, 0, 0], b: number[] = [0, 0, 0];
@@ -298,8 +303,8 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     m.addBinding(env.millRadius, 'value', { label: 'Radius', min: 3, max: 16, step: 0.1 });
     m.addBinding(env.millHeight, 'value', { label: 'Torus height', min: 0.5, max: 6, step: 0.1 });
     m.addBinding(env.millDir, 'value', { label: 'Direction', min: -1, max: 1, step: 2 });
-    m.addBinding(env.millCenter.value, 'x', { label: 'Center X', min: -12, max: 12, step: 0.1 });
-    m.addBinding(env.millCenter.value, 'z', { label: 'Center Z', min: -12, max: 12, step: 0.1 });
+    m.addBinding(env.millCenter.value, 'x', { label: 'Center X', min: -14, max: 14, step: 0.1 });
+    m.addBinding(env.millCenter.value, 'z', { label: 'Center Z', min: -14, max: 14, step: 0.1 });
 
     const p = folder.addFolder({ title: 'Fountain', expanded: false });
     p.addBinding(predator, 'speed', { label: 'Predator speed', min: 3, max: 14, step: 0.1 });
@@ -327,7 +332,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   // ------------------------------------------------------------------ debug hooks (kept)
   const camMode = query.get('fishCam');
   if (camMode) {
-    const presets: Record<string, [number, number, number]> = { close: [9, 7, 13], mid: [16, 12, 21], top: [0.5, 42, 6] };
+    const presets: Record<string, [number, number, number]> = { close: [9, 7, 13], mid: [16, 12, 21], top: [4, 42, 10] };
     const v = presets[camMode] ?? (camMode.split(',').map(Number) as [number, number, number]);
     if (v.length === 3 && v.every(Number.isFinite)) ctx.camera.position.set(v[0], v[1], v[2]);
   }

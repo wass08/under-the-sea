@@ -169,7 +169,7 @@ export function createIsland(scene: Scene) {
   // Placement on the sandy top
   type Spot = { x: number; z: number; y: number; s: number; ry: number };
   // Two palms: a tall leaning one and a shorter one.
-  const spots: Spot[] = [[-1.0, 1.5, 1.2, 0.4], [2.3, -0.7, 0.72, 2.2]].map(([x, z, sc, ry]) => ({ x, z, y: terrainHeight(x, z), s: sc, ry }));
+  const spots: Spot[] = [[-1.0, 1.5, 1.2, 0.4], [2.3, -0.7, 0.72, 2.2]].map(([dx, dz, sc, ry]) => { const x = ISLAND.x + dx, z = ISLAND.z + dz; return { x, z, y: terrainHeight(x, z), s: sc, ry }; });
   const variants = [0, 1, 2].map(i => {
     const trunk = buildTrunk(11 + i * 7), crown = buildCrown(trunk.top, trunk.height, 31 + i * 5), nuts = buildCoconuts(trunk.top, 61 + i);
     return { trunk: trunk.geometry, crown, nuts, list: spots.filter((_, k) => k % 3 === i) };

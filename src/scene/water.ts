@@ -1,7 +1,7 @@
 import { AdditiveBlending, BackSide, BufferGeometry, ClampToEdgeWrapping, DataTexture, DoubleSide, Float32BufferAttribute, HalfFloatType, LinearFilter, Mesh, MeshBasicNodeMaterial, PerspectiveCamera, PlaneGeometry, RedFormat, Scene, Sphere, Vector3 } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
 import {
-  Fn, If, Loop, float, vec2, vec3, vec4, mix, smoothstep, exp, max, min, pow, refract, reflect, normalize,
+  Fn, If, Loop, uniform, float, vec2, vec3, vec4, mix, smoothstep, exp, max, min, pow, refract, reflect, normalize,
   positionGeometry, positionWorld, cameraPosition, cameraProjectionMatrix, cameraViewMatrix, cameraProjectionMatrixInverse,
   screenUV, screenCoordinate, viewportDepthTexture, viewportOpaqueMipTexture, getViewPosition, texture, mx_noise_float, attribute,
   reflector, dot, abs, fract, sin,
@@ -115,6 +115,10 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   scene.add(reflection.target);
   (reflection as unknown as { reflector: { getVirtualCamera(c: PerspectiveCamera): PerspectiveCamera } }).reflector.getVirtualCamera(camera).layers.set(1);
 
+  // With a picture-in-picture inset active the planar reflector (a whole extra scene render whose cost explodes when a
+  // second pass exists) is replaced by the analytic sky; toggling rebuilds the surface colour graph.
+  let planarEnabled = true;
+  const buildSurfaceColor = () => {
   const aboveColor = Fn(() => {
     const fineA = mx_noise_float(vec3(positionWorld.xz.mul(3).add(simTime.mul(0.35)), simTime.mul(0.2)));
     const fineB = mx_noise_float(vec3(positionWorld.xz.mul(7).sub(simTime.mul(0.5)), 7.1));
@@ -123,7 +127,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const F = fresnel(N, body.rd).mul(1.3).min(1);
     const R3 = reflect(body.rd, N).toVar();
     const reflUV = screenUV.flipX().add(N.xz.mul(vec2(-0.05, 0.05)).mul(-1)).clamp(0.002, 0.998);
-    const planar = new URLSearchParams(location.search).has('noreflector') ? skyColor(vec3(R3.x, R3.y.abs(), R3.z)) : reflection.sample(reflUV).rgb;
+    const planar = planarEnabled ? reflection.sample(reflUV).rgb : skyColor(vec3(R3.x, R3.y.abs(), R3.z));
     const analytic = skyColor(vec3(R3.x, R3.y.abs(), R3.z));
     const reflected = mix(analytic, planar, 0.85);
     // Sun glitter: tight lobe on the detailed normal plus a soft lobe on the base wave normal.
@@ -172,6 +176,8 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     }).Else(() => { out.assign(aboveColor); });
     return out;
   })();
+  };
+  buildSurfaceColor();
   surfaceMaterial.opacityNode = float(1);
   surfaceMaterial.maskNode = hullOutside(positionWorld.xz);
   const geometry = new PlaneGeometry(R * 2, R * 2, 352, 352); geometry.rotateX(-Math.PI / 2);
@@ -261,6 +267,6 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   /** While the camera is inside the water the surface must write depth so post-processing fog sees it. */
   const setInside = (inside: boolean) => { if (surfaceMaterial.depthWrite !== inside) { surfaceMaterial.depthWrite = inside; surfaceMaterial.needsUpdate = true; } };
   /** Planar reflection for an extra camera (the inset) must only draw layer 1, like the main one. */
-  const prepareCamera = (cam: PerspectiveCamera) => { (reflection as unknown as { reflector: { getVirtualCamera(c: PerspectiveCamera): PerspectiveCamera } }).reflector.getVirtualCamera(cam).layers.set(new URLSearchParams(location.search).has('norefl') ? 20 : 1); };
-  return { surface, front, back, reflection, setInside, prepareCamera };
+  const setInsetActive = (on: boolean) => { if (planarEnabled === on) { planarEnabled = !on; buildSurfaceColor(); surfaceMaterial.needsUpdate = true; } };
+  return { surface, front, back, reflection, setInside, setInsetActive };
 }

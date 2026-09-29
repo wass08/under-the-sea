@@ -61,7 +61,9 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
   const size = new Vector2();
   const applyInset = () => {
     renderer.getSize(size);
-    if (insetCam && insetRect) { water.prepareCamera(insetCam); post.setInset(insetCam, insetRect, size.x, size.y); } else post.setInset(null, null, size.x, size.y);
+    const on = !!(insetCam && insetRect);
+    water.setInsetActive(on);
+    if (on) post.setInset(insetCam, insetRect, size.x, size.y); else post.setInset(null, null, size.x, size.y);
   };
   const debugInset = new URLSearchParams(location.search).get('inset')?.split(',').map(Number);
   if (debugInset && debugInset.length >= 3) {
@@ -138,7 +140,7 @@ function applyCameraPreset(camera: Ctx['camera']) {
   const cam = new URLSearchParams(location.search).get('cam');
   const presets: Record<string, [number, number, number]> = {
     side: [0, 12, 78], top: [0.01, 96, 0.01], close: [22, 15, 30], front: [6, 14, 64], under: [8, 5, 27], island: [-8, 24, 36],
-    corner: [32, 16, 32], low: [50, 9, 60], inside: [4, 8, 10], deep: [15, 2.8, 8], window: [16.5, 2.4, 2], deep2: [-12, 3.2, 12], closeup: [40, 27, 48], props: [-20, 12, 24], propsB: [-6, 10, 26], surf: [20, 26, 26], seabed: [15, 14, 20], grazing: [42, 22, 48],
+    corner: [32, 16, 32], low: [50, 9, 60], inside: [4, 8, 10], deep: [15, 2.8, 8], window: [16.5, 2.4, 2], deep2: [-12, 3.2, 12], closeup: [40, 27, 48], backside: [-42, 15, -46], backhigh: [-30, 28, -34], props: [-20, 12, 24], propsB: [-6, 10, 26], surf: [20, 26, 26], seabed: [15, 14, 20], grazing: [42, 22, 48],
   };
   if (cam && presets[cam]) camera.position.set(...presets[cam]);
   void WORLD;

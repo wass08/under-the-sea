@@ -1,11 +1,11 @@
-import { WORLD } from '../config';
+import { ISLAND as ISLAND_POS, WORLD } from '../config';
 import { createNoise2D, fbm } from '../lib/noise';
 
 /** Analytic height field: a wide sandy seabed with one sand island in the middle. Shared by mesh, fish contract and shaders. */
 const noiseA = createNoise2D(7), noiseB = createNoise2D(23), noiseC = createNoise2D(91);
 const smooth = (a: number, b: number, x: number) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
-export const ISLAND = { x: 0, z: 0, shoreRadius: 5 };
+export const ISLAND = { x: ISLAND_POS.x, z: ISLAND_POS.z, shoreRadius: 5 };
 
 // Radius from the island centre -> height above the sea floor. Monotone cubic (PCHIP): dune top, flat beach
 // ring just above the waterline, then a sandy shelf descending to the seabed by r ~ 11.

@@ -1,6 +1,6 @@
 import { Vector3 } from 'three/webgpu';
 import type { School } from '../contracts';
-import { WORLD } from '../config';
+import { BASIN, WORLD } from '../config';
 import { RIG_SCALE as K, clamp, damp, rand, smooth } from './build';
 
 /**
@@ -382,6 +382,7 @@ export class Game {
     for (let i = 0; i < 60; i++) {
       let x: number, z: number;
       if (haveSchool && Math.random() < 0.65) { x = c.x + rand(-3, 3); z = c.z + rand(-3, 3); }
+      else if (Math.random() < 0.6) { x = BASIN.x + rand(-6, 6); z = BASIN.z + rand(-6, 6); }
       else { const a = rand(0, Math.PI * 2), d = rand(4, settings.maxRange - 1); x = b.x + Math.cos(a) * d; z = b.z + Math.sin(a) * d; }
       if (this.validSpot(x, z, 3)) return new Vector3(x, this.env.heightAt(x, z), z);
     }

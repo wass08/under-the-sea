@@ -1,7 +1,7 @@
 import { BufferGeometry, Color, CylinderGeometry, Group, Mesh, MeshStandardNodeMaterial, Quaternion, SphereGeometry, TorusGeometry, Vector3 } from 'three/webgpu';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { World } from '../contracts';
-import { BOAT } from '../config';
+import { BASIN, BOAT } from '../config';
 import { RIG_SCALE, clamp, damp, grid, merge, mk, rnd, smoothMaterial, tube } from './build';
 import { woodTextures } from './textures';
 
@@ -11,7 +11,13 @@ import { woodTextures } from './textures';
  */
 
 /** Bow points at the island / open water, turned a bit so the default camera sees a 3/4 view. */
-export const BOAT_HEADING = Math.atan2(BOAT.z, -BOAT.x) - 0.75;
+export const BOAT_HEADING = (() => {
+  // bow toward the basin, pulled a little toward the default camera (46, 31, 56) for a 3/4 view of the fisherman
+  const bx = BASIN.x - BOAT.x, bz = BASIN.z - BOAT.z, bl = Math.hypot(bx, bz);
+  const cx = 46 - BOAT.x, cz = 56 - BOAT.z, cl = Math.hypot(cx, cz);
+  const fx = bx / bl + 0.45 * (cx / cl), fz = bz / bl + 0.45 * (cz / cl);
+  return Math.atan2(-fz, fx);
+})();
 
 const NS = 48; // stations along the hull
 const gunY = (u: number) => 0.16 + 0.12 * u * u; // sheer line (rises at the ends)
