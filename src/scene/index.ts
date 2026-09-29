@@ -4,7 +4,7 @@ import type { Ctx, World } from '../contracts';
 import type { FolderApi } from 'tweakpane';
 import { WORLD } from '../config';
 import { simTime, waterLevel } from '../state';
-import { emitRipple, oceanHeightCpu, oceanParams, oceanAmplitude } from '../lib/ocean';
+import { setHullMask, emitRipple, oceanHeightCpu, oceanParams, oceanAmplitude } from '../lib/ocean';
 import { sampleGrid } from './field';
 import { buildSlab, buildTerrain } from './terrain';
 import { createSlabMaterial, createTerrainMaterial } from './materials';
@@ -42,7 +42,7 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
   const heightProbe = new URLSearchParams(location.search).has('testheight') ? addHeightProbes(scene) : null;
   const post = createPost(renderer, scene, camera);
   // Let the planar reflection (layer 1) also pick up other modules' boat / fisherman meshes.
-  let reflectTimer = 0;
+  let reflectTimer = 0, boat: import('three/webgpu').Object3D | null = null;
   const markReflective = () => scene.children.forEach(child => {
     if (/boat|fisher|rod|lure/i.test(child.name) && !child.userData.reflective) { child.userData.reflective = true; child.traverse(o => o.layers.enable(1)); }
   });
@@ -58,6 +58,8 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
     ripple(point: Vector3, strength = 1) { emitRipple(point.x, point.z, Math.max(0, Math.min(3, strength))); },
     update(dt: number) {
       bubbles.update(dt);
+      if (!boat) boat = scene.getObjectByName('Fishing boat') ?? null;
+      if (boat) { const k = boat.scale.x; setHullMask(boat.position.x, boat.position.z, 0.8 * k, 0.33 * k, boat.rotation.y); }
       const p = camera.position, inside = Math.abs(p.x) < WORLD.half && Math.abs(p.z) < WORLD.half && p.y > WORLD.bed - 0.6;
       const depth = world.heightAt(p.x, p.z) - p.y;
       post.setUnderwater(inside ? Math.max(0, Math.min(1, depth / 0.12)) : 0, Math.max(0, depth));

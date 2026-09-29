@@ -1,6 +1,6 @@
 import { Vector4 } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
-import { float, uniform, sin, cos } from 'three/tsl';
+import { float, uniform, sin, cos, vec2 } from 'three/tsl';
 import { simTime } from '../state';
 
 /**
@@ -89,3 +89,16 @@ export function oceanHeightCpu(x: number, z: number, t: number, out?: { gx: numb
   if (out) { out.gx = gx; out.gz = gz; }
   return h;
 }
+
+/** Oriented ellipse (boat hull) where the water surface is not drawn: xy = centre, z/w = half length / half beam. */
+export const hullMask = uniform(new Vector4(0, 0, 0.0001, 0.0001));
+export const hullAxis = uniform(new Vector4(1, 0, 0, 1));
+/** yaw is the boat's rotation.y; the hull length runs along local +x (world direction (cos yaw, -sin yaw)). */
+export function setHullMask(x: number, z: number, halfLength: number, halfBeam: number, yaw: number) {
+  hullMask.value.set(x, z, halfLength, halfBeam);
+  hullAxis.value.set(Math.cos(yaw), -Math.sin(yaw), Math.sin(yaw), Math.cos(yaw));
+}
+export const hullOutside = (xz: import('three/webgpu').Node<'vec2'>) => {
+  const d = xz.sub(hullMask.xy), u = d.dot(vec2(hullAxis.x, hullAxis.y)), v = d.dot(vec2(hullAxis.z, hullAxis.w));
+  return u.div(hullMask.z).pow(2).add(v.div(hullMask.w).pow(2)).greaterThan(1);
+};

@@ -104,7 +104,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   const predator = new Predator(seabed);
   const pend = { strike: 0, land: 0, lure: false, biterSince: -1, biterLocal: 'none' as SchoolStats['biter'], strikeQueued: false };
   const angelOn = () => behaviour.angel;
-  let panicIdx = 0, statsPending = false, lastStats = 0;
+  let landUntil = 0, panicIdx = 0, statsPending = false, lastStats = 0;
 
   function panic(origin: Vector3, strength = 1) {
     const k = panicIdx++ % 4;
@@ -123,7 +123,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
         stats.centroid.set(a[1] / (CENTROID_SCALE * n) - CENTROID_OFFSET, a[2] / (CENTROID_SCALE * n) - CENTROID_OFFSET, a[3] / (CENTROID_SCALE * n) - CENTROID_OFFSET);
         stats.meanFear = Math.min(1, a[4] / (FEAR_SCALE * n));
       }
-      const remote = a[6];
+      const remote = performance.now() < landUntil ? 0 : a[6]; // ignore stale readbacks right after land()
       if (remote === 2) { stats.biter = 'hooked'; pend.biterSince = -1; }
       else if (remote === 1) { stats.biter = 'approaching'; pend.biterSince = -1; }
       else if (performance.now() - pend.biterSince > 700 || pend.biterSince < 0) { stats.biter = 'none'; }
@@ -176,7 +176,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       if (stats.biter === 'none') return;
       pend.land = caught ? 1 : 2; landFrames = 3;
       if (!caught) panic(env.lurePos.value.clone(), 0.35);
-      stats.biter = 'none'; pend.biterSince = -1;
+      stats.biter = 'none'; pend.biterSince = -1; landUntil = performance.now() + 700;
     },
     addControls(folder: FolderApi) { controls(folder); },
   };

@@ -85,8 +85,8 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
 
   // underwater grading: deeper = bluer/darker
   const depth = max(waterLevel.sub(positionNode.y), 0);
-  const deep = smoothstep(0.3, 5.5, depth);
-  const graded = mix(tinted, tinted.mul(vec3(0.5, 0.74, 1.0)).mul(0.78), deep.mul(0.7));
+  const deep = smoothstep(1.6, 6.0, depth); // shallow fish keep their saturated colour
+  const graded = mix(tinted, tinted.mul(vec3(0.5, 0.74, 1.0)).mul(0.78), deep.mul(0.6));
   material.colorNode = vec4(graded, 1);
 
   const N = normalW.normalize();
@@ -98,7 +98,7 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
   const toSun = sunDirection.negate(), Vw = normalize(cameraPosition.sub(positionNode));
   const H = normalize(Vw.add(toSun));
   const flank = float(1).sub(abs(N.y)).clamp(0, 1);
-  const spec = pow(max(dot(N, H), 0), 22).mul(0.35).add(pow(max(dot(N, H), 0), 160).mul(1.4));
+  const spec = pow(max(dot(N, H), 0), 22).mul(0.1).add(pow(max(dot(N, H), 0), 160).mul(1.4));
   const flicker = sin(seedV.mul(60).add(simTime.mul(2.2)).add(N.x.mul(6))).mul(0.25).add(0.75);
   const sheen = mix(vec3(0.75, 0.92, 1.0), vec3(1.0, 0.98, 0.94), above).mul(spec.mul(above.mul(1.2).add(1))).mul(flank.mul(0.8).add(0.2)).mul(isBody).mul(flicker).mul(visuals.sheen).mul(look.sparkle);
 
@@ -112,7 +112,7 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
   // short metallic glint: white-silver-cyan highlight, peak well below a full white fish
   const glintColor = vec3(0.62, 0.86, 1.0).mul(glint.mul(0.85)).add(vec3(0.95, 1.0, 1.0).mul(pow(glint, 3).mul(0.6)));
   const dbg = new URLSearchParams(location.search).get('fishLite');
-  material.emissiveNode = dbg === '1' ? glintColor : dbg === '2' ? glintColor.add(sheen) : tinted.mul(caustic).mul(0.9).add(sheen).add(glintColor);
+  material.emissiveNode = dbg === '1' ? glintColor : dbg === '2' ? glintColor.add(sheen) : tinted.mul(caustic).mul(0.55).add(sheen).add(glintColor);
 
   material.positionNode = v.world;
 

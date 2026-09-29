@@ -8,7 +8,7 @@ import {
 } from 'three/tsl';
 import { WORLD } from '../config';
 import { simTime, waterLevel } from '../state';
-import { oceanField } from '../lib/ocean';
+import { hullOutside, oceanField } from '../lib/ocean';
 import { godRayStrength, toSun, waterClarity } from './lighting';
 import { skyColor } from './atmosphere';
 import { edgeHeight, type Edges } from './terrain';
@@ -67,7 +67,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   });
 
   /** Everything that lies below a water fragment: refracted opaque scene, absorption, in-scatter, god rays. */
-  function volume(entry: Node<'vec3'>, normal: Node<'vec3'>) {
+  function volume(entry: Node<'vec3'>, normal: Node<'vec3'>, tintScale = 1) {
     const toEntry = entry.sub(cameraPosition);
     const d0 = toEntry.length(), rd = toEntry.div(d0);
     const opaque = getViewPosition(screenUV, viewportDepthTexture().r, cameraProjectionMatrixInverse).length();
@@ -83,20 +83,23 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     // Limit the offset: shrink it at grazing angles and clamp its length so nothing gets stretched into streaks.
     const facing = dot(normal, rd.negate()).abs();
     const delta = uvRaw.sub(screenUV), deltaLen = delta.length().max(1e-5);
-    const uvR = screenUV.add(delta.mul(min(float(1), float(0.02).div(deltaLen))).mul(smoothstep(0.12, 0.55, facing))).clamp(0.002, 0.998);
+    const edge = (u: Node<'vec2'>) => min(min(u.x, float(1).sub(u.x)), min(u.y, float(1).sub(u.y)));
+    const edgeFade = smoothstep(0.0, 0.08, min(edge(screenUV), edge(uvRaw)));
+    const uvR = screenUV.add(delta.mul(min(float(1), float(0.02).div(deltaLen))).mul(smoothstep(0.12, 0.55, facing)).mul(edgeFade)).clamp(0.002, 0.998);
     const depthR = getViewPosition(uvR, viewportDepthTexture(uvR).r, cameraProjectionMatrixInverse).length();
     const mismatch = depthR.sub(opaque).abs().div(opaque.sub(d0).max(0.5));
     const weight = float(1).sub(smoothstep(0.12, 0.45, mismatch)).mul(depthR.greaterThan(d0.add(0.05)).select(float(1), float(0)));
     const straight = vec4(viewportOpaqueMipTexture(screenUV, float(0)) as Node<'vec4'>).rgb;
     const shifted = vec4(viewportOpaqueMipTexture(uvR, float(0)) as Node<'vec4'>).rgb;
     const sampleColor = mix(straight, shifted, weight);
-    const transmittance = exp(sigma.mul(waterClarity).mul(path).negate());
+    const absorbPath = tintScale === 1 ? path : path.mul(smoothstep(0, 6, path).mul(0.6).add(0.4));
+    const transmittance = exp(sigma.mul(waterClarity).mul(absorbPath).negate());
     const deep = float(1).sub(exp(path.mul(-0.09).mul(waterClarity)));
-    const inscatter = mix(vec3(0.02, 0.30, 0.32), vec3(0.008, 0.10, 0.32), deep).mul(float(1).sub(exp(path.mul(-0.24).mul(waterClarity)))).mul(1.25);
+    const inscatter = mix(vec3(0.02, 0.30, 0.32), vec3(0.008, 0.10, 0.32), deep).mul(float(1).sub(exp(path.mul(-0.24).mul(waterClarity))).pow(tintScale.valueOf() === 1 ? 1 : 1.8)).mul(1.25);
     const rays = scatterRays(entry, rd, path);
     const phase = float(0.6).add(pow(dot(rd, toSun).max(0), 3).mul(2.4));
     const rayColor = vec3(1.0, 0.95, 0.75).mul(rays).mul(phase).mul(godRayStrength).mul(0.3);
-    const baseTint = vec3(0.004, 0.045, 0.06);
+    const baseTint = vec3(0.004, 0.045, 0.06).mul(tintScale);
     return { color: sampleColor.mul(transmittance).mul(vec3(0.94, 0.99, 1.0)).add(baseTint).add(inscatter).add(rayColor), path, rd, d0, opaque };
   }
 
@@ -118,8 +121,8 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const fineA = mx_noise_float(vec3(positionWorld.xz.mul(6.5).add(simTime.mul(0.35)), simTime.mul(0.2)));
     const fineB = mx_noise_float(vec3(positionWorld.xz.mul(15).sub(simTime.mul(0.5)), 7.1));
     const N = normalize(baseNormal.add(vec3(fineA, 0, fineB).mul(0.075))).toVar();
-    const body = volume(positionWorld, N);
-    const F = fresnel(N, body.rd).mul(1.7).min(1);
+    const body = volume(positionWorld, N, 0.35);
+    const F = fresnel(N, body.rd).mul(1.3).min(1);
     const R3 = reflect(body.rd, N).toVar();
     const reflUV = screenUV.flipX().add(N.xz.mul(vec2(-0.05, 0.05)).mul(-1)).clamp(0.002, 0.998);
     const planar = reflection.sample(reflUV).rgb;
@@ -142,6 +145,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     return mix(base, surfaceLight.mul(1.1), max(foam.min(0.9), rippleSlope.mul(0.42)).mul(float(1).sub(F)));
   })();
   surfaceMaterial.opacityNode = float(1);
+  surfaceMaterial.maskNode = hullOutside(positionWorld.xz);
   const geometry = new PlaneGeometry(R * 2, R * 2, 224, 224); geometry.rotateX(-Math.PI / 2);
   geometry.boundingSphere = new Sphere(new Vector3(0, WORLD.surface, 0), R * 1.6);
   const surface = new Mesh(geometry, surfaceMaterial);
