@@ -4,7 +4,7 @@ import { WORLD } from './config';
 
 export function createCamera(canvas: HTMLCanvasElement) {
   const camera = new PerspectiveCamera(38, innerWidth / innerHeight, 0.2, 900);
-  camera.position.set(52, 36, 64);
+  camera.position.set(46, 31, 56);
   const controls = new OrbitControls(camera, canvas);
   controls.target.set(0, (WORLD.bed + WORLD.surface) / 2 - 0.4, 0);
   controls.enableDamping = true; controls.dampingFactor = 0.07;
