@@ -177,6 +177,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       void realDt;
     },
     panic,
+    setInsetCamera() { /* TODO: include the inset view in culling/LOD */ },
     setLure(p: Vector3 | null) {
       if (p) { env.lurePos.value.copy(p); env.lureActive.value = 1; } else env.lureActive.value = 0;
     },

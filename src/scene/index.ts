@@ -77,6 +77,7 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
       if (reflectTimer <= 0) { reflectTimer = 1; markReflective(); }
     },
     render() { post.render(); },
+    setInset() { /* TODO: picture-in-picture */ },
     resize() {},
     addControls(folder: FolderApi) {
       const sunFolder = folder.addFolder({ title: 'Sun', expanded: true });

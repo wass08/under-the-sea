@@ -27,6 +27,7 @@ export function createMockSchool(): School & { mock: true } {
       if (!p) { drift = 0; if (stats.biter === 'approaching') { stats.biter = 'none'; approachT = -1; } }
     },
     setCuriosity(a) { curiosity = a; },
+    setInsetCamera() {},
     strike() { if (stats.nearLure <= 0 || stats.biter !== 'none') return false; stats.biter = 'approaching'; approachT = 0; return true; },
     land() { stats.biter = 'none'; approachT = -1; drift = 0; },
     stats,

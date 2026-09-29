@@ -14,6 +14,8 @@ export interface Ctx {
   camera: PerspectiveCamera;
 }
 
+export interface InsetRect { x: number; y: number; width: number; height: number }
+
 export interface World {
   /** Sun light; other modules may enable castShadow on their meshes. */
   sun: DirectionalLight;
@@ -38,6 +40,12 @@ export interface World {
   update(dt: number): void;
   /** Render the frame (owns the post-processing pipeline). */
   render(): void;
+  /**
+   * Picture-in-picture: after the main view, render() also renders `camera` into `rect`
+   * (CSS pixels, origin top-left of the canvas) with the same look (underwater medium, post).
+   * Pass null to disable. The caller owns the camera and any DOM frame around the rect.
+   */
+  setInset(camera: PerspectiveCamera | null, rect?: InsetRect): void;
   resize(): void;
   addControls(folder: FolderApi): void;
 }
@@ -68,6 +76,8 @@ export interface School {
   /** Resolve a hooked fish: caught → it leaves the school with the line (respawns later); otherwise it escapes in fear. */
   land(caught: boolean): void;
   readonly stats: SchoolStats;
+  /** An extra view (the picture-in-picture camera) that GPU culling/LOD must also serve; null to remove. */
+  setInsetCamera(camera: PerspectiveCamera | null): void;
   addControls(folder: FolderApi): void;
 }
 
