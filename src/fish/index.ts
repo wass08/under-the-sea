@@ -12,7 +12,7 @@ import type { InstanceNodes } from './render';
 import { Predator } from './predator';
 import { simTime } from '../state';
 
-const MAIN_LENGTH = 0.22, ANGEL_LENGTH = 0.46, ANGEL_COUNT = 512, PREDATOR_LENGTH = 1.55;
+const MAIN_LENGTH = 0.22, ANGEL_LENGTH = 0.46, ANGEL_COUNT = 512, PREDATOR_LENGTH = 1.25;
 const base = import.meta.env.BASE_URL;
 const query = new URLSearchParams(location.search);
 
@@ -36,7 +36,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
 
   // ------------------------------------------------------------------ assets
   const [main, angel, big] = await Promise.all([
-    loadFishAsset(`${base}models/fish_01.glb`, { frames: 32, body: 300, fins: 90, eye: 22, proxies: [110] }),
+    loadFishAsset(`${base}models/fish_01.glb`, { frames: 32, body: 300, fins: 90, eye: 22, proxies: [70] }),
     loadFishAsset(`${base}models/angel_fish.glb`, { frames: 32, body: 520, fins: 0, eye: 24, proxies: [140] }),
     loadFishAsset(`${base}models/fish_02.glb`, { frames: 32, body: 1500, fins: 0, eye: 60, proxies: [] }),
   ]);
@@ -72,8 +72,8 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   // predator: one instance driven by uniforms
   const pU = { pos: uniform(new Vector3(0, -40, 0)), vel: uniform(new Vector3(1, 0, 0)), phase: uniform(0), bank: uniform(0), size: uniform(0) };
   const predInst: InstanceNodes = { P: pU.pos, V: pU.vel, phase: pU.phase, size: pU.size, flash: float(0), bank: pU.bank, hidden: float(0), fear: float(0), seed: float(0.5) };
-  const steel = () => vec3(0.38, 0.45, 0.55);
-  const predMeshes = createFishMesh(big, 0, null, predInst, PREDATOR_LENGTH, 1, { tint: steel, sparkle: 0.35, roughness: 0.55 });
+  const steel = () => vec3(1);
+  const predMeshes = createFishMesh(big, 0, null, predInst, PREDATOR_LENGTH, 1, { tint: steel, sparkle: 0.15, roughness: 0.4, shape: [1.3, 0.85], procedural: true });
   void instanceIndex;
 
   const all = [fishMeshes, angelMeshes, predMeshes];
@@ -197,6 +197,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     }
   }
   const noSim = query.get('fishNoSim') === '1';
+  if (query.has('fishScan')) env.scanCap.value = Number(query.get('fishScan'));
   const follow = query.has('fishFollow'), fd = Number(query.get('fishFollow')) || 1, followOffset = new Vector3(2.5 * fd, 2.2 * fd, 3.5 * fd);
   if (query.get('fishNoSurface') === '1') world.surface.visible = false;
   if (query.get('fishHide') === '1') { fishMeshes.mesh.visible = false; if (fishMeshes.shadowMesh) fishMeshes.shadowMesh.visible = false; }

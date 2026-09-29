@@ -23,11 +23,11 @@ export function createEnv() {
     // milling
     millBlend: u(0), millStrength: u(1), millRadius: u(2.9), millHeight: u(0.8), millDir: u(1), millCenter: u(new Vector3(0.4, 4.5, 0.3)), attractors: [0, 1, 2].map(() => u(new Vector3(0, 4, 0))), attractW: u(1),
     // predator / fountain
-    predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(3.2), fountain: u(1),
+    predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(2.0), fountain: u(1),
     // panic
     panicOrigin: [0, 1, 2, 3].map(() => u(new Vector4(0, 0, 0, -1000))),
     panicStrength: u(new Vector4(0, 0, 0, 0)),
-    panicSpeed: u(5.0), burst: u(7.0), calm: u(0.8), transmission: u(0.96),
+    panicSpeed: u(5.0), burst: u(9.5), calm: u(0.8), transmission: u(0.8),
     // lure
     lurePos: u(new Vector3(0, 5, 0)), lureActive: u(0), curiosity: u(0), curiosityRadius: u(3.5), inspectors: u(100), hooked: u(0),
     strike: u(0), land: u(0), respawn: u(10),
@@ -161,8 +161,8 @@ export function createSim(o: SimOptions) {
     const Vold = V.toVar();
     const alive = float(1).toVar();
 
-    // --- strike selection commit
-    If(env.strike.greaterThan(0.5).and(state.lessThan(0.5)), () => {
+    // --- strike selection commit (main school only: other species never run the selection pass)
+    if (o.main) If(env.strike.greaterThan(0.5).and(state.lessThan(0.5)), () => {
       const key = statsWrite.element(8);
       If(key.notEqual(uint(0xffffffff)).and(key.bitAnd(uint(0x3ffff)).equal(i)), () => { state.assign(1); });
     });
@@ -272,7 +272,7 @@ export function createSim(o: SimOptions) {
       // --- large-scale flow: follow the wandering attractor loosely + coherent flow field (density waves, curling edges)
       const grp = floor(rnd(31).mul(3)), myAtt = select(grp.lessThan(0.5), env.attractors[0], select(grp.lessThan(1.5), env.attractors[1], env.attractors[2]));
       const ad = myAtt.sub(P), al2 = length(ad);
-      acc.addAssign(ad.div(max(al2, 0.01)).mul(smoothstep(2.6, 5.5, al2)).mul(2.6).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))));
+      acc.addAssign(ad.div(max(al2, 0.01)).mul(smoothstep(2.6, 5.5, al2)).mul(2.6).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(fear.mul(2.5).add(1)));
       acc.addAssign(vec3(sin(P.y.mul(1.7).add(clock.mul(0.6))).add(sin(P.z.mul(1.1).sub(clock.mul(0.4)))), sin(P.x.mul(1.3).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(1.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.9).add(clock.mul(0.3))))).mul(1.0));
 
       // --- bounds (soft walls)
@@ -285,9 +285,11 @@ export function createSim(o: SimOptions) {
       const hP = terrainH(P.x, P.z), hA = terrainH(ahead.x, ahead.z);
       const clr = min(P.y.sub(hP), ahead.y.sub(hA));
       const tw = clamp(float(1.0).sub(clr).div(1.0), 0, 1);
-      const tn = terrainNormal(ahead.x, ahead.z);
-      acc.addAssign(tn.mul(tw.mul(tw)).mul(38));
-      V.subAssign(tn.mul(min(dot(V, tn), 0)).mul(tw).mul(clamp(dt.mul(8), 0, 1)));
+      If(tw.greaterThan(0.001), () => { // only pay for the normal near the terrain
+        const tn = terrainNormal(ahead.x, ahead.z);
+        acc.addAssign(tn.mul(tw.mul(tw)).mul(38));
+        V.subAssign(tn.mul(min(dot(V, tn), 0)).mul(tw).mul(clamp(dt.mul(8), 0, 1)));
+      });
 
       // --- milling (torus)
       If(millW.greaterThan(0.001), () => {
@@ -303,10 +305,12 @@ export function createSim(o: SimOptions) {
       // --- fountain: flee the predator laterally + backward relative to its heading
       const dP = P.sub(env.predPos), dl = length(dP), H = normalize(env.predVel), along = dot(dP, H), perp = dP.sub(H.mul(along)), pl = length(perp);
       const fr = env.fearRadius;
-      const zone = env.predActive.mul(smoothstep(fr, fr.mul(0.3), dl)).mul(smoothstep(fr.mul(-0.45), fr.mul(0.25), along));
+      // ellipsoidal zone: reaches further ahead of the predator, so the school opens a tunnel before it arrives
+      const dEff = sqrt(pl.mul(pl).add(along.mul(select(along.greaterThan(0), float(0.5), float(1.0))).pow(2)));
+      const zone = env.predActive.mul(smoothstep(fr, fr.mul(0.25), dEff)).mul(smoothstep(fr.mul(-0.6), fr.mul(0.1), along));
       const lateral = select(pl.greaterThan(0.06), perp.div(pl), cross(H, vec3(0, 1, 0)).mul(rA.sub(0.5).sign()));
       const flee = lateral.add(H.mul(-0.55)).add(vec3(0, rB.sub(0.5).mul(0.6), 0));
-      acc.addAssign(flee.mul(zone).mul(env.fountain).mul(o.fearSensitivity).mul(34));
+      acc.addAssign(flee.mul(zone).mul(env.fountain).mul(o.fearSensitivity).mul(34).mul(float(1).add(smoothstep(fr.mul(0.7), 0, dEff).mul(2))));
       fear.assign(max(fear, zone.mul(0.55).mul(clamp(env.fountain, 0, 1)).mul(o.fearSensitivity)));
 
       // --- lure curiosity
@@ -332,7 +336,7 @@ export function createSim(o: SimOptions) {
         const str = k === 0 ? env.panicStrength.x : k === 1 ? env.panicStrength.y : k === 2 ? env.panicStrength.z : env.panicStrength.w;
         const age = clock.sub(oU.w), Rf = age.mul(env.panicSpeed), Rp = Rf.sub(env.panicSpeed.mul(dt));
         const dO = P.sub(oU.xyz), d = length(dO);
-        const hit = step(0, age).mul(step(d, Rf)).mul(step(Rp, d)).mul(step(Rf, str.mul(11))).mul(step(0.001, str));
+        const hit = step(0, age).mul(step(d, Rf)).mul(step(Rp, d)).mul(step(Rf, str.mul(3.4))).mul(step(0.001, str));
         If(hit.greaterThan(0.5), () => {
           const away = normalize(select(d.greaterThan(0.05), dO.div(max(d, 0.05)), randDir(4)).add(randDir(6).mul(0.25)));
           V.assign(mix(V, away.mul(env.burst).mul(clamp(str, 0.3, 1.2)).mul(rB.mul(0.3).add(0.85)), 0.9));
@@ -366,7 +370,7 @@ export function createSim(o: SimOptions) {
       const sp2c = clamp(sp2, vmin, vmax);
       V.assign(V.mul(sp2c.div(max(sp2, 0.001))));
       // after an explosive burst fish decelerate back toward cruise speed
-      V.mulAssign(float(1).sub(clamp(dt.mul(1.6), 0, 1).mul(step(spd.mul(o.cruise).mul(1.6), sp2c))));
+      V.mulAssign(float(1).sub(clamp(dt.mul(2.4), 0, 1).mul(step(spd.mul(o.cruise).mul(1.6), sp2c))));
       // flatten the pitch when calm
       const pitchLim = mix(float(0.55), float(0.95), clamp(fear.mul(1.5), 0, 1));
       const spN = max(length(V), 0.001);
@@ -396,7 +400,7 @@ export function createSim(o: SimOptions) {
       bank.assign(mix(bank, clamp(lat.mul(0.11), -1.0, 1.0), clamp(dt.mul(7), 0, 1)));
       const ang = length(cross(dirV, dirN)).div(max(dt, 0.0005));
       turnS.assign(mix(turnS, ang, clamp(dt.mul(10), 0, 1)));
-      flash.assign(max(flash.mul(exp(dt.mul(-14.0))), smoothstep(4.0, 11.0, turnS).mul(fear.mul(0.9).add(0.1)).min(1).mul(0.4)));
+      flash.assign(max(flash.mul(exp(dt.mul(-14.0))), smoothstep(4.0, 11.0, turnS).mul(smoothstep(0.35, 0.8, fear)).mul(0.4)));
       phaseRate.assign(float(0.9).add(speedNow.mul(0.85)).add(fear.mul(1.2)));
       alive.assign(1);
     });

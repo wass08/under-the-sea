@@ -35,12 +35,13 @@ function vatNodes(lod: FishLod, frames: number) {
 }
 
 /** Builds the vertex-stage world position + normal for one LOD. `scale` = world size / model length. */
-function buildVertex(lod: FishLod, frames: number, inst: InstanceNodes, scale: number, inspect?: any) {
+function buildVertex(lod: FishLod, frames: number, inst: InstanceNodes, scale: number, inspect?: any, shape?: [number, number]) {
   const vat = vatNodes(lod, frames), V = lod.vertexCount;
   const ph = fract(inst.phase).mul(frames), f0 = floor(ph), a = fract(ph), f1 = mod(f0.add(1), frames);
   const vid = vertexIndex.toFloat();
   const i0 = f0.mul(V).add(vid).mul(2).toUint(), i1 = f1.mul(V).add(vid).mul(2).toUint();
-  const p = mix(vat.element(i0).xyz, vat.element(i1).xyz, a);
+  const p0 = mix(vat.element(i0).xyz, vat.element(i1).xyz, a);
+  const p = shape ? vec3(p0.x.mul(shape[0]), p0.y, p0.z.mul(shape[1])) : p0;
   const n = mix(vat.element(i0.add(1)).xyz, vat.element(i1.add(1)).xyz, a);
 
   const speed = length(inst.V);
@@ -63,11 +64,15 @@ export interface FishLook {
   /** Caustics / sheen strength (predator: less sparkle). */
   sparkle: number;
   roughness: number;
+  /** Non-uniform body scale [length, width]. */
+  shape?: [number, number];
+  /** Dark steel-blue back / silver belly instead of the texture colours (keeps texture detail). */
+  procedural?: boolean;
 }
 
 export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodIndex: number | null, inst: InstanceNodes, worldLength: number, count: number, look: FishLook, inspect?: any) {
   const lod = asset.lods[lodIndex], scale = worldLength / asset.length;
-  const v = buildVertex(lod, asset.frames, inst, scale, inspect);
+  const v = buildVertex(lod, asset.frames, inst, scale, inspect, look.shape);
   const positionNode = v.world.toVarying('fishPos'), normalW = v.normal.toVarying('fishNormal');
   const flashV = inst.flash.toVarying('fishFlash'), seedV = inst.seed.toVarying('fishSeed'), fearV = inst.fear.toVarying('fishFear');
 
@@ -81,6 +86,11 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
   albedo = mix(albedo, vec3(0.92, 0.9, 0.82), step(1.5, id));
   albedo = mix(albedo, vec3(0.006, 0.01, 0.016), step(2.5, id));
   const isBody = float(1).sub(step(1.5, id));
+  if (look.procedural) {
+    const luma = dot(albedo, vec3(0.3, 0.5, 0.2)), up = smoothstep(-0.35, 0.25, normalW.y);
+    const proc = mix(vec3(0.62, 0.68, 0.76), vec3(0.015, 0.04, 0.1), up).mul(luma.mul(1.0).add(0.4));
+    albedo = mix(albedo, proc, isBody);
+  }
   const tinted = albedo.mul(look.tint(seedV));
 
   // underwater grading: deeper = bluer/darker

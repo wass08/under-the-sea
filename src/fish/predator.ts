@@ -10,7 +10,7 @@ const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
  */
 export class Predator {
   pos = new Vector3(4, 4.2, 3); dir = new Vector3(-1, 0, -0.3).normalize();
-  speed = 5.5; interval = 22; cruiseSpeed = 1.5;
+  speed = 7.0; interval = 22; cruiseSpeed = 1.5;
   phase = 0; bank = 0; scale = 0; active = false;
   private mode: 'cruise' | 'charge' = 'cruise';
   private timer = 6; private chargeTime = 0; private chargeDir = new Vector3(); private orbit = 0; private forced = false;
@@ -29,14 +29,14 @@ export class Predator {
     const c = centroid;
     if (this.mode === 'cruise') {
       this.timer -= dt;
-      // circle the tank (inside the walls), at the school's depth
-      const rel = this.v.set(this.pos.x, 0, this.pos.z), ang = Math.atan2(rel.z, rel.x) + 0.6, R = 3.7;
+      // prowl around the OUTSIDE of the school (target clamped inside the tank walls)
+      const rel = this.v.set(this.pos.x - c.x, 0, this.pos.z - c.z), ang = Math.atan2(rel.z, rel.x) + 0.5, R = 5.0;
       this.orbit += dt * 0.4;
-      this.target.set(Math.cos(ang) * R, clamp(c.y + Math.sin(this.orbit) * 0.9, 2.8, 6.0), Math.sin(ang) * R);
+      this.target.set(clamp(c.x + Math.cos(ang) * R, -4.6, 4.6), clamp(c.y + Math.sin(this.orbit) * 0.9, 2.8, 6.0), clamp(c.z + Math.sin(ang) * R, -4.6, 4.6));
       this.want.copy(this.target).sub(this.pos);
       this.speedNow += (this.cruiseSpeed - this.speedNow) * Math.min(1, dt * 1.2);
       this.steer(dt, 1.3);
-      if (this.timer <= 0 && (this.pos.distanceTo(c) > 3.2 || this.forced)) {
+      if (this.timer <= 0 && (this.pos.distanceTo(c) > 3.6 || this.forced)) {
         this.mode = 'charge'; this.chargeTime = 0; this.forced = false;
         this.chargeDir.copy(c).sub(this.pos); this.chargeDir.y *= 0.5;
         if (this.chargeDir.lengthSq() < 0.01) this.chargeDir.set(1, 0, 0);
@@ -51,7 +51,7 @@ export class Predator {
       const past = this.v.copy(this.pos).sub(c).dot(this.chargeDir);
       if (past > 4.2 || this.chargeTime > 8) { this.mode = 'cruise'; this.timer = this.interval * (0.7 + Math.random() * 0.6); }
     }
-    this.phase = (this.phase + dt * (0.35 + this.speedNow * 0.32)) % 1;
+    this.phase = (this.phase + dt * (1.1 + this.speedNow * 0.6)) % 1; // fast, sweeping tail beat
     this.avoid();
   }
 
