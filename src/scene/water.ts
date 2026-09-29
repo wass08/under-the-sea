@@ -149,19 +149,20 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const fineA = mx_noise_float(vec3(positionWorld.xz.mul(3).add(simTime.mul(0.35)), simTime.mul(0.2)));
     const fineB = mx_noise_float(vec3(positionWorld.xz.mul(7).sub(simTime.mul(0.5)), 7.1));
     const N = normalize(baseNormal.add(vec3(fineA, 0, fineB).mul(0.075)));
+    const Nsoft = normalize(baseNormal.mul(0.6).add(vec3(0, 0.4, 0)).add(vec3(fineA, 0, fineB).mul(0.03)));
     const rdC = normalize(positionWorld.sub(cameraPosition));
     If(dot(rdC, N).greaterThan(0), () => {
       // Seen from below: bright Snell's window with the sky above, total internal reflection outside it.
       const cosI = dot(rdC, N).clamp(0, 1), eta = 1.333;
       const k = float(1).sub(float(eta * eta).mul(float(1).sub(cosI.mul(cosI))));
       const windowMask = smoothstep(0.0, 0.12, k);
-      const refr = refract(rdC, N.negate(), float(eta));
+      const refr = refract(rdC, Nsoft.negate(), float(eta));
       const clip = cameraProjectionMatrix.mul(cameraViewMatrix.mul(vec4(positionWorld.add(refr.mul(60)), 1)));
       const uvw = clip.xy.div(clip.w).mul(vec2(0.5, -0.5)).add(0.5).clamp(0.003, 0.997);
       const seen = vec4(viewportOpaqueMipTexture(uvw, float(0)) as Node<'vec4'>).rgb;
       const shimmer = mx_noise_float(vec3(positionWorld.xz.mul(1.6).add(simTime.mul(0.5)), simTime.mul(0.7))).mul(0.25).add(1.0);
       const Fw = float(0.02).add(float(0.98).mul(float(1).sub(cosI).pow(5))).mul(1.0);
-      const windowColor = seen.mul(1.35).add(skyColor(refr).mul(0.5)).mul(shimmer).mul(float(1).sub(Fw));
+      const windowColor = seen.min(2.4).mul(vec3(0.7, 1.0, 1.1)).add(skyColor(refr).min(3).mul(vec3(0.3, 0.7, 1.0))).mul(shimmer).mul(float(1).sub(Fw));
       const medium = mediumColor(reflect(rdC, N.negate()).y);
       out.assign(mix(medium, windowColor.add(medium.mul(Fw)), windowMask));
     }).Else(() => { out.assign(aboveColor); });

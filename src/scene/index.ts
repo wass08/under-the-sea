@@ -17,6 +17,9 @@ import { createIsland } from './island';
 import { createBubbles, createPlankton } from './particles';
 
 const gradient = { gx: 0, gz: 0 };
+/** ?lookAt=x,y,z (debug): aim the camera after the orbit controls have updated. */
+const lookAtParam = new URLSearchParams(location.search).get('lookAt')?.split(',').map(Number);
+const lookAt = lookAtParam && lookAtParam.length === 3 ? new Vector3(...lookAtParam) : null;
 
 export async function createWorld({ renderer, scene, camera }: Ctx): Promise<World> {
   applyCameraPreset(camera);
@@ -61,6 +64,7 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
     },
     ripple(point: Vector3, strength = 1) { emitRipple(point.x, point.z, Math.max(0, Math.min(3, strength))); },
     update(dt: number) {
+      if (lookAt) camera.lookAt(lookAt);
       bubbles.update(dt);
       if (!boat) boat = scene.getObjectByName('Fishing boat') ?? null;
       if (boat) { const k = boat.scale.x; setHullMask(boat.position.x, boat.position.z, 0.8 * k, 0.33 * k, boat.rotation.y); }

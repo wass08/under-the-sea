@@ -17,13 +17,14 @@ export function underwaterShading(albedo: Node<'vec3'>, normal: Node<'vec3'>, ga
   const wet = float(1).sub(smoothstep(-0.5, -0.05, depth).mul(float(1).sub(submerged)).mul(0.24));
   const light = normal.dot(toSun).max(0);
   if (!withCaustics) return { albedo: tinted.mul(wet), emissive: vec3(0) as unknown as Node<'vec3'> };
-  const gate = light.mul(sunVisibilityRef.node).mul(submerged);
+  // Fully lit where the sun reaches; a third of it in shade so shelves facing away still shimmer.
+  const gate = mix(float(0.33), float(1), light.mul(sunVisibilityRef.node)).mul(submerged);
   // Only pay for the Worley field where sunlight actually reaches the underwater surface.
   const emissive = Fn(() => {
     const out = vec3(0).toVar();
     If(gate.greaterThan(0.002), () => {
       const caustic = causticAt(positionWorld, depth).mul(vec3(0.75, 1.0, 1.05));
-      out.assign(tinted.mul(caustic).mul(gate).mul(depth.mul(-0.05).exp()).mul(causticStrength).mul(gain));
+      out.assign(tinted.mul(caustic).mul(gate).mul(mix(float(0.4), light.max(0.4), 1)).mul(depth.mul(-0.05).exp()).mul(causticStrength).mul(gain));
     });
     return out;
   })();
@@ -37,7 +38,7 @@ export function createTerrainMaterial() {
   const material = new MeshStandardNodeMaterial({ roughness: 0.96, metalness: 0 });
   const p = positionWorld, n0 = normalWorldGeometry;
   const depth = waterDepthAt(p.y);
-  const flat = smoothstep(0.72, 0.93, n0.y);
+  const flat = smoothstep(0.35, 0.85, n0.y).mul(0.45).add(smoothstep(0.72, 0.93, n0.y).mul(0.55));
   const { texture: sandMap, maxSlope } = createSandTexture();
   const t1 = texture(sandMap, p.xz.div(SAND_TILE)), t2 = texture(sandMap, p.xz.div(SAND_TILE).mul(3.7).add(0.31)), t3 = texture(sandMap, p.xz.div(SAND_TILE * 4.3).add(0.6));
   const slope = vec2(t1.r.sub(0.5), t1.g.sub(0.5)).add(vec2(t2.r.sub(0.5), t2.g.sub(0.5)).mul(0.55)).mul(2 * maxSlope);

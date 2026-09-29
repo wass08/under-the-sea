@@ -2,7 +2,7 @@
 
 *You can't prompt what you can't name*, episode 2: **Boids & GPGPU**.
 
-A floating block of ocean with tens of thousands of GPU-simulated schooling fish. They show three collective behaviours: **milling**, the **fountain effect** and **flash expansion**. A fisherman in a rowboat casts a line: the splash scatters the school, calm returns, curious fish inspect the lure, one of them bites, and you click to hook it.
+A floating 36 × 36 block of ocean with a palm island in the middle and thousands of GPU-simulated schooling fish. They show three collective behaviours: **milling**, the **fountain effect** and **flash expansion**. A fisherman in a rowboat casts a line: the splash scatters the school, calm returns, curious fish inspect the lure, one of them bites, and you click to hook it.
 
 Vite + vanilla TypeScript, three 0.186 WebGPU/TSL (compute shaders + instancing), Tweakpane.
 
@@ -31,7 +31,7 @@ Open current Chrome or Edge with WebGPU and hardware acceleration enabled.
 
 | Param | Effect |
 | --- | --- |
-| `?fish=65536` | School size (256 … 262144, default 32768). Buffers are fixed at boot. |
+| `?fish=32768` | School size (256 … 262144, default 12288 in three sub-schools). Buffers are fixed at boot. |
 | `?autofish` | Start in auto-fish mode. |
 | `?milling=1` | Start milling. |
 | `?fishDemo=milling\|fountain\|panic\|flash` | Force a behaviour (panic re-triggers every few seconds). |
