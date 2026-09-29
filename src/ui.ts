@@ -4,7 +4,7 @@ import { state } from './state';
 
 /** Global control panel. Modules add their own folders. */
 export function createPanel() {
-  const pane = new Pane({ title: 'School', expanded: true });
+  const pane = new Pane({ title: 'Controls', expanded: true });
   pane.element.parentElement!.classList.add('panel');
   const perf = { fps: 0 };
   pane.addBinding(perf, 'fps', { readonly: true, label: 'FPS', format: (v: number) => v.toFixed(0) });
