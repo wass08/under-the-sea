@@ -2,7 +2,7 @@
 import { StorageBufferAttribute, Vector3, Vector4 } from 'three/webgpu';
 import type { WebGPURenderer } from 'three/webgpu';
 import * as TSL from 'three/tsl';
-const {
+const { atan,
   Fn, If, Loop, atomicAdd, atomicMin, atomicStore, clamp, cos, cross, dot, exp, float, floor, hash, instanceIndex, instancedArray, length, max, min,
   mix, normalize, select, sin, smoothstep, sqrt, step, storage, uint, uniform, vec3, vec4, abs, fract, int,
 } = TSL as any;
@@ -19,9 +19,9 @@ export function createEnv() {
   const env = {
     dt: u(0.016), clock: u(0), frame: u(0),
     // boids
-    speed: u(1), sepW: u(1.2), aliW: u(1.0), cohW: u(1.0), sepR: u(0.2), neighR: u(0.5), scanCap: u(5, 'int'),
+    speed: u(1), sepW: u(1.2), aliW: u(1.0), cohW: u(1.0), sepR: u(0.27), neighR: u(0.5), scanCap: u(5, 'int'),
     // milling
-    millBlend: u(0), millStrength: u(1), millRadius: u(3.0), millHeight: u(2.2), millDir: u(1), millCenter: u(new Vector3(0.8, 4.1, 0.8)),
+    millBlend: u(0), millStrength: u(1), millRadius: u(2.9), millHeight: u(0.8), millDir: u(1), millCenter: u(new Vector3(0.4, 4.5, 0.3)), attractor: u(new Vector3(0, 4, 0)), attractW: u(1),
     // predator / fountain
     predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(3.2), fountain: u(1),
     // panic
@@ -269,10 +269,15 @@ export function createSim(o: SimOptions) {
         acc.addAssign(dxz.div(max(dl, 0.01)).mul(smoothstep(o.homeRadius, o.homeRadius + 2.5, dl)).mul(2.5));
       }
 
+      // --- large-scale flow: follow the wandering attractor loosely + coherent flow field (density waves, curling edges)
+      const ad = env.attractor.sub(P), al2 = length(ad);
+      acc.addAssign(ad.div(max(al2, 0.01)).mul(smoothstep(2.6, 5.5, al2)).mul(2.6).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))));
+      acc.addAssign(vec3(sin(P.y.mul(1.7).add(clock.mul(0.6))).add(sin(P.z.mul(1.1).sub(clock.mul(0.4)))), sin(P.x.mul(1.3).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(1.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.9).add(clock.mul(0.3))))).mul(1.0));
+
       // --- bounds (soft walls)
-      const m = float(1.0), lo = vec3(SWIM_BOUNDS.min[0], SWIM_BOUNDS.min[1], SWIM_BOUNDS.min[2]), hi = vec3(SWIM_BOUNDS.max[0], waterLevel.sub(0.3), SWIM_BOUNDS.max[2]);
+      const m = float(2.4), lo = vec3(SWIM_BOUNDS.min[0], SWIM_BOUNDS.min[1], SWIM_BOUNDS.min[2]), hi = vec3(SWIM_BOUNDS.max[0], waterLevel.sub(0.3), SWIM_BOUNDS.max[2]);
       const pen = clamp(lo.add(m).sub(P).div(m), 0, 1).sub(clamp(P.sub(hi.sub(m)).div(m), 0, 1));
-      acc.addAssign(pen.mul(abs(pen).mul(0.6).add(0.4)).mul(14));
+      acc.addAssign(pen.mul(abs(pen)).mul(9).mul(float(1).sub(millW.mul(0.7))).add(pen.mul(abs(pen).mul(abs(pen))).mul(10)));
 
       // --- terrain avoidance
       const ahead = P.add(V.mul(0.7));
@@ -287,8 +292,9 @@ export function createSim(o: SimOptions) {
       If(millW.greaterThan(0.001), () => {
         const C = env.millCenter, r = vec3(P.x.sub(C.x), 0, P.z.sub(C.z)), dist = max(length(r), 0.05), er = r.div(dist);
         const et = vec3(er.z.negate(), 0, er.x).mul(env.millDir);
-        const R = env.millRadius.mul(rA.mul(0.55).add(0.72));
-        const yMid = C.y.add(rB.sub(0.5).mul(env.millHeight));
+        const R = env.millRadius.mul(rA.mul(0.3).add(0.85));
+        const swirl = sin(atan(er.z, er.x).mul(2).add(clock.mul(0.7))).mul(0.4).add(sin(atan(er.z, er.x).sub(clock.mul(0.5))).mul(0.2));
+        const yMid = C.y.add(rB.sub(0.5).mul(env.millHeight)).add(swirl).sub(r.x.add(r.z).mul(0.3));
         const want = et.mul(spd.mul(1.75)).add(er.mul(clamp(R.sub(dist).mul(1.6), -1.4, 1.4))).add(vec3(0, clamp(yMid.sub(P.y).mul(1.4), -0.7, 0.7), 0));
         acc.addAssign(want.sub(V).mul(3.6).mul(env.millStrength).mul(millW).mul(float(1).sub(fear)));
       });

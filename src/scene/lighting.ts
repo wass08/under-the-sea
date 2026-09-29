@@ -8,7 +8,7 @@ import { simTime, sunDirection, waterLevel } from '../state';
 
 /** User-facing sun parameters (degrees). */
 const q = new URLSearchParams(location.search).get('sun')?.split(',').map(Number);
-export const sunParams = { azimuth: q?.[0] ?? 182, elevation: q?.[1] ?? 30, intensity: 5.2 };
+export const sunParams = { azimuth: q?.[0] ?? 198, elevation: q?.[1] ?? 30, intensity: 5.2 };
 export const lookParams = { caustics: 1, godRays: 1, clarity: 1 };
 export const causticStrength = uniform(1);
 export const godRayStrength = uniform(1);
@@ -27,7 +27,7 @@ export function applySunAngles() {
 // ---- Caustics -----------------------------------------------------------------------------------------------
 export const causticParams = createCausticsUniforms();
 causticParams.scaleA.value = 0.72; causticParams.scaleB.value = 1.15; causticParams.speed.value = 0.30;
-causticParams.sharpness.value = 15; causticParams.intensity.value = 1.35; causticParams.rgbOffset.value = 0.02;
+causticParams.sharpness.value = 18; causticParams.intensity.value = 1.35; causticParams.rgbOffset.value = 0.02;
 /** Point on the surface plane from which sunlight reaches `p` (world position node). */
 export const sunSurfacePoint = (p: Node<'vec3'>) => p.xz.sub(sunDirection.xz.mul(p.y.sub(waterLevel).div(sunDirection.y.min(-0.15))));
 export function causticAtSurface(s: Node<'vec2'>, depth: Node<'float'>) {

@@ -8,7 +8,7 @@ import { causticAt, causticStrength, sunVisibilityRef, toSun, waterDepthAt, wate
  * Underwater shading for opaque terrain-like surfaces: depth tint on the albedo and sun caustics that
  * follow the sun through the water surface. Returns the adjusted albedo and the caustic emissive.
  */
-export function underwaterShading(albedo: Node<'vec3'>, normal: Node<'vec3'>, gain = 4.5) {
+export function underwaterShading(albedo: Node<'vec3'>, normal: Node<'vec3'>, gain = 8.0) {
   const depth = waterDepthAt(positionWorld.y);
   const submerged = smoothstep(-0.03, 0.22, depth);
   const tinted = albedo.mul(mix(vec3(1), waterTransmittance(depth).mul(vec3(0.9, 1.0, 1.0)), submerged.mul(0.92)));
@@ -16,7 +16,7 @@ export function underwaterShading(albedo: Node<'vec3'>, normal: Node<'vec3'>, ga
   const wet = float(1).sub(smoothstep(-0.4, -0.05, depth).mul(float(1).sub(submerged)).mul(0.22));
   const light = normal.dot(toSun).max(0);
   const caustic = causticAt(positionWorld, depth).mul(vec3(0.75, 1.0, 1.05));
-  const emissive = tinted.mul(caustic).mul(light).mul(sunVisibilityRef.node).mul(submerged).mul(depth.mul(-0.12).exp()).mul(causticStrength).mul(gain);
+  const emissive = tinted.mul(caustic).mul(light).mul(sunVisibilityRef.node).mul(submerged).mul(depth.mul(-0.08).exp()).mul(causticStrength).mul(gain);
   return { albedo: tinted.mul(wet), emissive };
 }
 

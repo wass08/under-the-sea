@@ -11,7 +11,7 @@ export const BASIN = { x: 2.0, z: 1.9 };
 
 // Radius (from island centre) -> height above the seabed. Monotone cubic (PCHIP) through the anchors.
 const ANCHORS: [number, number][] = [
-  [0, 8.1], [1.0, 7.9], [1.7, 7.5], [2.3, 6.8], [2.75, 5.9], [3.2, 4.9], [3.7, 3.7], [4.4, 2.1], [5.2, 0.85], [6.2, 0],
+  [0, 8.1], [1.0, 7.9], [1.7, 7.5], [2.3, 6.8], [2.7, 5.9], [3.0, 4.3], [3.25, 2.6], [3.55, 1.1], [3.9, 0.25], [4.4, 0],
 ];
 const xs = ANCHORS.map(a => a[0]), ys = ANCHORS.map(a => a[1]);
 const deltas = xs.slice(1).map((x, i) => (ys[i + 1] - ys[i]) / (x - xs[i]));
@@ -42,7 +42,7 @@ export function islandBump(x: number, z: number) {
   let r = Math.hypot(dx / 1.04, dz / 0.93) * (1 + 0.15 * noiseB(dx * 0.33 + 3, dz * 0.33 - 1));
   r += 0.42 * fbm(dx * 0.55, dz * 0.55, { noise: noiseC, octaves: 3 });
   const crag = noiseA(x * 1.05 + 4, z * 1.05) * 0.32 * smooth(4.2, 1.6, r) + noiseC(x * 2.6, z * 2.6) * 0.09 * smooth(3.6, 1.0, r);
-  return profile(Math.max(0, r)) + crag * (r < 6.3 ? 1 : 0);
+  return profile(Math.max(0, r)) + crag * (r < 4.6 ? 1 : 0);
 }
 
 export function terrainHeight(x: number, z: number) {

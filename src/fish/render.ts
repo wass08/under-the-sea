@@ -124,7 +124,7 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
     const sm = new MeshBasicNodeMaterial();
     sm.positionNode = sv.world; sm.side = 2;
     shadowMesh = new Mesh(sl.geometry, sm);
-    shadowMesh.count = count; shadowMesh.frustumCulled = false; shadowMesh.castShadow = true; shadowMesh.layers.set(1);
+    shadowMesh.count = count; shadowMesh.frustumCulled = false; shadowMesh.castShadow = true; shadowMesh.layers.set(3);
   }
   return { mesh, shadowMesh, material };
 }

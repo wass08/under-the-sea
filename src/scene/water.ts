@@ -32,7 +32,7 @@ function toHalf(v: number) {
 }
 
 /** Absorption (per world unit) — red dies first, then green, leaving deep teal-blue. */
-const sigma = vec3(0.16, 0.048, 0.027);
+const sigma = vec3(0.30, 0.085, 0.04);
 
 export function createWater(scene: Scene, camera: PerspectiveCamera, heightTexture: DataTexture, edges: Edges) {
   const box = { lo: vec3(-R, bottomY, -R), hi: vec3(R, WORLD.surface + 0.6, R) };
@@ -53,7 +53,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
       const ps = p.xz.add(toSun.xz.mul(towardSurface));
       const beamA = mx_noise_float(vec3(ps.mul(0.42), simTime.mul(0.16))).mul(0.5).add(0.5);
       const beamB = mx_noise_float(vec3(ps.mul(1.15).add(11.3), simTime.mul(0.27))).mul(0.5).add(0.5);
-      const beam = smoothstep(0.42, 0.85, beamA.mul(0.7).add(beamB.mul(0.3)));
+      const beam = smoothstep(0.52, 0.8, beamA.mul(0.6).add(beamB.mul(0.4)));
       // Terrain (island) shades the beams: two height probes toward the sun.
       const q1 = p.add(toSun.mul(0.7)), q2 = p.add(toSun.mul(2.0)), q3 = p.add(toSun.mul(4.2));
       const h1 = texture(heightTexture, q1.xz.div(R * 2).add(0.5)).level(float(0)).r;
@@ -87,11 +87,13 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const shifted = vec4(viewportOpaqueMipTexture(uvR, float(0)) as Node<'vec4'>).rgb;
     const sampleColor = mix(straight, shifted, weight);
     const transmittance = exp(sigma.mul(waterClarity).mul(path).negate());
-    const inscatter = vec3(0.006, 0.10, 0.145).mul(float(1).sub(exp(path.mul(-0.10).mul(waterClarity))));
+    const deep = float(1).sub(exp(path.mul(-0.09).mul(waterClarity)));
+    const inscatter = mix(vec3(0.02, 0.30, 0.32), vec3(0.008, 0.10, 0.32), deep).mul(float(1).sub(exp(path.mul(-0.24).mul(waterClarity)))).mul(1.25);
     const rays = scatterRays(entry, rd, path);
-    const phase = float(0.55).add(pow(dot(rd, toSun).max(0), 4).mul(1.6));
-    const rayColor = vec3(0.75, 1.0, 0.9).mul(rays).mul(phase).mul(godRayStrength).mul(0.085);
-    return { color: sampleColor.mul(transmittance).add(inscatter).add(rayColor), path, rd, d0, opaque };
+    const phase = float(0.6).add(pow(dot(rd, toSun).max(0), 3).mul(2.4));
+    const rayColor = vec3(1.0, 0.95, 0.75).mul(rays).mul(phase).mul(godRayStrength).mul(0.3);
+    const baseTint = vec3(0.004, 0.045, 0.06);
+    return { color: sampleColor.mul(transmittance).mul(vec3(0.94, 0.99, 1.0)).add(baseTint).add(inscatter).add(rayColor), path, rd, d0, opaque };
   }
 
   const fresnel = (n: Node<'vec3'>, rd: Node<'vec3'>) => float(0.02).add(float(0.98).mul(float(1).sub(dot(n, rd.negate()).abs().clamp()).pow(5)));
@@ -111,7 +113,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   surfaceMaterial.colorNode = Fn(() => {
     const fineA = mx_noise_float(vec3(positionWorld.xz.mul(6.5).add(simTime.mul(0.35)), simTime.mul(0.2)));
     const fineB = mx_noise_float(vec3(positionWorld.xz.mul(15).sub(simTime.mul(0.5)), 7.1));
-    const N = normalize(baseNormal.add(vec3(fineA, 0, fineB).mul(0.05))).toVar();
+    const N = normalize(baseNormal.add(vec3(fineA, 0, fineB).mul(0.075))).toVar();
     const body = volume(positionWorld, N);
     const F = fresnel(N, body.rd).mul(1.7).min(1);
     const R3 = reflect(body.rd, N).toVar();
@@ -121,7 +123,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const reflected = mix(analytic, planar, 0.85);
     // Sun glitter: tight lobe on the detailed normal plus a soft lobe on the base wave normal.
     const sunDot = dot(R3, toSun).max(0);
-    const glint = pow(sunDot, 900).mul(45).add(pow(sunDot, 90).mul(1.4));
+    const glint = pow(sunDot, 700).mul(170).add(pow(sunDot, 70).mul(2.2));
     // Shoreline foam from the depth below the surface.
     const depthBelow = body.path.mul(body.rd.y.abs());
     const swirl = mx_noise_float(vec3(positionWorld.xz.mul(4.2), simTime.mul(0.35))).mul(0.5).add(0.5);

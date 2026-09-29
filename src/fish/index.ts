@@ -12,7 +12,7 @@ import type { InstanceNodes } from './render';
 import { Predator } from './predator';
 import { simTime } from '../state';
 
-const MAIN_LENGTH = 0.28, ANGEL_LENGTH = 0.46, ANGEL_COUNT = 512, PREDATOR_LENGTH = 1.55;
+const MAIN_LENGTH = 0.22, ANGEL_LENGTH = 0.46, ANGEL_COUNT = 512, PREDATOR_LENGTH = 1.55;
 const base = import.meta.env.BASE_URL;
 const query = new URLSearchParams(location.search);
 
@@ -88,7 +88,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     const on = shadowState.enabled;
     if (on) {
       sun.castShadow = true;
-      sun.shadow.camera.layers.enable(1);
+      sun.shadow.camera.layers.enable(3); // proxies live on layer 3 (layer 1 is the water reflector's)
       const sc: any = sun.shadow.camera;
       if (sc.right !== undefined && sc.right === 5 && sc.left === -5) { sc.left = -10; sc.right = 10; sc.top = 10; sc.bottom = -10; sc.far = 60; sc.updateProjectionMatrix(); sun.shadow.mapSize.set(2048, 2048); }
     }
@@ -144,6 +144,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       // predator (CPU, single fish)
       const wantPred = behaviour.fountain;
       predator.update(dt, stats.centroid, wantPred);
+      updateAttractor(dt);
       pU.pos.value.copy(predator.pos); pU.vel.value.copy(predator.dir); pU.phase.value = predator.phase; pU.bank.value = predator.bank; pU.size.value = predator.scale;
       predMeshes.mesh.visible = predator.scale > 0.01;
       env.predPos.value.copy(predator.pos); env.predVel.value.copy(predator.dir); env.predActive.value = predator.active ? 1 : 0;
@@ -179,6 +180,16 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     addControls(folder: FolderApi) { controls(folder); },
   };
   let landFrames = 0;
+  // slowly wandering attractor the school follows loosely (keeps it off the walls and away from the island)
+  let attT = 0;
+  function updateAttractor(dt: number) {
+    attT += dt;
+    const t = attT, a = env.attractor.value;
+    let x = 3.4 * Math.sin(t * 0.075 + 0.5) + 1.2 * Math.sin(t * 0.19), z = 3.4 * Math.sin(t * 0.058 + 2.0) + 1.2 * Math.cos(t * 0.17);
+    const dx = x - homeXZ[0], dz = z - homeXZ[1], d = Math.hypot(dx, dz);
+    if (ic > 10 && d < 4.2) { x = homeXZ[0] + dx / d * 4.2; z = homeXZ[1] + dz / d * 4.2; }
+    a.set(Math.max(-4.2, Math.min(4.2, x)), 4.1 + 1.0 * Math.sin(t * 0.13 + 1) + 0.5 * Math.sin(t * 0.31), Math.max(-4.2, Math.min(4.2, z)));
+  }
   const noSim = query.get('fishNoSim') === '1';
   const follow = query.has('fishFollow'), fd = Number(query.get('fishFollow')) || 1, followOffset = new Vector3(2.5 * fd, 2.2 * fd, 3.5 * fd);
   if (query.get('fishNoSurface') === '1') world.surface.visible = false;
@@ -242,7 +253,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   }
   const demo = query.get('fishDemo');
   if (demo === 'fountain') { behaviour.fountain = true; setTimeout(() => predator.send(), 2500); }
-  if (demo === 'panic') setTimeout(() => panic(stats.centroid.clone(), 1), 3500);
+  if (demo === 'panic') setInterval(() => panic(randomInSchool(), 1), 5000);
   if (demo === 'flash') setInterval(() => panic(randomInSchool(), 1), 6000);
   (window as any).fishDebug = { school, behaviour, env, tris, visuals, readAux: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.aux.value)), readVel: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.vel.value)), panic: (x: number, y: number, z: number, s = 1) => panic(new Vector3(x, y, z), s) };
   void simTime; void Vector4; void SWIM_BOUNDS; void sampleHeight;
