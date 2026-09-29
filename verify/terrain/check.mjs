@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {bundle} from '../temp-build.mjs';
+import {readFile,writeFile} from 'node:fs/promises';
+import {Scene,Raycaster,Vector3,Matrix4} from 'three/webgpu';
+import {scoreIsland} from '../island-score.mjs';
+const old=await bundle('src/lib/terrain.ts',[{name:'before',transform:async(code,id)=>id.endsWith('/src/lib/terrain.ts')?await readFile('verify/terrain/before/terrain.ts','utf8'):null}]),current=await bundle('src/lib/terrain.ts');
+const lab=[];for(const level of [1,2,3]){const opts={level,size:14,count:1500,seed:42,amplitude:4.2},a=old.generateTerrain(opts),b=current.generateTerrain(opts);for(const k of ['position','biomeWeights','biome','normal'])assert.deepEqual(b.geometry.getAttribute(k).array,a.geometry.getAttribute(k).array,`Lab L${level} ${k}`);lab.push({level,vertices:b.heights.length,triangles:b.faces.length,unchanged:true});a.geometry.dispose();b.geometry.dispose();}
+const {createIsland,ISLAND_SEED}=await bundle('src/scene/island.ts'),{createReef}=await bundle('src/scene/reef.ts');
+const scene=new Scene(),island=createIsland(scene);createReef(scene,island.peak);scene.updateMatrixWorld(true);
+const ray=new Raycaster(),down=new Vector3(0,-1,0),at=new Vector3();
+const ground=(x,z)=>{ray.set(at.set(x,4,z),down);return Math.max(.28,ray.intersectObject(island.peak,false)[0]?.point.y??0);};
+let heightError=0;const texture=island.heightTexture.image;for(let z=0;z<128;z+=3)for(let x=0;x<128;x+=3){const h=ground(((x+.5)/128-.5)*7.6,((z+.5)/128-.5)*4.4);heightError=Math.max(heightError,Math.abs(h-texture.data[z*128+x]));}assert.ok(heightError<1e-6);
+const objects=[];for(const mesh of scene.children.filter(m=>m.isInstancedMesh)){let checked=0,penetrations=0;const matrix=new Matrix4(),p=new Vector3(),attr=mesh.geometry.getAttribute('position');for(let i=0;i<mesh.count;i++){mesh.getMatrixAt(i,matrix);for(let j=0;j<attr.count;j++){p.fromBufferAttribute(attr,j).applyMatrix4(matrix);if(p.y<.28)continue;checked++;if(ground(p.x,p.z)>p.y+.005)penetrations++;}}objects.push({name:mesh.name||'gravel',count:mesh.count,checked,penetrations});assert.equal(penetrations,0,mesh.name||'gravel');}
+const d=current.generateIslandTerrain(ISLAND_SEED),metrics=scoreIsland(d,ISLAND_SEED);assert.ok(metrics.eligible);assert.ok(d.diagnostics.thermalChange.changed>0&&d.diagnostics.carveChange.changed>0);const dry=d.faces.filter(f=>f.height>2.07),weights=d.geometry.getAttribute('biomeWeights').array;assert.ok(Array.from(weights).every((w,i)=>i%4!==3||w===0));assert.ok(dry.some(f=>f.weights[1]>.05));const result={lab,metrics,heightTextureMaxError:heightError,objects,dryFaces:dry.length,dryFacesWithGreen:dry.filter(f=>f.weights[1]>.05).length,snowWeight:0,diagnostics:d.diagnostics};await writeFile('verify/terrain/checks.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));

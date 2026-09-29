@@ -1,0 +1,3 @@
+import {build} from 'rolldown';import {execFileSync} from 'node:child_process';import {mkdtemp,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
+const dir=await mkdtemp(join(tmpdir(),'aquarium-burst-')),file=join(dir,'reference.mjs');
+try{await build({input:'verify/burst-reference-entry.ts',external:id=>id.startsWith('node:'),plugins:[{name:'external-packages',resolveId:id=>['three/webgpu','@dimforge/rapier3d-compat'].includes(id)?{id:import.meta.resolve(id),external:true}:null}],output:{file,format:'esm'}});console.log(execFileSync(process.execPath,[file],{encoding:'utf8'}));}finally{await rm(dir,{recursive:true,force:true});}

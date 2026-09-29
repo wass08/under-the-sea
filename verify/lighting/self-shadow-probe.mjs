@@ -1,0 +1,26 @@
+import {execFileSync} from 'node:child_process';
+import {readFile,writeFile} from 'node:fs/promises';
+import {Vector3,Matrix4,PerspectiveCamera,Mesh,MeshBasicMaterial,DoubleSide,Raycaster} from 'three/webgpu';
+import {bundle} from '../temp-build.mjs';
+const session='aquarium-self-shadow',tag=process.argv[2]||'before',run=(...args)=>JSON.parse(execFileSync('agent-browser',['--session',session,'--json',...args],{encoding:'utf8',maxBuffer:20e6})).data,ev=js=>run('eval',js).result;
+const state=ev('aquarium'),meta=ev(await readFile('verify/lighting/self-shadow-depth.js','utf8'));
+if(meta.error)throw Error(meta.error);
+const {generateIslandTerrain}=await bundle('src/lib/terrain.ts'),data=generateIslandTerrain(166),mesh=new Mesh(data.geometry,new MeshBasicMaterial({side:DoubleSide}));mesh.position.fromArray(state.island.position);mesh.updateMatrixWorld();
+const p=data.geometry.attributes.position,n=data.geometry.attributes.normal,w=data.geometry.attributes.biomeWeights,ray=new Raycaster(),lamp=new Vector3().fromArray(state.lampPosition),shadowMatrix=new Matrix4().fromArray(meta.matrix),shadowView=new Matrix4().fromArray(meta.camera.world).invert();
+const camera=new PerspectiveCamera();camera.matrixWorld.fromArray(state.camera.world);camera.matrixWorldInverse.copy(camera.matrixWorld).invert();camera.projectionMatrix.fromArray(state.camera.projection);camera.position.fromArray(state.camera.position);
+const proj=v=>{const q=v.clone().applyMatrix4(shadowMatrix);return [q.x,1-q.y,q.z]},pixel=v=>{const q=v.clone().project(camera);return [(q.x*.5+.5)*state.camera.viewport[0],(-q.y*.5+.5)*state.camera.viewport[1]]};
+const probes=[];
+for(let i=0;i<p.count;i+=3){const vertices=[0,1,2].map(j=>new Vector3().fromBufferAttribute(p,i+j).add(mesh.position)),c=vertices[0].clone().add(vertices[1]).add(vertices[2]).divideScalar(3),normal=new Vector3().fromBufferAttribute(n,i),incidence=normal.dot(lamp.clone().sub(c).normalize());
+ if(c.y<.8||c.y>2.45||[0,1,2].some(j=>w.getZ(i+j)<.9))continue;
+ ray.set(camera.position,c.clone().sub(camera.position).normalize());if(ray.intersectObject(mesh)[0]?.faceIndex!==i/3)continue;
+ ray.set(lamp,c.clone().sub(lamp).normalize());const hit=ray.intersectObject(mesh)[0];
+ const offset=c.clone().addScaledVector(normal,meta.normalBias),coord=proj(offset),raw=proj(c),bias=tag.startsWith('before')?-.00012-(1-Math.abs(incidence))*.003:-.00002-(1-Math.abs(incidence))*.00003;
+ const pv=vertices.map(v=>proj(v.clone().addScaledVector(normal,meta.normalBias))),dx=pv[1].map((x,k)=>x-pv[0][k]),dy=pv[2].map((x,k)=>x-pv[0][k]),det=dx[0]*dy[1]-dx[1]*dy[0],gradient=[(dx[2]*dy[1]-dy[2]*dx[1])/det,(dx[0]*dy[2]-dy[0]*dx[2])/det].map(v=>Math.max(-2,Math.min(2,v))),residual=tag.startsWith('before')?0:Math.min(.0004,(Math.abs(gradient[0])+Math.abs(gradient[1]))/3072);
+ const depth=-offset.clone().applyMatrix4(shadowView).z,A=meta.camera.far/(meta.camera.far-meta.camera.near),B=meta.camera.far*meta.camera.near/(meta.camera.far-meta.camera.near),worldBias=depth-B/(A-(coord[2]+bias-residual));
+ probes.push({id:i/3,peak:c.x<0?'main':'secondary',side:incidence>.3?'lit':incidence<-.1?'far':'grazing',incidence,world:c.toArray(),normal:normal.toArray(),pixel:pixel(c),vertices:vertices.map(v=>v.toArray()),uv:coord.slice(0,2),rawDepth:raw[2],receiver:coord[2],bias,biasedDepth:coord[2]+bias-residual,residual,gradient,worldBias,ridgeDepth:hit?proj(hit.point)[2]:null,ridgeDistance:hit?c.distanceTo(hit.point):null});
+}
+const values=ev(`(()=>{const d=__shadowAudit.depth,n=3072;return ${JSON.stringify(probes.map(p=>p.uv))}.map(([u,v])=>d[Math.floor(v*n)*n+Math.floor(u*n)]);})()`);
+probes.forEach((p,i)=>p.mapDepth=values[i]);
+await writeFile(`verify/lighting/self-shadow-${tag}-depth.json`,JSON.stringify({state:{height:state.height,camera:state.camera},meta,probes},null,2));
+console.table(probes.filter(p=>p.side==='far').filter((p,i)=>i%10===0).map(({id,peak,incidence,mapDepth,ridgeDepth,rawDepth,biasedDepth,worldBias,ridgeDistance})=>({id,peak,incidence,mapDepth,ridgeDepth,rawDepth,biasedDepth,worldBias,ridgeDistance})));
+console.log('probes',probes.length);

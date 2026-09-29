@@ -1,0 +1,27 @@
+{
+  "name": "tideline-glass-aquarium",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "verify": "node verify/runtime.mjs"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.20.0",
+    "d3-delaunay": "^6.0.4",
+    "simplex-noise": "^4.0.3",
+    "three": "0.186.0",
+    "tweakpane": "^4.0.5"
+  },
+  "devDependencies": {
+    "@tweakpane/core": "^2.0.5",
+    "@types/d3-delaunay": "^6.0.4",
+    "@types/three": "latest",
+    "playwright": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  }
+}

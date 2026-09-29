@@ -1,0 +1,2 @@
+import {build} from 'rolldown';import {execFileSync} from 'node:child_process';import {mkdtemp,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
+const dir=await mkdtemp(join(tmpdir(),'lab-cells-histogram-'));try{const file=join(dir,'fixture.mjs');await build({input:'verify/lab-cells-histogram.ts',output:{file,format:'esm'}});console.log(execFileSync(process.execPath,[file],{encoding:'utf8'}));}finally{await rm(dir,{recursive:true,force:true});}

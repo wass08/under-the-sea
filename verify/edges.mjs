@@ -1,0 +1,46 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+import { verifyPond } from './pond-check.mjs';
+const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-webgpu', '--use-angle=metal', '--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+const errors = [], results = [];
+page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+const state = () => page.evaluate(() => window.aquarium);
+const click = async p => { await page.mouse.click(p.x, p.y); await page.waitForTimeout(200); };
+try {
+  await page.goto((process.env.VERIFY_URL || 'http://localhost:4174/')); await page.waitForFunction(() => window.aquarium?.elapsed > 2, null, { timeout: 90000 });
+  await click((await state()).aboveTarget);
+  const above = await state(); assert.equal(above.cracks, 1); assert.ok(above.holeBottom > above.tank.base); assert.equal(above.spilling, false);
+  await page.waitForTimeout(1000); assert.equal((await state()).height, above.tank.base); results.push('PASS above-water crack: no jet/drips, no drainage');
+  await click((await state()).wallTargets[0]); assert.equal((await state()).cracks, 1); results.push('PASS one crack per wall');
+  await click((await state()).wallTargets[2]); assert.equal((await state()).cracks, 2); assert.equal((await state()).spilling, true);
+  await page.mouse.move(900, 350); await page.mouse.down(); await page.mouse.move(1440, 350, { steps: 30 }); await page.mouse.up(); await page.waitForTimeout(2000);
+  await click((await state()).wallTargets[1]); assert.equal((await state()).cracks, 3);
+  await click((await state()).wallTargets[3]); assert.equal((await state()).cracks, 4);
+  const multi = await state(), lowestSill = Math.min(...multi.holes.map(h => h.bottom));
+  assert.ok(multi.height > lowestSill + 0.05, 'Drainage must still be in progress before measuring settlement');
+  await page.waitForFunction(sill => !window.aquarium.spilling && Math.abs(window.aquarium.height - sill) < 0.001, lowestSill, { timeout: 90000 });
+  const settled = await state(); assert.ok(settled.height < multi.height); assert.ok(Math.abs(settled.height - lowestSill) < 0.001); assert.equal(settled.spilling, false);
+  results.push(`PASS four cracks: water drained from ${multi.height} to lowest sill ${settled.height}; spilling stopped`);
+  await page.keyboard.press('Space'); await page.waitForTimeout(1800); const full = await state(); assert.equal(full.mode, 'shattered'); assert.ok(full.brokenCount <= full.physics.shardBodyLimit); assert.equal(full.shardBodies,649,'Exact gentle 100/80/65/50% outer-seed budgets 220/176/143/110 reduce four-wall load while preserving independent impact cells'); assert.deepEqual(full.physics.wallBudgets.map(b=>b.cells),[220,176,143,110]); assert.deepEqual(full.physics.wallBudgets.map(b=>b.fraction),[1,.8,.65,.5]); assert.ok(full.physics.wallBudgets.every(b=>b.released===b.cells)); assert.equal(full.physics.maxCellsPerBody,1,'No pre-flight compounds'); results.push(`PASS four-wall full break: ${full.brokenCount} bodies, ${full.drawCalls} draw calls, ${full.fps} FPS`);
+  await page.waitForFunction(()=>window.aquarium.elapsed-window.aquarium.physics.lastReleaseTime>=5,null,{timeout:60000}); console.log('Five-second budget diagnostics',JSON.stringify((await state()).physics)); assert.equal((await state()).awakeShards,0,'Budgeted launch population sleeps natively by five seconds'); results.push('PASS adaptive launch budget: 649 single-cell bodies, zero awake by 5 s');
+  await page.keyboard.press('r'); assert.equal((await state()).rewinding, true); await page.waitForFunction(() => !window.aquarium.rewinding); const reset = await state(); assert.equal(reset.cracks, 0); assert.equal(reset.brokenCount, 0); assert.equal(reset.height, reset.tank.base); assert.equal(reset.spilling, false);
+  // Start the independent mid-spill case at the default camera; the four-wall case orbited to the back.
+  await page.goto((process.env.VERIFY_URL || 'http://localhost:4174/')); await page.waitForFunction(() => window.aquarium?.elapsed > 2);
+  await click((await state()).crackTarget); await page.waitForTimeout(600);
+  assert.equal((await state()).spilling, true);
+  await page.keyboard.press('t'); await page.keyboard.press('r');
+  const rewindStart = await state(); assert.equal(rewindStart.rewinding, true); assert.equal(rewindStart.audio.lastPlay.kind, 'rewind');
+  await page.waitForTimeout(600); const reverse = await state();
+  assert.ok(reverse.rewindProgress > 0.02 && reverse.rewindProgress < 0.045, '0.15× also slows the real-time rewind');
+  assert.equal(reverse.elapsed, rewindStart.elapsed, 'Physics clock is frozen during rewind');
+  assert.ok(reverse.height >= rewindStart.height, 'Water rises during reverse spill');
+  await page.keyboard.press('r'); const skipped = await state();
+  assert.equal(skipped.rewinding, false); assert.equal(skipped.shardBodies, 0); assert.equal(skipped.cracks, 0); assert.equal(skipped.height, skipped.tank.base);
+  assert.deepEqual(skipped.normal, [0, 1, 0]); await page.keyboard.press('t');
+  results.push('PASS reset mid-spill: reverse audio, water rises, frozen physics, 0.15× rewind, second Reset skips to pristine');
+  results.push(await verifyPond(page,process.env.VERIFY_URL || 'http://localhost:4174/'));
+  assert.deepEqual(errors, []); results.push('PASS reset after four-wall break; zero console errors');
+  console.log(results.join('\n')); await writeFile('verify/edges-summary.txt', results.join('\n') + '\n');
+} finally { await browser.close(); }

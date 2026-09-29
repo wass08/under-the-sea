@@ -1,0 +1,53 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+const browser = await chromium.launch({headless:true,args:['--enable-unsafe-webgpu','--enable-features=Vulkan,UseSkiaRenderer','--use-angle=metal','--ignore-gpu-blocklist']});
+const page = await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1.5});
+const errors=[], reports=[];
+page.on('pageerror',e=>errors.push(e.message)); page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+const state=()=>page.evaluate(()=>window.aquarium);
+const until=t=>page.waitForFunction(t=>window.aquarium.elapsed>=t,t,{timeout:90000});
+const capture=name=>page.screenshot({path:`verify/${name}.png`});
+const pond=p=>{const expected=Math.min(1.6,Math.sqrt(.15**2+p.sheetVolume/(Math.PI*.85*(.94**2+(.04**2+.02**2)/2)*p.poolDepth)));assert.equal(p.poolDepth,.025);assert.ok(p.sheetVolume>0);assert.ok(Math.abs(p.radius[0]-expected)<1e-9);assert.ok(Math.abs(p.radius[1]-expected*.85)<1e-9);return {sheetVolume:p.sheetVolume,depth:p.poolDepth,radius:p.radius[0],expected};};
+const report=(label,value)=>{const line=`${label}: ${JSON.stringify(value)}`;reports.push(line);console.log(line);};
+try {
+  await page.goto(`${process.env.VERIFY_URL || 'http://localhost:4174/'}?camera=default`);
+  await page.waitForFunction(()=>window.aquarium?.elapsed>2);
+  const idle=await state(); await capture('idle');
+  await page.mouse.click(idle.crackTarget.x,idle.crackTarget.y);
+  const initial=await state(), start=initial.elapsed;
+  assert.equal(initial.cracks,1);
+  await until(start+.6); await capture('crack');
+  const fps=await page.evaluate(async()=>{const s=[];for(let i=0;i<90;i++){await new Promise(requestAnimationFrame);s.push(window.aquarium.fps);}return s.sort((a,b)=>a-b)[45];});
+  report('Pour performance',{medianFPS:fps,pixelRatio:1.5});
+  await until(start+3); await capture('spill');
+  const pouring=await state();
+  assert.ok(pouring.spilling); assert.ok(pouring.puddles.length===1); assert.ok(pouring.spillFlow[0].meanRelativeError<.15);
+  report('Pond at 3s',{height:pouring.height,radii:pouring.puddles[0].radius,flow:pouring.spillFlow[0]});
+  await until(start+10); const ten=await state();
+  assert.ok(ten.puddles[0].sheetVolume>pouring.puddles[0].sheetVolume);
+  assert.ok(ten.puddles[0].radius[0]>=pouring.puddles[0].radius[0]);
+  report('Thin-sheet pond formula',{at3s:pond(pouring.puddles[0]),at10s:pond(ten.puddles[0])});
+  await page.waitForFunction(()=>!window.aquarium.spilling,null,{timeout:90000});
+  const settled=await state(); await until(settled.elapsed+1);
+  const stopped=(await state()).puddles[0];
+  assert.deepEqual(stopped.position,settled.puddles[0].position);assert.deepEqual(stopped.radius,settled.puddles[0].radius);assert.equal(stopped.sheetVolume,settled.puddles[0].sheetVolume);pond(stopped);
+  report('Stopped pond','PASS: position, radius and sheetVolume unchanged after flow stops');
+  await page.keyboard.press('Space'); const shatter=await state();
+  await until(shatter.elapsed+1.5); await capture('shatter');
+  await until(shatter.elapsed+10); await capture('shatter-settled');
+  const full=await state();
+  assert.ok(full.puddles.length>0); assert.equal(new Set(full.puddles.map(p=>p.position[1])).size,full.puddles.length);
+  assert.ok(full.puddles.every(p=>!p.depthWrite));full.puddles.forEach(pond);
+  const stability=await page.evaluate(async p=>{
+    const source=document.querySelector('#app canvas'),c=document.createElement('canvas');c.width=source.width;c.height=source.height;
+    const ctx=c.getContext('2d',{willReadFrequently:true}),x=Math.round(p.sample.x*1.5)-16,y=Math.round(p.sample.y*1.5)-16;let previous,max=0,sum=0,n=0;
+    for(let i=0;i<10;i++){await new Promise(requestAnimationFrame);ctx.drawImage(source,0,0);const data=ctx.getImageData(x,y,32,32).data;if(previous)for(let j=0;j<data.length;j++)if(j%4!==3){const d=Math.abs(data[j]-previous[j]);max=Math.max(max,d);sum+=d;n++;}previous=data;}
+    return {frames:10,maxChannelDifference:max,meanChannelDifference:sum/n};
+  },full.puddles[0]);
+  report('Pond frame stability',stability); assert.ok(stability.maxChannelDifference<=12);
+  await page.keyboard.press('r'); await page.waitForFunction(()=>!window.aquarium.rewinding); await capture('reset');
+  const reset=await state(); assert.equal(reset.height,idle.height); assert.equal(reset.puddles.length,0); assert.equal(reset.spilling,false);
+  assert.deepEqual(errors,[]);
+  report('Focused spill checks','PASS: crack, pour speed, bounded thin-sheet pond growth, stopped pond, distinct puddle depths, frame stability, rewind/reset, no shader or console errors');
+} finally {await writeFile('verify/spill-runtime.txt',reports.join('\n')+'\n');await browser.close();}

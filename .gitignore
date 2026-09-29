@@ -1,0 +1,22 @@
+node_modules/
+dist/
+verify/*.png
+verify/*.txt
+verify/reference/
+.DS_Store
+# verification evidence (regenerable): images, metrics, logs, source snapshots
+verify/**/*.png
+verify/**/*.json
+verify/**/*.txt
+verify/**/*.log
+verify/**/*.diff
+verify/**/*.md5
+verify/**/*.bundle.mjs
+verify/run-*/
+verify/*-before/
+verify/*-after/
+verify/**/before/
+verify/**/followup-before/
+verify/lab/
+verify/ui/*.png
+dist-*/
