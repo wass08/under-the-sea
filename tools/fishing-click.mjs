@@ -1,0 +1,20 @@
+// Usage: node tools/fishing-click.mjs "<url>"  -- clicks the canvas like a user (cast, recast, island/boat rejection) and logs state.
+import { chromium } from 'playwright';
+const [url = 'http://localhost:5193/'] = process.argv.slice(2);
+const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
+const logs = [];
+page.on('console', m => { if (['error', 'warning'].includes(m.type())) logs.push(m.text().slice(0, 300)); });
+page.on('pageerror', e => logs.push(e.message));
+await page.goto(url);
+await page.waitForFunction(() => document.documentElement.dataset.status === 'ready', null, { timeout: 60000 });
+await page.waitForTimeout(500);
+const st = () => page.evaluate(() => window.fishing.state.phase + ' ' + window.fishing.state.hint);
+console.log('sky click ->', await st()); await page.mouse.click(800, 40); await page.waitForTimeout(200); console.log(await st());
+await page.mouse.click(620, 330); await page.waitForTimeout(300); console.log('water click ->', await st());
+await page.waitForTimeout(2200); console.log('later ->', await st());
+await page.mouse.click(980, 350); await page.waitForTimeout(400); console.log('recast click ->', await st());
+await page.waitForTimeout(1800); console.log('then ->', await st());
+await page.mouse.click(600, 600); await page.waitForTimeout(200); console.log('island/slab click ->', await st());
+console.log(logs.join('\n') || '(no console errors)');
+await browser.close();
