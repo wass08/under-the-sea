@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "d3-delaunay": "^6.0.4",
+    "meshoptimizer": "^1.1.1",
     "simplex-noise": "^4.0.3",
     "three": "0.186.0",
     "tweakpane": "^4.0.5"
