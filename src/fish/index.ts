@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Vector3, Vector4 } from 'three/webgpu';
+import { CylinderGeometry, Mesh, MeshStandardNodeMaterial, Vector3, Vector4 } from 'three/webgpu';
 import * as TSL from 'three/tsl';
 const { float, uniform, vec3, hash, instanceIndex } = TSL as any;
 import type { FolderApi } from 'tweakpane';
@@ -20,7 +20,19 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   const { renderer, scene } = ctx;
   const N = QUERY.fish;
   const env = createEnv();
-  env.seabedRes = world.seabed.resolution;
+  // debug: ?fishFakeIsland=1 injects a test island into the height field (and a proxy mesh) to check terrain avoidance on the stub world
+  let seabed = world.seabed;
+  if (query.get('fishFakeIsland') === '1') {
+    const r = seabed.resolution, h = new Float32Array(seabed.heights);
+    for (let z = 0; z < r; z++) for (let x = 0; x < r; x++) {
+      const wx = -WORLD.half + (x + 0.5) / r * 2 * WORLD.half, wz = -WORLD.half + (z + 0.5) / r * 2 * WORLD.half, d = Math.hypot(wx + 2.5, wz + 2.5);
+      const t = Math.min(1, Math.max(0, (2.8 - d) / 1.2)), k = t * t * (3 - 2 * t);
+      h[z * r + x] = Math.max(h[z * r + x], WORLD.bed + (WORLD.surface + 2.5 - WORLD.bed) * k);
+    }
+    seabed = { heights: h, resolution: r };
+    const cone = new Mesh(new CylinderGeometry(1.6, 2.8, WORLD.surface + 2.5 - WORLD.bed, 32), new MeshStandardNodeMaterial({ color: '#7a6a4a' }));
+    cone.position.set(-2.5, (WORLD.surface + 2.5 + WORLD.bed) / 2, -2.5); scene.add(cone);
+  }
 
   // ------------------------------------------------------------------ assets
   const [main, angel, big] = await Promise.all([
@@ -33,17 +45,17 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
 
   // ------------------------------------------------------------------ island centre (for the angelfish)
   let ix = 0, iz = 0, ic = 0;
-  const { heights, resolution } = world.seabed;
+  const { heights, resolution } = seabed;
   for (let z = 0; z < resolution; z++) for (let x = 0; x < resolution; x++) if (heights[z * resolution + x] > WORLD.surface) { ix += -WORLD.half + (x + 0.5) / resolution * 2 * WORLD.half; iz += -WORLD.half + (z + 0.5) / resolution * 2 * WORLD.half; ic++; }
   const homeXZ: [number, number] = ic > 10 ? [ix / ic, iz / ic] : [-2.2, -2.2];
 
   // ------------------------------------------------------------------ simulations
   const mainSim = createSim({
-    renderer, env, count: N, seabed: world.seabed, cruise: 1.4, minSpeed: 0.55, maxSpeed: 2.4, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
+    renderer, env, count: N, seabed, cruise: 1.4, minSpeed: 0.55, maxSpeed: 2.4, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
     homeClear: 0, homeStrength: 0, homeXZ: [0, 0], homeRadius: 99, clusters: 5, clusterRadius: 1.5, seed: 1, main: true,
   });
   const angelSim = createSim({
-    renderer, env, count: ANGEL_COUNT, seabed: world.seabed, cruise: 0.75, minSpeed: 0.3, maxSpeed: 1.6, millInfluence: 0.25, lureInfluence: 0, fearSensitivity: 0.7,
+    renderer, env, count: ANGEL_COUNT, seabed, cruise: 0.75, minSpeed: 0.3, maxSpeed: 1.6, millInfluence: 0.25, lureInfluence: 0, fearSensitivity: 0.7,
     homeClear: 1.5, homeStrength: 1.6, homeXZ, homeRadius: 3.2, clusters: 3, clusterRadius: 1.0, seed: 2, main: false,
   });
 
@@ -60,7 +72,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   // predator: one instance driven by uniforms
   const pU = { pos: uniform(new Vector3(0, -40, 0)), vel: uniform(new Vector3(1, 0, 0)), phase: uniform(0), bank: uniform(0), size: uniform(0) };
   const predInst: InstanceNodes = { P: pU.pos, V: pU.vel, phase: pU.phase, size: pU.size, flash: float(0), bank: pU.bank, hidden: float(0), fear: float(0), seed: float(0.5) };
-  const steel = () => vec3(0.5, 0.58, 0.68);
+  const steel = () => vec3(0.38, 0.45, 0.55);
   const predMeshes = createFishMesh(big, 0, null, predInst, PREDATOR_LENGTH, 1, { tint: steel, sparkle: 0.35, roughness: 0.55 });
   void instanceIndex;
 
@@ -84,11 +96,12 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     predMeshes.mesh.castShadow = on;
   }
   applyShadows();
+  if (query.get('fishShadowTest') === '1') for (const t of world.terrain) t.receiveShadow = true; // debug: show fish shadows on the terrain
 
   // ------------------------------------------------------------------ state
   const stats: SchoolStats = { nearLure: 0, biter: 'none', centroid: new Vector3(0.5, 4, 0.5), meanFear: 0 };
   const behaviour = { milling: query.get('fishDemo') === 'milling' || query.get('milling') === '1', fountain: false, angel: true };
-  const predator = new Predator(world.seabed);
+  const predator = new Predator(seabed);
   const pend = { strike: 0, land: 0, lure: false, biterSince: -1, biterLocal: 'none' as SchoolStats['biter'], strikeQueued: false };
   const angelOn = () => behaviour.angel;
   let panicIdx = 0, statsPending = false, lastStats = 0;
@@ -132,6 +145,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       const wantPred = behaviour.fountain;
       predator.update(dt, stats.centroid, wantPred);
       pU.pos.value.copy(predator.pos); pU.vel.value.copy(predator.dir); pU.phase.value = predator.phase; pU.bank.value = predator.bank; pU.size.value = predator.scale;
+      predMeshes.mesh.visible = predator.scale > 0.01;
       env.predPos.value.copy(predator.pos); env.predVel.value.copy(predator.dir); env.predActive.value = predator.active ? 1 : 0;
 
       env.strike.value = pend.strike; env.land.value = pend.land;

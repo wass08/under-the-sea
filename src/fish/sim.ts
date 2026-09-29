@@ -21,7 +21,7 @@ export function createEnv() {
     // boids
     speed: u(1), sepW: u(1.2), aliW: u(1.0), cohW: u(1.0), sepR: u(0.2), neighR: u(0.5), scanCap: u(5, 'int'),
     // milling
-    millBlend: u(0), millStrength: u(1), millRadius: u(2.4), millHeight: u(1.6), millDir: u(1), millCenter: u(new Vector3(0.8, 4.1, 0.8)),
+    millBlend: u(0), millStrength: u(1), millRadius: u(3.0), millHeight: u(2.2), millDir: u(1), millCenter: u(new Vector3(0.8, 4.1, 0.8)),
     // predator / fountain
     predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(3.2), fountain: u(1),
     // panic
@@ -255,7 +255,7 @@ export function createSim(o: SimOptions) {
 
       // --- wander
       const tt = clock.mul(0.8);
-      acc.addAssign(vec3(sin(tt.add(rA.mul(50))), sin(tt.mul(1.3).add(rB.mul(50))).mul(0.35), sin(tt.mul(0.9).add(rC.mul(50)))).mul(0.9));
+      acc.addAssign(vec3(sin(tt.add(rA.mul(50))), sin(tt.mul(1.3).add(rB.mul(50))).mul(0.6), sin(tt.mul(0.9).add(rC.mul(50)))).mul(0.9));
 
       // --- cruise speed relaxation (per-fish cruise variation)
       const cruise = spd.mul(o.cruise).mul(rB.mul(0.4).add(0.8));
@@ -350,7 +350,7 @@ export function createSim(o: SimOptions) {
       const sp2c = clamp(sp2, vmin, vmax);
       V.assign(V.mul(sp2c.div(max(sp2, 0.001))));
       // flatten the pitch when calm
-      const pitchLim = mix(float(0.42), float(0.95), clamp(fear.mul(1.5), 0, 1));
+      const pitchLim = mix(float(0.55), float(0.95), clamp(fear.mul(1.5), 0, 1));
       const spN = max(length(V), 0.001);
       V.y.assign(clamp(V.y, spN.mul(pitchLim).negate(), spN.mul(pitchLim)));
 
