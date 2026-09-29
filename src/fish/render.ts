@@ -102,15 +102,21 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
   const N = normalW.normalize();
   material.normalNode = transformNormalToView(N).mul(faceDirection).normalize();
   const above = smoothstep(0.0, 0.3, positionNode.y.sub(waterLevel)); // fish lifted out of the water: dry lighting + wet sheen
+  material.metalnessNode = isBody.mul(0.3).mul(float(1).sub(above.mul(0.5)));
   material.roughnessNode = float(look.roughness).mul(mix(1.0, 0.7, isBody)).mul(mix(1.0, 0.5, above));
 
   // --- emissive: sun-flank sheen, caustics on the back, panic flash
   const toSun = sunDirection.negate(), Vw = normalize(cameraPosition.sub(positionNode));
   const H = normalize(Vw.add(toSun));
   const flank = float(1).sub(abs(N.y)).clamp(0, 1);
-  const spec = pow(max(dot(N, H), 0), 22).mul(0.1).add(pow(max(dot(N, H), 0), 160).mul(1.4));
-  const flicker = sin(seedV.mul(60).add(simTime.mul(2.2)).add(N.x.mul(6))).mul(0.25).add(0.75);
-  const sheen = mix(vec3(0.75, 0.92, 1.0), vec3(1.0, 0.98, 0.94), above).mul(spec.mul(above.mul(1.2).add(1))).mul(flank.mul(0.8).add(0.2)).mul(isBody).mul(flicker).mul(visuals.sheen).mul(look.sparkle);
+  const NH = max(dot(N, H), 0), NV = abs(dot(N, Vw));
+  // silvery / iridescent flank: tight sun glint + soft lobe, hue shifting with view angle (thin-film look), glinting as fish bank and turn
+  const irid = vec3(0.5).add(cos(vec3(0, 2.09, 4.19).add(NV.mul(5).add(seedV.mul(6.28)))).mul(0.5));
+  const silver = mix(vec3(0.82, 0.94, 1.0), irid, 0.45);
+  const lobe = pow(NH, 90).mul(2.4).add(pow(NH, 12).mul(0.16));
+  const flicker = sin(seedV.mul(60).add(simTime.mul(2.2)).add(N.x.mul(6))).mul(0.2).add(0.8);
+  const sheen = mix(silver, vec3(1.0, 0.98, 0.94), above).mul(lobe.mul(above.mul(1.2).add(1))).mul(flank.mul(0.8).add(0.2)).mul(isBody).mul(flicker).mul(visuals.sheen).mul(look.sparkle);
+  const rim = pow(float(1).sub(NV), 3).mul(vec3(0.25, 0.6, 0.75)).mul(0.22).mul(float(1).sub(above)).mul(isBody).mul(look.sparkle); // subsurface-ish rim
 
   const proj = positionNode.xz.sub(sunDirection.xz.mul(positionNode.y.div(sunDirection.y.min(-0.2))));
   const cau = causticsField(proj, simTime, { ...causticParams, level: 2, depth } as any);
@@ -122,7 +128,7 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
   // short metallic glint: white-silver-cyan highlight, peak well below a full white fish
   const glintColor = vec3(0.62, 0.86, 1.0).mul(glint.mul(0.85)).add(vec3(0.95, 1.0, 1.0).mul(pow(glint, 3).mul(0.6)));
   const dbg = new URLSearchParams(location.search).get('fishLite');
-  material.emissiveNode = dbg === '1' ? glintColor : dbg === '2' ? glintColor.add(sheen) : tinted.mul(caustic).mul(0.55).add(sheen).add(glintColor);
+  material.emissiveNode = dbg === '1' ? glintColor : dbg === '2' ? glintColor.add(sheen) : tinted.mul(caustic).mul(0.55).add(sheen).add(rim).add(glintColor);
 
   material.positionNode = v.world;
 

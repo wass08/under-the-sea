@@ -26,7 +26,7 @@ export function applySunAngles() {
 
 // ---- Caustics -----------------------------------------------------------------------------------------------
 export const causticParams = createCausticsUniforms();
-causticParams.scaleA.value = 0.72; causticParams.scaleB.value = 1.15; causticParams.speed.value = 0.30;
+causticParams.scaleA.value = 0.42; causticParams.scaleB.value = 0.68; causticParams.speed.value = 0.30;
 causticParams.sharpness.value = 18; causticParams.intensity.value = 1.35; causticParams.rgbOffset.value = 0.02;
 /** Point on the surface plane from which sunlight reaches `p` (world position node). */
 export const sunSurfacePoint = (p: Node<'vec3'>) => p.xz.sub(sunDirection.xz.mul(p.y.sub(waterLevel).div(sunDirection.y.min(-0.15))));
@@ -56,12 +56,12 @@ export async function createLighting(scene: Scene) {
     scene.environment = hdr; scene.environmentIntensity = 0.7;
   } catch (error) { console.warn('HDRI unavailable, using hemisphere light only', error); }
 
-  const center = new Vector3(0, 3.2, 0), view = new Matrix4();
+  const center = new Vector3(0, 8, 0), view = new Matrix4();
   /** Fit the orthographic shadow frustum tightly around the diorama (and the ground patch it shadows). */
   function fitShadow() {
     const dir = sunDirection.value.clone().normalize();
     sun.target.position.copy(center);
-    sun.position.copy(center).addScaledVector(dir, -60);
+    sun.position.copy(center).addScaledVector(dir, -120);
     sun.updateMatrixWorld(); sun.target.updateMatrixWorld();
     view.lookAt(sun.position, center, new Vector3(0, 1, 0)).setPosition(sun.position);
     const inv = view.clone().invert();
@@ -76,8 +76,8 @@ export async function createLighting(scene: Scene) {
         z0 = Math.min(z0, -p.z); z1 = Math.max(z1, -p.z);
       }
     };
-    box(-2.8, 11.5, h, true);
-    box(WORLD.ground, WORLD.ground, 30, false);
+    box(0, 21, h, true);
+    box(WORLD.ground, WORLD.ground, 90, false);
     cam.left = x0 - 0.3; cam.right = x1 + 0.3; cam.bottom = y0 - 0.3; cam.top = y1 + 0.3;
     cam.near = Math.max(0.5, z0 - 1); cam.far = z1 + 2;
     cam.updateProjectionMatrix();
@@ -87,5 +87,5 @@ export async function createLighting(scene: Scene) {
 }
 
 /** Fog/tint the sun undergoes on its way through `depth` units of water. */
-export const waterTransmittance = (depth: Node<'float'>) => exp(vec3(0.17, 0.06, 0.035).mul(waterClarity).mul(depth.max(0)).negate());
+export const waterTransmittance = (depth: Node<'float'>) => exp(vec3(0.11, 0.04, 0.023).mul(waterClarity).mul(depth.max(0)).negate());
 export const waterDepthAt = (y: Node<'float'>) => waterLevel.sub(y);

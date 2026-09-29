@@ -61,8 +61,8 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   let camOverride: { pos: Vector3; look: Vector3; relative: boolean } | null = null;
   const cam = query.get('fishingCam');
   if (cam) {
-    const off = (query.get('camOff') ?? (cam === 'cast' ? '4.5,3.2,5' : '1.9,1.25,2.3')).split(',').map(Number);
-    const look = (query.get('camLook') ?? (cam === 'cast' ? '-1.5,0.3,-1.2' : '0,0.45,0')).split(',').map(Number);
+    const off = (query.get('camOff') ?? (cam === 'cast' ? '-4,6.5,11' : cam === 'wide' ? '-6,10,20' : '0.8,2.6,7')).split(',').map(Number);
+    const look = (query.get('camLook') ?? (cam === 'cast' ? '4,0,-1' : cam === 'wide' ? '3,0,-4' : '0,1.3,0')).split(',').map(Number);
     camOverride = { pos: new Vector3(off[0], off[1], off[2]), look: new Vector3(look[0], look[1], look[2]), relative: true };
   }
 
@@ -115,9 +115,11 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
     proj.copy(game.bobber).project(camera);
     hud.update(game, { x: (proj.x * 0.5 + 0.5) * innerWidth, y: (-proj.y * 0.5 + 0.5) * innerHeight });
     if (camOverride) {
+      // relative presets are in the boat frame (x = bow, z = starboard), so they follow the hull's heading
       const o = camOverride.relative ? tmpO.set(boat.state.x, boat.group.position.y, boat.state.z) : tmpO.set(0, 0, 0);
-      camera.position.copy(camOverride.pos).add(o);
-      camera.lookAt(tmpL.copy(camOverride.look).add(o));
+      const c = Math.cos(boat.state.yaw), sn = Math.sin(boat.state.yaw), rot = (v: Vector3, out: Vector3) => camOverride!.relative ? out.set(v.x * c + v.z * sn, v.y, -v.x * sn + v.z * c) : out.copy(v);
+      camera.position.copy(rot(camOverride.pos, tmpL)).add(o);
+      camera.lookAt(rot(camOverride.look, tmpL).add(o));
     }
   }
 

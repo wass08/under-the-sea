@@ -1,23 +1,21 @@
 import { WORLD } from '../config';
 import { createNoise2D, fbm } from '../lib/noise';
 
-/** Analytic height field of the seabed and island, shared by the mesh, the fish contract and the shaders. */
+/** Analytic height field: a wide sandy seabed with one sand island in the middle. Shared by mesh, fish contract and shaders. */
 const noiseA = createNoise2D(7), noiseB = createNoise2D(23), noiseC = createNoise2D(91);
 const smooth = (a: number, b: number, x: number) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
-export const ISLAND = { x: -2.9, z: -2.9 };
-/** Basin centre: the big open space where the school lives. */
-export const BASIN = { x: 2.0, z: 1.9 };
+export const ISLAND = { x: 0, z: 0, shoreRadius: 5 };
 
-// Radius (from island centre) -> height above the seabed. Monotone cubic (PCHIP) through the anchors.
+// Radius from the island centre -> height above the sea floor. Monotone cubic (PCHIP): dune top, flat beach
+// ring just above the waterline, then a sandy shelf descending to the seabed by r ~ 11.
 const ANCHORS: [number, number][] = [
-  [0, 8.1], [1.0, 7.9], [1.7, 7.5], [2.3, 6.8], [2.7, 5.9], [3.0, 4.3], [3.35, 2.7], [3.85, 1.4], [4.45, 0.45], [5.1, 0],
+  [0, 10.9], [1.5, 10.6], [3.0, 9.9], [4.0, 9.4], [4.6, 9.15], [5.1, 8.8], [5.6, 7.6], [6.2, 5.5], [7.2, 3.0], [8.5, 1.2], [10, 0.3], [11.5, 0],
 ];
 const xs = ANCHORS.map(a => a[0]), ys = ANCHORS.map(a => a[1]);
 const deltas = xs.slice(1).map((x, i) => (ys[i + 1] - ys[i]) / (x - xs[i]));
 const tangents = ys.map((_, i) => {
-  if (i === 0) return 0;
-  if (i === ys.length - 1) return 0;
+  if (i === 0 || i === ys.length - 1) return 0;
   if (deltas[i - 1] * deltas[i] <= 0) return 0;
   const h0 = xs[i] - xs[i - 1], h1 = xs[i + 1] - xs[i], w1 = 2 * h1 + h0, w2 = h1 + 2 * h0;
   return (w1 + w2) / (w1 / deltas[i - 1] + w2 / deltas[i]);
@@ -30,23 +28,18 @@ function profile(r: number) {
 }
 
 export function seabedHeight(x: number, z: number) {
-  const relief = fbm(x * 0.30 + 11, z * 0.30 - 5, { noise: noiseA, octaves: 3 });
-  const d = Math.hypot(x - BASIN.x, z - BASIN.z);
-  const lift = 1.25 * smooth(4.6, 11, d) * (0.78 + 0.22 * noiseB(x * 0.4, z * 0.4));
-  const dip = 0.16 * Math.exp(-((d / 3.8) ** 2));
-  return WORLD.bed - 0.05 + relief * 0.34 + noiseC(x * 1.4, z * 1.4) * 0.035 + lift - dip;
+  const relief = fbm(x * 0.075 + 11, z * 0.075 - 5, { noise: noiseA, octaves: 3 });
+  const rim = 0.55 * smooth(11, 18, Math.max(Math.abs(x), Math.abs(z)));
+  return WORLD.bed - 0.05 + relief * 0.55 + noiseC(x * 0.4, z * 0.4) * 0.05 + rim;
 }
 
 export function islandBump(x: number, z: number) {
   const dx = x - ISLAND.x, dz = z - ISLAND.z;
-  let r = Math.hypot(dx / 1.04, dz / 0.93) * (1 + 0.15 * noiseB(dx * 0.33 + 3, dz * 0.33 - 1));
-  r += 0.42 * fbm(dx * 0.55, dz * 0.55, { noise: noiseC, octaves: 3 });
-  const crag = noiseA(x * 1.05 + 4, z * 1.05) * 0.4 * smooth(4.2, 1.6, r) + noiseC(x * 2.6, z * 2.6) * 0.12 * smooth(3.6, 1.0, r);
-  // Ledges and buttresses on the flank so the underwater column is not a smooth pillar.
-  const flank = smooth(5.0, 4.0, r) * smooth(1.8, 2.8, r);
-  const base = profile(Math.max(0, r));
-  const ledge = Math.sin(base * 2.6 + noiseB(x * 0.8, z * 0.8) * 3) * 0.5 * flank + noiseB(x * 1.7 + 8, z * 1.7) * 0.7 * flank * flank;
-  return base + (crag + ledge) * (r < 5.2 ? 1 : 0);
+  let r = Math.hypot(dx / 1.06, dz / 0.94) * (1 + 0.07 * noiseB(dx * 0.11 + 3, dz * 0.11 - 1));
+  r += 0.55 * fbm(dx * 0.16, dz * 0.16, { noise: noiseC, octaves: 3 });
+  const dunes = noiseA(x * 0.22 + 4, z * 0.22) * 0.32 * smooth(5.2, 1.5, r) + noiseC(x * 0.6, z * 0.6) * 0.08 * smooth(6.5, 2.0, r);
+  const under = noiseB(x * 0.35 + 8, z * 0.35) * 0.18 * smooth(11, 7, r) * smooth(4.5, 6.5, r);
+  return profile(Math.max(0, r)) + (r < 11.5 ? dunes + under : 0);
 }
 
 export function terrainHeight(x: number, z: number) {

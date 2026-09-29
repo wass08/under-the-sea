@@ -10,7 +10,8 @@ import { SWIM_BOUNDS, WORLD } from '../config';
 import { waterLevel } from '../state';
 
 /** Uniform grid over the water volume (cell = largest neighbour radius). */
-export const GRID = { cell: 0.6, min: [-WORLD.half, 0.5, -WORLD.half], x: 20, y: 13, z: 20, slots: 48 } as const;
+const CELL = 1.2, GMIN_Y = WORLD.bed - 0.5;
+export const GRID = { cell: CELL, min: [-WORLD.half, GMIN_Y, -WORLD.half], x: Math.ceil(2 * WORLD.half / CELL), y: Math.ceil((WORLD.surface + 1 - GMIN_Y) / CELL), z: Math.ceil(2 * WORLD.half / CELL), slots: 48 } as const;
 const CELLS = GRID.x * GRID.y * GRID.z;
 
 /** Uniforms shared by every school (behaviours, lure, predator, panic waves...). */
@@ -19,17 +20,17 @@ export function createEnv() {
   const env = {
     dt: u(0.016), clock: u(0), frame: u(0),
     // boids
-    speed: u(1), sepW: u(1.2), aliW: u(1.0), cohW: u(1.0), sepR: u(0.27), neighR: u(0.5), scanCap: u(5, 'int'),
+    speed: u(1), sepW: u(3.0), aliW: u(2.4), cohW: u(0.7), sepR: u(0.75), neighR: u(1.1), scanCap: u(4, 'int'),
     // milling
-    millBlend: u(0), millStrength: u(1), millRadius: u(2.9), millHeight: u(0.8), millDir: u(1), millCenter: u(new Vector3(0.4, 4.5, 0.3)), attractors: [0, 1, 2].map(() => u(new Vector3(0, 4, 0))), attractW: u(1),
+    millBlend: u(0), millStrength: u(1), millRadius: u(12.5), millHeight: u(2.5), millDir: u(1), millCenter: u(new Vector3(0, 6.4, 0)), attractors: [0, 1, 2].map(() => u(new Vector3(0, 4, 0))), attractW: u(1),
     // predator / fountain
-    predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(2.0), fountain: u(1),
+    predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(3.5), fountain: u(1),
     // panic
     panicOrigin: [0, 1, 2, 3].map(() => u(new Vector4(0, 0, 0, -1000))),
     panicStrength: u(new Vector4(0, 0, 0, 0)),
-    panicSpeed: u(5.0), burst: u(9.5), calm: u(0.8), transmission: u(0.8),
+    panicSpeed: u(8.0), burst: u(13.0), calm: u(0.8), transmission: u(0.8),
     // lure
-    lurePos: u(new Vector3(0, 5, 0)), lureActive: u(0), curiosity: u(0), curiosityRadius: u(3.5), inspectors: u(100), hooked: u(0),
+    lurePos: u(new Vector3(0, 5, 0)), lureActive: u(0), curiosity: u(0), curiosityRadius: u(5), inspectors: u(100), hooked: u(0),
     strike: u(0), land: u(0), respawn: u(10),
     // misc
     seabedRes: 64,
@@ -70,7 +71,7 @@ export function sampleHeight(s: { heights: Float32Array; resolution: number }, x
 }
 
 export const STATS_SLOTS = 16; // 0 near, 1..3 centroid sums, 4 fear sum, 5 alive count, 6 biter state, 7 biter dist*1000, 8 strike selection key
-export const CENTROID_SCALE = 256, CENTROID_OFFSET = 16, FEAR_SCALE = 1024;
+export const CENTROID_SCALE = 128, CENTROID_OFFSET = 24, FEAR_SCALE = 1024;
 
 export function createSim(o: SimOptions) {
   const { renderer, env, seabed } = o, N = o.count;
@@ -199,7 +200,7 @@ export function createSim(o: SimOptions) {
     }).ElseIf(state.greaterThan(0.5), () => {
       // ------------------------------------------------ darting at the lure
       const toL = env.lurePos.sub(P), d = length(toL);
-      V.assign(mix(V, toL.div(max(d, 0.001)).mul(5.5), clamp(dt.mul(12), 0, 1)));
+      V.assign(mix(V, toL.div(max(d, 0.001)).mul(8.0), clamp(dt.mul(12), 0, 1)));
       P.addAssign(V.mul(dt));
       phaseRate.assign(7); flash.assign(max(flash.mul(0.95), 0.25));
       statsWrite.element(6).assign(uint(1)); statsWrite.element(7).assign(uint(clamp(d.mul(1000), 0, 60000)));
@@ -255,7 +256,7 @@ export function createSim(o: SimOptions) {
 
       // --- wander
       const tt = clock.mul(0.8);
-      acc.addAssign(vec3(sin(tt.add(rA.mul(50))), sin(tt.mul(1.3).add(rB.mul(50))).mul(0.6), sin(tt.mul(0.9).add(rC.mul(50)))).mul(0.9));
+      acc.addAssign(vec3(sin(tt.add(rA.mul(50))), sin(tt.mul(1.3).add(rB.mul(50))).mul(0.6), sin(tt.mul(0.9).add(rC.mul(50)))).mul(1.2));
 
       // --- cruise speed relaxation (per-fish cruise variation)
       const cruise = spd.mul(o.cruise).mul(rB.mul(0.4).add(0.8));
@@ -272,19 +273,19 @@ export function createSim(o: SimOptions) {
       // --- large-scale flow: follow the wandering attractor loosely + coherent flow field (density waves, curling edges)
       const grp = floor(rnd(31).mul(3)), myAtt = select(grp.lessThan(0.5), env.attractors[0], select(grp.lessThan(1.5), env.attractors[1], env.attractors[2]));
       const ad = myAtt.sub(P), al2 = length(ad);
-      acc.addAssign(ad.div(max(al2, 0.01)).mul(smoothstep(2.6, 5.5, al2)).mul(2.6).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(fear.mul(2.5).add(1)));
-      acc.addAssign(vec3(sin(P.y.mul(1.7).add(clock.mul(0.6))).add(sin(P.z.mul(1.1).sub(clock.mul(0.4)))), sin(P.x.mul(1.3).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(1.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.9).add(clock.mul(0.3))))).mul(1.0));
+      acc.addAssign(ad.div(max(al2, 0.01)).mul(smoothstep(2.5, 6.5, al2)).mul(3.2).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(fear.mul(2.5).add(1)));
+      acc.addAssign(vec3(sin(P.y.mul(0.6).add(clock.mul(0.6))).add(sin(P.z.mul(0.4).sub(clock.mul(0.4)))), sin(P.x.mul(0.45).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(0.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.3).add(clock.mul(0.3))))).mul(1.0));
 
       // --- bounds (soft walls)
-      const m = float(2.4), lo = vec3(SWIM_BOUNDS.min[0], SWIM_BOUNDS.min[1], SWIM_BOUNDS.min[2]), hi = vec3(SWIM_BOUNDS.max[0], waterLevel.sub(0.3), SWIM_BOUNDS.max[2]);
+      const m = vec3(5.0, 2.0, 5.0), lo = vec3(SWIM_BOUNDS.min[0], SWIM_BOUNDS.min[1], SWIM_BOUNDS.min[2]), hi = vec3(SWIM_BOUNDS.max[0], waterLevel.sub(0.3), SWIM_BOUNDS.max[2]);
       const pen = clamp(lo.add(m).sub(P).div(m), 0, 1).sub(clamp(P.sub(hi.sub(m)).div(m), 0, 1));
-      acc.addAssign(pen.mul(abs(pen)).mul(9).mul(float(1).sub(millW.mul(0.7))).add(pen.mul(abs(pen).mul(abs(pen))).mul(10)));
+      acc.addAssign(pen.mul(abs(pen)).mul(14).mul(float(1).sub(millW.mul(0.7))).add(pen.mul(abs(pen).mul(abs(pen))).mul(10)));
 
       // --- terrain avoidance
-      const ahead = P.add(V.mul(0.7));
+      const ahead = P.add(V.mul(1.0));
       const hP = terrainH(P.x, P.z), hA = terrainH(ahead.x, ahead.z);
       const clr = min(P.y.sub(hP), ahead.y.sub(hA));
-      const tw = clamp(float(1.0).sub(clr).div(1.0), 0, 1);
+      const tw = clamp(float(1.8).sub(clr).div(1.8), 0, 1);
       If(tw.greaterThan(0.001), () => { // only pay for the normal near the terrain
         const tn = terrainNormal(ahead.x, ahead.z);
         acc.addAssign(tn.mul(tw.mul(tw)).mul(38));
@@ -296,9 +297,9 @@ export function createSim(o: SimOptions) {
         const C = env.millCenter, r = vec3(P.x.sub(C.x), 0, P.z.sub(C.z)), dist = max(length(r), 0.05), er = r.div(dist);
         const et = vec3(er.z.negate(), 0, er.x).mul(env.millDir);
         const R = env.millRadius.mul(rA.mul(0.3).add(0.85));
-        const swirl = sin(atan(er.z, er.x).mul(2).add(clock.mul(0.7))).mul(0.4).add(sin(atan(er.z, er.x).sub(clock.mul(0.5))).mul(0.2));
-        const yMid = C.y.add(rB.sub(0.5).mul(env.millHeight)).add(swirl).sub(r.x.add(r.z).mul(0.3));
-        const want = et.mul(spd.mul(1.75)).add(er.mul(clamp(R.sub(dist).mul(1.6), -1.4, 1.4))).add(vec3(0, clamp(yMid.sub(P.y).mul(1.4), -0.7, 0.7), 0));
+        const swirl = sin(atan(er.z, er.x).mul(2).add(clock.mul(0.7))).mul(0.9).add(sin(atan(er.z, er.x).sub(clock.mul(0.5))).mul(0.45));
+        const yMid = C.y.add(rB.sub(0.5).mul(env.millHeight)).add(swirl).sub(r.x.add(r.z).mul(0.035));
+        const want = et.mul(spd.mul(3.2)).add(er.mul(clamp(R.sub(dist).mul(1.6), -4, 4))).add(vec3(0, clamp(yMid.sub(P.y).mul(1.0), -1.2, 1.2), 0));
         acc.addAssign(want.sub(V).mul(3.6).mul(env.millStrength).mul(millW).mul(float(1).sub(fear)));
       });
 
@@ -310,22 +311,22 @@ export function createSim(o: SimOptions) {
       const zone = env.predActive.mul(smoothstep(fr, fr.mul(0.25), dEff)).mul(smoothstep(fr.mul(-0.6), fr.mul(0.1), along));
       const lateral = select(pl.greaterThan(0.06), perp.div(pl), cross(H, vec3(0, 1, 0)).mul(rA.sub(0.5).sign()));
       const flee = lateral.add(H.mul(-0.55)).add(vec3(0, rB.sub(0.5).mul(0.6), 0));
-      acc.addAssign(flee.mul(zone).mul(env.fountain).mul(o.fearSensitivity).mul(34).mul(float(1).add(smoothstep(fr.mul(0.7), 0, dEff).mul(2))));
+      acc.addAssign(flee.mul(zone).mul(env.fountain).mul(o.fearSensitivity).mul(40).mul(float(1).add(smoothstep(fr.mul(0.7), 0, dEff).mul(2))));
       fear.assign(max(fear, zone.mul(0.55).mul(clamp(env.fountain, 0, 1)).mul(o.fearSensitivity)));
 
       // --- lure curiosity
       if (o.lureInfluence > 0) {
         const toL = env.lurePos.sub(P), d = length(toL), dirL = toL.div(max(d, 0.001));
         const bold = step(rnd(11), min(env.curiosity.mul(env.inspectors).div(N), 0.03));
-        const startle = env.hooked.mul(bold).mul(step(d, 1.8));
+        const startle = env.hooked.mul(bold).mul(step(d, 2.6));
         fear.assign(max(fear, startle.mul(0.45)));
         acc.subAssign(dirL.mul(startle).mul(8));
         // the school just drifts a little closer
-        acc.addAssign(dirL.mul(env.lureActive).mul(env.curiosity).mul(0.5).mul(step(1.5, d)).mul(smoothstep(6, 3, d)));
+        acc.addAssign(dirL.mul(env.lureActive).mul(env.curiosity).mul(0.6).mul(step(2.0, d)).mul(smoothstep(10, 4, d)));
         const curious = env.lureActive.mul(bold).mul(step(d, env.curiosityRadius)).mul(step(fear, 0.25));
-        const orbit = rB.mul(0.6).add(0.4);
+        const orbit = rB.mul(0.8).add(0.6);
         const tang = normalize(cross(vec3(0, 1, 0), dirL)).mul(rA.sub(0.5).sign());
-        const want = dirL.mul(clamp(d.sub(orbit).mul(1.2), -0.6, 1.3)).add(tang.mul(0.45));
+        const want = dirL.mul(clamp(d.sub(orbit).mul(1.2), -1.0, 2.0)).add(tang.mul(0.7));
         acc.addAssign(want.sub(V).mul(3.2).mul(curious));
         acc.addAssign(sep.mul(env.sepW).mul(11).mul(curious.mul(0.5)));
       }
@@ -360,7 +361,7 @@ export function createSim(o: SimOptions) {
       });
 
       // --- integrate (turn rate limited)
-      const accMax = float(7.0).mul(fear.mul(4).add(1)).add(select(millW.greaterThan(0.5), float(2), float(0)));
+      const accMax = float(10.0).mul(fear.mul(4).add(1)).add(select(millW.greaterThan(0.5), float(3), float(0)));
       const al = length(acc);
       acc.mulAssign(min(float(1), accMax.div(max(al, 0.001))));
       V.addAssign(acc.mul(dt));
@@ -379,11 +380,11 @@ export function createSim(o: SimOptions) {
       const Pn = P.add(V.mul(dt)).toVar();
       // terrain hard constraint
       const hn = terrainH(Pn.x, Pn.z);
-      If(Pn.y.lessThan(hn.add(0.12)), () => {
+      If(Pn.y.lessThan(hn.add(0.2)), () => {
         const n2 = terrainNormal(Pn.x, Pn.z);
         If(hn.sub(Pn.y).greaterThan(0.35), () => {
           Pn.assign(P); V.assign(V.sub(n2.mul(dot(V, n2).min(0))).add(n2.mul(0.6)));
-        }).Else(() => { Pn.y.assign(hn.add(0.12)); V.y.assign(max(V.y, 0)); });
+        }).Else(() => { Pn.y.assign(hn.add(0.2)); V.y.assign(max(V.y, 0)); });
       });
       // bounds
       const ceilY = waterLevel.sub(0.22);

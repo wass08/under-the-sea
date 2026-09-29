@@ -5,7 +5,7 @@ import { WORLD } from '../config';
 import { waterLevel } from '../state';
 import { causticAtSurface, causticStrength, toSun } from './lighting';
 
-export const skyParams = { fogDistance: 58 };
+export const skyParams = { fogDistance: 150 };
 const zenith = color('#052540'), upper = color('#0f5478'), horizonCool = color('#58b4c2'), horizonWarm = color('#f7ae7c');
 
 /** Sky/horizon gradient with a soft sun glow. dir is a normalized world direction. */
@@ -32,7 +32,7 @@ export function createAtmosphere(scene: Scene, sunVisibility: Node<'float'>) {
   const dir = viewDir.div(dist);
   // Radial falloff darkens the ground near the base of the diorama (ambient occlusion) and lights a soft vignette.
   const patchDist = positionWorld.xz.abs().sub(vec2(WORLD.half + 0.5)).max(0).length();
-  const contact = smoothstep(0.0, 5.5, patchDist).mul(0.55).add(0.45);
+  const contact = smoothstep(0.0, 16, patchDist).mul(0.55).add(0.45);
   const tone = mx_noise_float(vec3(positionWorld.xz.mul(0.35), 0)).mul(0.06).add(1);
   ground.colorNode = color('#125064').mul(contact).mul(tone);
 
@@ -52,14 +52,14 @@ export function createAtmosphere(scene: Scene, sunVisibility: Node<'float'>) {
     const light = vec3(0).toVar();
     If(waterRay.greaterThan(0.001), () => {
       const cst = causticAtSurface(surfaceHit, float(2.0));
-      light.assign(cst.mul(vec3(0.35, 0.85, 1.0)).mul(waterRay).mul(inPath.mul(-0.05).exp()));
+      light.assign(cst.mul(vec3(0.35, 0.85, 1.0)).mul(waterRay).mul(inPath.mul(-0.03).exp()));
     });
     return light.mul(sunVisibility).mul(causticStrength).mul(0.32);
   })();
   const fog = float(1).sub(dist.div(skyParams.fogDistance * 1.6).pow(1.5).negate().exp()).clamp();
   ground.outputNode = vec4(mix(output.rgb, horizonAt(dir), fog), 1);
   ground.fog = false;
-  const geometry = new PlaneGeometry(1500, 1500); geometry.rotateX(-Math.PI / 2);
+  const geometry = new PlaneGeometry(6000, 6000); geometry.rotateX(-Math.PI / 2);
   const mesh = new Mesh(geometry, ground);
   mesh.position.y = WORLD.ground; mesh.receiveShadow = true; mesh.name = 'Ground';
   scene.add(mesh);

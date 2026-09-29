@@ -32,7 +32,9 @@ export interface GameEvent { type: 'cast' | 'release' | 'splash' | 'bite' | 'nib
 export const settings = {
   auto: false,
   autoSuccess: 0.8,
-  lureDepth: 1.4,
+  lureDepth: 1.8,
+  minRange: 2,
+  maxRange: 16,
   biteMin: 2,
   biteMax: 6,
   hookWindow: 1.5,
@@ -77,7 +79,8 @@ export class Game {
 
   // ------- timing exposed to the animation layers -------
   get castWind() { return 0.6 / settings.castSpeed; }
-  get castFlight() { return 0.9 / settings.castSpeed; }
+  private flightT = 0.9;
+  get castFlight() { return this.flightT / settings.castSpeed; }
   get jerkTime() { return JERK; }
   get celebrateHold() { return HOLD; }
   get auto() { return settings.auto; }
@@ -101,16 +104,29 @@ export class Game {
 
   // ------- input -------
   /** Is x,z a place we can cast to (inside the water square, away from the boat, not on the island)? */
-  validSpot(x: number, z: number, minBoat = 1.5): boolean {
-    const lim = WORLD.half - 0.4;
+  validSpot(x: number, z: number, minBoat = settings.minRange): boolean {
+    const lim = WORLD.half - 0.8;
     if (Math.abs(x) >= lim || Math.abs(z) >= lim) return false;
-    if (Math.hypot(x - this.env.boat.x, z - this.env.boat.z) < minBoat) return false;
-    return this.env.seabedAt(x, z) < WORLD.surface - 0.8;
+    const d = Math.hypot(x - this.env.boat.x, z - this.env.boat.z);
+    if (d < minBoat || d > settings.maxRange + 0.01) return false;
+    return this.env.seabedAt(x, z) < WORLD.surface - 1.4; // deep enough (not the island / its shelf)
   }
 
-  /** Cast (or recast) at a surface point. Returns true if the request was accepted. */
-  requestCast(p: Vector3): boolean {
-    if (!this.validSpot(p.x, p.z)) return false;
+  /** Cast (or recast) at a surface point; too-far targets are clamped to max range along the direction. Returns true if accepted. */
+  requestCast(input: Vector3): boolean {
+    const b = this.env.boat, dx = input.x - b.x, dz = input.z - b.z, dist = Math.hypot(dx, dz);
+    if (dist < 1e-3) return false;
+    const p = new Vector3();
+    let found = false;
+    // clamp to range, then walk back toward the boat until the spot is valid (skips shelves / island)
+    const far = dist > settings.maxRange;
+    for (let d = Math.min(dist, settings.maxRange); d >= settings.minRange; d -= 0.5) {
+      p.set(b.x + (dx / dist) * d, 0, b.z + (dz / dist) * d);
+      if (this.validSpot(p.x, p.z)) { found = true; break; }
+      if (!far) break; // an in-range click on a bad spot is rejected, not silently moved
+    }
+    if (!found) return false;
+    p.y = this.env.heightAt(p.x, p.z);
     if (this.phase === 'idle') { this.startCast(p); return true; }
     if (IN_WATER.includes(this.phase) && this.phase !== 'bite') { this.startRetrieve(p); return true; }
     if (this.phase === 'retrieving') { this.queued = p.clone(); return true; }
@@ -134,6 +150,7 @@ export class Game {
 
   private startCast(p: Vector3) {
     this.target.set(p.x, this.env.heightAt(p.x, p.z), p.z);
+    this.flightT = 0.75 + Math.hypot(p.x - this.env.boat.x, p.z - this.env.boat.z) * 0.055;
     this.enter('casting'); this.released = false; this.inWater = false; this.totalWait = 0;
     this.emit('cast', this.env.tip);
   }
@@ -337,11 +354,13 @@ export class Game {
   }
 
   private pickSpot(): Vector3 | null {
-    const lim = WORLD.half - 0.9, c = this.school.stats.centroid;
-    for (let i = 0; i < 40; i++) {
-      let x = rand(-lim, lim), z = rand(-lim, lim);
-      if (this.school.count > 0 && Number.isFinite(c.x) && (c.x !== 0 || c.z !== 0) && Math.random() < 0.6) { x = c.x + rand(-2.5, 2.5); z = c.z + rand(-2.5, 2.5); }
-      if (this.validSpot(x, z, 2)) return new Vector3(x, this.env.heightAt(x, z), z);
+    const c = this.school.stats.centroid, b = this.env.boat;
+    const haveSchool = this.school.count > 0 && Number.isFinite(c.x) && (c.x !== 0 || c.z !== 0);
+    for (let i = 0; i < 60; i++) {
+      let x: number, z: number;
+      if (haveSchool && Math.random() < 0.65) { x = c.x + rand(-3, 3); z = c.z + rand(-3, 3); }
+      else { const a = rand(0, Math.PI * 2), d = rand(4, settings.maxRange - 1); x = b.x + Math.cos(a) * d; z = b.z + Math.sin(a) * d; }
+      if (this.validSpot(x, z, 3)) return new Vector3(x, this.env.heightAt(x, z), z);
     }
     return null;
   }

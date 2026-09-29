@@ -1,7 +1,10 @@
 import { AdditiveBlending, CircleGeometry, Color, CylinderGeometry, DoubleSide, InstancedMesh, Matrix4, Mesh, MeshBasicNodeMaterial, Quaternion, RingGeometry, Scene, SphereGeometry, Vector3 } from 'three/webgpu';
 import type { BufferGeometry } from 'three/webgpu';
 import type { World } from '../contracts';
-import { rand } from './build';
+import { RIG_SCALE, rand } from './build';
+
+/** FX scale relative to the original 1.35 rig. */
+const K = RIG_SCALE / 1.35;
 
 const MAX = 700, GRAVITY = 11, RINGS = 5, DISCS = 4, CROWNS = 3;
 const UP = new Vector3(0, 1, 0);
@@ -27,7 +30,7 @@ export function createFx(scene: Scene, world: World, onDripHit: (p: Vector3) => 
   function spawn(x: number, y: number, z: number, ax: number, ay: number, az: number, s: number, l: number) {
     const i = cursor; cursor = (cursor + 1) % MAX;
     if (!alive[i]) active++;
-    alive[i] = 1; px[i] = x; py[i] = y; pz[i] = z; vx[i] = ax; vy[i] = ay; vz[i] = az; age[i] = 0; life[i] = l; size[i] = s;
+    alive[i] = 1; px[i] = x; py[i] = y; pz[i] = z; vx[i] = ax * K; vy[i] = ay * Math.sqrt(K); vz[i] = az * K; age[i] = 0; life[i] = l * Math.sqrt(K); size[i] = s * K;
   }
 
   const glowMat = () => new MeshBasicNodeMaterial({ color: new Color(1.2, 1.5, 1.65), transparent: true, opacity: 0, depthWrite: false, side: DoubleSide, blending: AdditiveBlending });
@@ -45,7 +48,7 @@ export function createFx(scene: Scene, world: World, onDripHit: (p: Vector3) => 
   const cursors = { ring: 0, disc: 0, crown: 0 };
   const start = (pool: Fade[], key: 'ring' | 'disc' | 'crown', p: Vector3, radius: number, dur: number, peak: number) => {
     const r = pool[cursors[key]]; cursors[key] = (cursors[key] + 1) % pool.length;
-    r.t = 0; r.dur = dur; r.radius = radius; r.peak = peak; r.x = p.x; r.z = p.z; r.y = p.y; r.mesh.visible = true;
+    r.t = 0; r.dur = dur; r.radius = radius * K; r.peak = peak; r.x = p.x; r.z = p.z; r.y = p.y; r.mesh.visible = true;
   };
 
   return {

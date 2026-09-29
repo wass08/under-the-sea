@@ -12,13 +12,14 @@ import type { InstanceNodes } from './render';
 import { Predator } from './predator';
 import { simTime } from '../state';
 
-const MAIN_LENGTH = 0.22, ANGEL_LENGTH = 0.46, ANGEL_COUNT = 512, PREDATOR_LENGTH = 1.25;
+const MAIN_LENGTH = 0.3, ANGEL_LENGTH = 0.6, ANGEL_COUNT = 512, PREDATOR_LENGTH = 1.4;
 const base = import.meta.env.BASE_URL;
 const query = new URLSearchParams(location.search);
 
 export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   const { renderer, scene } = ctx;
-  const N = QUERY.fish;
+  // with the 36-unit world, fish need ~1-2 body lengths of clear space to stay individually readable: default to 16384 unless ?fish= is given
+  const N = query.has('fish') ? QUERY.fish : 16384;
   const env = createEnv();
   // debug: ?fishFakeIsland=1 injects a test island into the height field (and a proxy mesh) to check terrain avoidance on the stub world
   let seabed = world.seabed;
@@ -36,7 +37,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
 
   // ------------------------------------------------------------------ assets
   const [main, angel, big] = await Promise.all([
-    loadFishAsset(`${base}models/fish_01.glb`, { frames: 32, body: 300, fins: 90, eye: 22, proxies: [70] }),
+    loadFishAsset(`${base}models/fish_01.glb`, { frames: 32, body: 560, fins: 130, eye: 90, proxies: [70] }),
     loadFishAsset(`${base}models/angel_fish.glb`, { frames: 32, body: 520, fins: 0, eye: 24, proxies: [140] }),
     loadFishAsset(`${base}models/fish_02.glb`, { frames: 32, body: 1500, fins: 0, eye: 60, proxies: [] }),
   ]);
@@ -47,16 +48,17 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   let ix = 0, iz = 0, ic = 0;
   const { heights, resolution } = seabed;
   for (let z = 0; z < resolution; z++) for (let x = 0; x < resolution; x++) if (heights[z * resolution + x] > WORLD.surface) { ix += -WORLD.half + (x + 0.5) / resolution * 2 * WORLD.half; iz += -WORLD.half + (z + 0.5) / resolution * 2 * WORLD.half; ic++; }
-  const homeXZ: [number, number] = ic > 10 ? [ix / ic, iz / ic] : [-2.2, -2.2];
+  const homeXZ: [number, number] = ic > 10 ? [ix / ic, iz / ic] : [0, 0];
 
+  env.millCenter.value.x = homeXZ[0]; env.millCenter.value.z = homeXZ[1]; // circle the island
   // ------------------------------------------------------------------ simulations
   const mainSim = createSim({
-    renderer, env, count: N, seabed, cruise: 1.4, minSpeed: 0.55, maxSpeed: 2.4, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
-    homeClear: 0, homeStrength: 0, homeXZ: [0, 0], homeRadius: 99, clusters: 5, clusterRadius: 1.5, seed: 1, main: true,
+    renderer, env, count: N, seabed, cruise: 2.2, minSpeed: 0.9, maxSpeed: 3.6, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
+    homeClear: 0, homeStrength: 0, homeXZ: [0, 0], homeRadius: 99, clusters: 4, clusterRadius: 3.5, seed: 1, main: true,
   });
   const angelSim = createSim({
-    renderer, env, count: ANGEL_COUNT, seabed, cruise: 0.75, minSpeed: 0.3, maxSpeed: 1.6, millInfluence: 0.25, lureInfluence: 0, fearSensitivity: 0.7,
-    homeClear: 1.5, homeStrength: 1.6, homeXZ, homeRadius: 3.2, clusters: 3, clusterRadius: 1.0, seed: 2, main: false,
+    renderer, env, count: ANGEL_COUNT, seabed, cruise: 1.1, minSpeed: 0.45, maxSpeed: 2.4, millInfluence: 0.25, lureInfluence: 0, fearSensitivity: 0.7,
+    homeClear: 2.4, homeStrength: 1.6, homeXZ, homeRadius: 9, clusters: 3, clusterRadius: 2.5, seed: 2, main: false,
   });
 
   // ------------------------------------------------------------------ meshes
@@ -66,7 +68,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   })();
   void lureInspect;
   const silver = (seed: any) => vec3(1).add(vec3(hash(seed.mul(91)), hash(seed.mul(57)), hash(seed.mul(33))).sub(0.5).mul(0.2));
-  const fishMeshes = createFishMesh(main, 0, 1, instanceFromSim(mainSim.read, 1), MAIN_LENGTH, N, { tint: silver, sparkle: 1, roughness: 0.62 });
+  const fishMeshes = createFishMesh(main, 0, 1, instanceFromSim(mainSim.read, 1), MAIN_LENGTH, N, { tint: silver, sparkle: 1, roughness: 0.62, shape: [1.1, 0.82] });
   const angelMeshes = createFishMesh(angel, 0, 1, instanceFromSim(angelSim.read, 2), ANGEL_LENGTH, ANGEL_COUNT, { tint: silver, sparkle: 0.6, roughness: 0.6 });
 
   // predator: one instance driven by uniforms
@@ -99,7 +101,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   if (query.get('fishShadowTest') === '1') for (const t of world.terrain) t.receiveShadow = true; // debug: show fish shadows on the terrain
 
   // ------------------------------------------------------------------ state
-  const stats: SchoolStats = { nearLure: 0, biter: 'none', centroid: new Vector3(0.5, 4, 0.5), meanFear: 0 };
+  const stats: SchoolStats = { nearLure: 0, biter: 'none', centroid: new Vector3(0, 6, 0), meanFear: 0 };
   const behaviour = { milling: query.get('fishDemo') === 'milling' || query.get('milling') === '1', fountain: false, angel: true };
   const predator = new Predator(seabed);
   const pend = { strike: 0, land: 0, lure: false, biterSince: -1, biterLocal: 'none' as SchoolStats['biter'], strikeQueued: false };
@@ -187,18 +189,17 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     attT += dt;
     const t = attT;
     // three sub-group attractors: a shared wandering centre plus offsets whose spread breathes, so groups split and merge
-    const cx = 2.2 * Math.sin(t * 0.06 + 0.5), cz = 2.2 * Math.sin(t * 0.047 + 2.0), spread = 0.5 + 3.0 * (0.5 + 0.5 * Math.sin(t * 0.09 + 1.0));
+    // the groups sail around the island; their angular spread breathes so they split and merge
+    const thc = t * 0.045 + 0.7, spread = 1.5 * (0.5 + 0.5 * Math.sin(t * 0.07 + 1.0)), lim = WORLD.half - 4;
     for (let k = 0; k < 3; k++) {
-      const ph = k * 2.094 + t * (0.07 + k * 0.03);
-      let x = cx + Math.cos(ph) * spread + 0.8 * Math.sin(t * (0.11 + k * 0.05) + k), z = cz + Math.sin(ph) * spread + 0.8 * Math.cos(t * (0.13 + k * 0.04) + k * 2);
-      const dx = x - homeXZ[0], dz = z - homeXZ[1], d = Math.hypot(dx, dz);
-      if (ic > 10 && d < 4.4) { x = homeXZ[0] + dx / d * 4.4; z = homeXZ[1] + dz / d * 4.4; }
-      env.attractors[k].value.set(Math.max(-4.3, Math.min(4.3, x)), 4.2 + (1.3 + 0.5 * Math.sin(t * 0.05)) * Math.sin(t * (0.12 + k * 0.07) + k * 2.1), Math.max(-4.3, Math.min(4.3, z)));
+      const th = thc + (k - 1) * spread + 0.25 * Math.sin(t * (0.09 + k * 0.03) + k), r = 11.5 + 3.0 * Math.sin(t * (0.04 + k * 0.017) + k * 2.0);
+      const x = Math.max(-lim, Math.min(lim, homeXZ[0] + Math.cos(th) * r)), z = Math.max(-lim, Math.min(lim, homeXZ[1] + Math.sin(th) * r));
+      env.attractors[k].value.set(x, 6.4 + 1.6 * Math.sin(t * (0.11 + k * 0.05) + k * 2.1) + 0.8 * Math.sin(t * 0.29 + k), z);
     }
   }
   const noSim = query.get('fishNoSim') === '1';
   if (query.has('fishScan')) env.scanCap.value = Number(query.get('fishScan'));
-  const follow = query.has('fishFollow'), fd = Number(query.get('fishFollow')) || 1, followOffset = new Vector3(2.5 * fd, 2.2 * fd, 3.5 * fd);
+  const follow = query.has('fishFollow'), fd = Number(query.get('fishFollow')) || 1, followOffset = new Vector3(4 * fd, 3.5 * fd, 6 * fd);
   if (query.get('fishNoSurface') === '1') world.surface.visible = false;
   if (query.get('fishHide') === '1') { fishMeshes.mesh.visible = false; if (fishMeshes.shadowMesh) fishMeshes.shadowMesh.visible = false; }
 
@@ -216,33 +217,33 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     f.addBinding(env.sepW, 'value', { label: 'Separation', min: 0, max: 4, step: 0.05 });
     f.addBinding(env.aliW, 'value', { label: 'Alignment', min: 0, max: 4, step: 0.05 });
     f.addBinding(env.cohW, 'value', { label: 'Cohesion', min: 0, max: 4, step: 0.05 });
-    f.addBinding(env.sepR, 'value', { label: 'Separation radius', min: 0.1, max: 0.6, step: 0.01 });
-    f.addBinding(env.neighR, 'value', { label: 'Neighbour radius', min: 0.2, max: 0.6, step: 0.01 });
+    f.addBinding(env.sepR, 'value', { label: 'Separation radius', min: 0.2, max: 1.2, step: 0.01 });
+    f.addBinding(env.neighR, 'value', { label: 'Neighbour radius', min: 0.4, max: 1.2, step: 0.01 });
     f.addBinding(env.scanCap, 'value', { label: 'Neighbours / cell', min: 1, max: 12, step: 1 });
 
     const m = folder.addFolder({ title: 'Milling', expanded: false });
     m.addBinding(env.millStrength, 'value', { label: 'Strength', min: 0, max: 2, step: 0.05 });
-    m.addBinding(env.millRadius, 'value', { label: 'Radius', min: 0.8, max: 4.5, step: 0.05 });
-    m.addBinding(env.millHeight, 'value', { label: 'Torus height', min: 0.2, max: 3, step: 0.05 });
+    m.addBinding(env.millRadius, 'value', { label: 'Radius', min: 3, max: 16, step: 0.1 });
+    m.addBinding(env.millHeight, 'value', { label: 'Torus height', min: 0.5, max: 6, step: 0.1 });
     m.addBinding(env.millDir, 'value', { label: 'Direction', min: -1, max: 1, step: 2 });
-    m.addBinding(env.millCenter.value, 'x', { label: 'Center X', min: -4, max: 4, step: 0.1 });
-    m.addBinding(env.millCenter.value, 'z', { label: 'Center Z', min: -4, max: 4, step: 0.1 });
+    m.addBinding(env.millCenter.value, 'x', { label: 'Center X', min: -12, max: 12, step: 0.1 });
+    m.addBinding(env.millCenter.value, 'z', { label: 'Center Z', min: -12, max: 12, step: 0.1 });
 
     const p = folder.addFolder({ title: 'Fountain', expanded: false });
-    p.addBinding(predator, 'speed', { label: 'Predator speed', min: 2, max: 10, step: 0.1 });
-    p.addBinding(env.fearRadius, 'value', { label: 'Fear radius', min: 1, max: 6, step: 0.1 });
+    p.addBinding(predator, 'speed', { label: 'Predator speed', min: 3, max: 14, step: 0.1 });
+    p.addBinding(env.fearRadius, 'value', { label: 'Fear radius', min: 1.5, max: 10, step: 0.1 });
     p.addBinding(env.fountain, 'value', { label: 'Fountain strength', min: 0, max: 2, step: 0.05 });
     p.addBinding(predator, 'interval', { label: 'Charge every (s)', min: 5, max: 60, step: 1 });
 
     const fl = folder.addFolder({ title: 'Flash / panic', expanded: false });
     fl.addBinding(env.calm, 'value', { label: 'Calm rate', min: 0.1, max: 3, step: 0.05 });
-    fl.addBinding(env.panicSpeed, 'value', { label: 'Wave speed', min: 2, max: 14, step: 0.1 });
-    fl.addBinding(env.burst, 'value', { label: 'Burst speed', min: 2, max: 10, step: 0.1 });
+    fl.addBinding(env.panicSpeed, 'value', { label: 'Wave speed', min: 3, max: 20, step: 0.1 });
+    fl.addBinding(env.burst, 'value', { label: 'Burst speed', min: 3, max: 18, step: 0.1 });
     fl.addBinding(env.transmission, 'value', { label: 'Transmission', min: 0.5, max: 1, step: 0.01 });
     fl.addBinding(visuals.flashGain, 'value', { label: 'Flash glint', min: 0, max: 3, step: 0.05 });
 
     const l = folder.addFolder({ title: 'Lure', expanded: false });
-    l.addBinding(env.curiosityRadius, 'value', { label: 'Curiosity radius', min: 1, max: 5, step: 0.1 });
+    l.addBinding(env.curiosityRadius, 'value', { label: 'Curiosity radius', min: 2, max: 10, step: 0.1 });
 
     const v = folder.addFolder({ title: 'Look', expanded: false });
     v.addBinding(visuals.sheen, 'value', { label: 'Body sheen', min: 0, max: 2, step: 0.05 });
@@ -254,7 +255,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   // ------------------------------------------------------------------ debug hooks (kept)
   const camMode = query.get('fishCam');
   if (camMode) {
-    const presets: Record<string, [number, number, number]> = { close: [3.6, 4.4, 5.2], mid: [7, 5.5, 9], top: [0.5, 15, 3] };
+    const presets: Record<string, [number, number, number]> = { close: [9, 7, 13], mid: [16, 12, 21], top: [0.5, 42, 6] };
     const v = presets[camMode] ?? (camMode.split(',').map(Number) as [number, number, number]);
     if (v.length === 3 && v.every(Number.isFinite)) ctx.camera.position.set(v[0], v[1], v[2]);
   }

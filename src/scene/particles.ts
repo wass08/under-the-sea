@@ -11,22 +11,22 @@ import { emitRipple } from '../lib/ocean';
 const R = WORLD.half;
 
 /** Plankton / dust motes drifting in the water, catching the sun beams. Fully GPU-driven. */
-export function createPlankton(scene: Scene, count = 900) {
+export function createPlankton(scene: Scene, count = 5000) {
   const id = float(instanceIndex);
   const r = (k: number) => hash(id.add(k));
   const phase = r(1).mul(6.283);
   const t = simTime;
-  const x = r(2).sub(0.5).mul(2 * R - 0.6).add(sin(t.mul(0.09).add(phase)).mul(0.25));
+  const x = r(2).sub(0.5).mul(2 * R - 0.6).add(sin(t.mul(0.09).add(phase)).mul(0.6));
   const y = r(3).pow(0.8).mul(WORLD.surface - WORLD.bed - 0.6).add(WORLD.bed + 0.35).add(sin(t.mul(0.13).add(phase.mul(1.3))).mul(0.2));
-  const z = r(4).sub(0.5).mul(2 * R - 0.6).add(sin(t.mul(0.11).add(phase.mul(0.7))).mul(0.25));
+  const z = r(4).sub(0.5).mul(2 * R - 0.6).add(sin(t.mul(0.11).add(phase.mul(0.7))).mul(0.6));
   const position = vec3(x, y, z);
   const material = new PointsNodeMaterial({ transparent: true, depthWrite: false, blending: AdditiveBlending, sizeAttenuation: false });
   material.positionNode = position;
   material.sizeNode = r(5).mul(2.2).add(1.4);
   const s = sunSurfacePoint(position);
-  const beam = smoothstep(0.35, 0.85, mx_noise_float(vec3(s.mul(0.42), t.mul(0.16))).mul(0.5).add(0.5));
+  const beam = smoothstep(0.35, 0.85, mx_noise_float(vec3(s.mul(0.19), t.mul(0.16))).mul(0.5).add(0.5));
   const twinkle = sin(t.mul(r(6).mul(1.5).add(0.4)).add(phase)).mul(0.5).add(0.5);
-  const depthFade = waterLevel.sub(y).mul(-0.11).exp();
+  const depthFade = waterLevel.sub(y).mul(-0.06).exp();
   material.colorNode = mix(color('#8fd8d0'), color('#fff1cf'), beam.mul(0.8)).mul(beam.mul(godRayStrength).mul(1.6).add(0.35)).mul(depthFade);
   material.opacityNode = smoothstep(0.5, 0.05, uv().sub(0.5).length()).mul(twinkle.mul(0.6).add(0.4)).mul(0.55).mul(smoothstep(0.0, 0.35, waterLevel.sub(y)));
   const points = new Sprite(material); points.count = count; points.frustumCulled = false; points.renderOrder = 9; points.name = 'Plankton';
@@ -36,13 +36,13 @@ export function createPlankton(scene: Scene, count = 900) {
 
 /** A few bubble streams rising from the seabed; each pops on the surface with a tiny ripple. */
 export function createBubbles(scene: Scene) {
-  const vents = [[-4.3, 3.6], [4.5, -3.4], [0.8, -4.8], [-1.0, 4.9]].map(([x, z]) => ({ x, z, y: terrainHeight(x, z) }));
-  const perVent = 16, count = vents.length * perVent, rng = random(77);
+  const vents = [[-13, 9], [14, -8], [-4, -15], [3, 14], [-15, -10]].map(([x, z]) => ({ x, z, y: terrainHeight(x, z) }));
+  const perVent = 22, count = vents.length * perVent, rng = random(77);
   const origin = new Float32Array(count * 3), params = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     const v = vents[i % vents.length];
     origin.set([v.x + (rng() - 0.5) * 0.12, v.y + 0.02, v.z + (rng() - 0.5) * 0.12], i * 3);
-    params.set([0.03 + Math.pow(rng(), 1.8) * 0.07, rng(), 0.16 + rng() * 0.14], i * 3); // radius, phase, cycles per second
+    params.set([0.05 + Math.pow(rng(), 1.8) * 0.11, rng(), 0.16 + rng() * 0.14], i * 3); // radius, phase, cycles per second
   }
   const o = instancedBufferAttribute(new InstancedBufferAttribute(origin, 3), 'vec3') as unknown as Node<'vec3'>, p = instancedBufferAttribute(new InstancedBufferAttribute(params, 3), 'vec3') as unknown as Node<'vec3'>;
   const material = new MeshBasicNodeMaterial({ transparent: true, depthWrite: false });

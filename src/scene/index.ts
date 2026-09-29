@@ -32,9 +32,9 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
   slabMesh.name = 'Earth slab'; slabMesh.castShadow = true; slabMesh.receiveShadow = true;
   scene.add(terrainMesh, slabMesh);
 
-  const resolution = 128;
+  const resolution = 256;
   const heights = sampleGrid(resolution);
-  const heightTexture: DataTexture = createHeightTexture(sampleGrid(256), 256);
+  const heightTexture: DataTexture = createHeightTexture(heights, resolution);
   const water = createWater(scene, camera, heightTexture, terrainData.edges);
   createFlora(scene); createIsland(scene);
   createPlankton(scene); const bubbles = createBubbles(scene);
@@ -93,8 +93,8 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
 function applyCameraPreset(camera: Ctx['camera']) {
   const cam = new URLSearchParams(location.search).get('cam');
   const presets: Record<string, [number, number, number]> = {
-    side: [0, 4.5, 26], top: [0.01, 34, 0.01], close: [7.5, 5.2, 10.5], front: [2, 5, 22], under: [3, 1.8, 9.5],
-    island: [-2, 9, 13], corner: [11, 6, 11], low: [17, 3.4, 20], grazing: [14, 8.2, 16], inside: [1, 4, 3.5], surf: [7, 9.5, 9.5], seabed: [5, 6, 7],
+    side: [0, 12, 78], top: [0.01, 96, 0.01], close: [22, 15, 30], front: [6, 14, 64], under: [8, 5, 27], island: [-8, 24, 36],
+    corner: [32, 16, 32], low: [50, 9, 60], inside: [4, 8, 10], surf: [20, 26, 26], seabed: [15, 14, 20], grazing: [42, 22, 48],
   };
   if (cam && presets[cam]) camera.position.set(...presets[cam]);
   void WORLD;

@@ -32,7 +32,7 @@ function toHalf(v: number) {
 }
 
 /** Absorption (per world unit) — red dies first, then green, leaving deep teal-blue. */
-const sigma = vec3(0.30, 0.085, 0.04);
+const sigma = vec3(0.20, 0.058, 0.028);
 
 export function createWater(scene: Scene, camera: PerspectiveCamera, heightTexture: DataTexture, edges: Edges) {
   const box = { lo: vec3(-R, bottomY, -R), hi: vec3(R, WORLD.surface + 0.6, R) };
@@ -41,7 +41,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   // ---- Volume optics shared by the top surface and the side faces -----------------------------------------
   /** Beams of sunlight inside the water volume (single scattering, raymarched from the entry point). */
   const scatterRays = Fn(([origin, dir, length]: [Node<'vec3'>, Node<'vec3'>, Node<'float'>]) => {
-    const steps = 14;
+    const steps = 12;
     const acc = float(0).toVar();
     const stepLen = length.div(steps);
     const jitter = fract(screenCoordinate.x.mul(0.06711056).add(screenCoordinate.y.mul(0.00583715)).fract().mul(52.9829189));
@@ -51,17 +51,17 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
       const under = waterLevel.sub(p.y);
       const towardSurface = under.div(toSun.y.max(0.15));
       const ps = p.xz.add(toSun.xz.mul(towardSurface));
-      const beamA = mx_noise_float(vec3(ps.mul(0.42), simTime.mul(0.16))).mul(0.5).add(0.5);
-      const beamB = mx_noise_float(vec3(ps.mul(1.15).add(11.3), simTime.mul(0.27))).mul(0.5).add(0.5);
+      const beamA = mx_noise_float(vec3(ps.mul(0.19), simTime.mul(0.16))).mul(0.5).add(0.5);
+      const beamB = mx_noise_float(vec3(ps.mul(0.52).add(11.3), simTime.mul(0.27))).mul(0.5).add(0.5);
       const beam = smoothstep(0.52, 0.8, beamA.mul(0.6).add(beamB.mul(0.4)));
       // Terrain (island) shades the beams: two height probes toward the sun.
-      const q1 = p.add(toSun.mul(0.7)), q2 = p.add(toSun.mul(2.0)), q3 = p.add(toSun.mul(4.2));
+      const q1 = p.add(toSun.mul(1.6)), q2 = p.add(toSun.mul(4.5)), q3 = p.add(toSun.mul(9.5));
       const h1 = texture(heightTexture, q1.xz.div(R * 2).add(0.5)).level(float(0)).r;
       const h2 = texture(heightTexture, q2.xz.div(R * 2).add(0.5)).level(float(0)).r;
       const h3 = texture(heightTexture, q3.xz.div(R * 2).add(0.5)).level(float(0)).r;
       const open = smoothstep(-0.05, 0.25, q1.y.sub(h1)).mul(smoothstep(-0.05, 0.25, q2.y.sub(h2))).mul(smoothstep(-0.05, 0.25, q3.y.sub(h3)));
       const inside = smoothstep(-0.02, 0.2, under);
-      acc.addAssign(beam.mul(open).mul(inside).mul(under.mul(-0.10).exp()).mul(stepLen));
+      acc.addAssign(beam.mul(open).mul(inside).mul(under.mul(-0.065).exp()).mul(stepLen));
     });
     return acc;
   });
@@ -74,10 +74,10 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const dir = vec3(safeAxis(rd.x), safeAxis(rd.y), safeAxis(rd.z));
     const t0 = box.lo.sub(cameraPosition).div(dir), t1 = box.hi.sub(cameraPosition).div(dir);
     const exitDist = max(t0, t1).x.min(max(t0, t1).y).min(max(t0, t1).z);
-    const path = min(opaque, exitDist).sub(d0).max(0).min(24).toVar();
+    const path = min(opaque, exitDist).sub(d0).max(0).min(70).toVar();
     // Screen-space refraction: look up where the refracted ray would land.
     const refracted = refract(rd, normal, float(1 / 1.333));
-    const target = entry.add(rd.mul(path)).add(refracted.sub(rd).mul(path.min(2.5)));
+    const target = entry.add(rd.mul(path)).add(refracted.sub(rd).mul(path.min(5)));
     const clip = cameraProjectionMatrix.mul(cameraViewMatrix.mul(vec4(target, 1)));
     const uvRaw = clip.xy.div(clip.w).mul(vec2(0.5, -0.5)).add(0.5);
     // Limit the offset: shrink it at grazing angles and clamp its length so nothing gets stretched into streaks.
@@ -94,11 +94,11 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const sampleColor = mix(straight, shifted, weight);
     const absorbPath = tintScale === 1 ? path : path.mul(smoothstep(0, 6, path).mul(0.6).add(0.4));
     const transmittance = exp(sigma.mul(waterClarity).mul(absorbPath).negate());
-    const deep = float(1).sub(exp(path.mul(-0.09).mul(waterClarity)));
-    const inscatter = mix(vec3(0.02, 0.30, 0.32), vec3(0.008, 0.10, 0.32), deep).mul(float(1).sub(exp(path.mul(-0.24).mul(waterClarity))).pow(tintScale.valueOf() === 1 ? 1 : 1.8)).mul(1.25);
+    const deep = float(1).sub(exp(path.mul(-0.06).mul(waterClarity)));
+    const inscatter = mix(vec3(0.02, 0.30, 0.32), vec3(0.008, 0.10, 0.32), deep).mul(float(1).sub(exp(path.mul(-0.16).mul(waterClarity))).pow(tintScale.valueOf() === 1 ? 1 : 1.8)).mul(1.25);
     const rays = scatterRays(entry, rd, path);
     const phase = float(0.6).add(pow(dot(rd, toSun).max(0), 3).mul(2.4));
-    const rayColor = vec3(1.0, 0.95, 0.75).mul(rays).mul(phase).mul(godRayStrength).mul(0.3);
+    const rayColor = vec3(1.0, 0.95, 0.75).mul(rays).mul(phase).mul(godRayStrength).mul(0.22);
     const baseTint = vec3(0.004, 0.045, 0.06).mul(tintScale);
     return { color: sampleColor.mul(transmittance).mul(vec3(0.94, 0.99, 1.0)).add(baseTint).add(inscatter).add(rayColor), path, rd, d0, opaque };
   }
@@ -118,8 +118,8 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   (reflection as unknown as { reflector: { getVirtualCamera(c: PerspectiveCamera): PerspectiveCamera } }).reflector.getVirtualCamera(camera).layers.set(1);
 
   surfaceMaterial.colorNode = Fn(() => {
-    const fineA = mx_noise_float(vec3(positionWorld.xz.mul(6.5).add(simTime.mul(0.35)), simTime.mul(0.2)));
-    const fineB = mx_noise_float(vec3(positionWorld.xz.mul(15).sub(simTime.mul(0.5)), 7.1));
+    const fineA = mx_noise_float(vec3(positionWorld.xz.mul(3).add(simTime.mul(0.35)), simTime.mul(0.2)));
+    const fineB = mx_noise_float(vec3(positionWorld.xz.mul(7).sub(simTime.mul(0.5)), 7.1));
     const N = normalize(baseNormal.add(vec3(fineA, 0, fineB).mul(0.075))).toVar();
     const body = volume(positionWorld, N, 0.35);
     const F = fresnel(N, body.rd).mul(1.3).min(1);
@@ -130,15 +130,15 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const reflected = mix(analytic, planar, 0.85);
     // Sun glitter: tight lobe on the detailed normal plus a soft lobe on the base wave normal.
     const sunDot = dot(R3, toSun).max(0);
-    const facet = normalize(N.add(vec3(mx_noise_float(vec3(positionWorld.xz.mul(34).add(simTime.mul(0.6)), simTime.mul(0.9))), 0, mx_noise_float(vec3(positionWorld.xz.mul(41).sub(simTime.mul(0.5)), 3.7))).mul(0.16)));
+    const facet = normalize(N.add(vec3(mx_noise_float(vec3(positionWorld.xz.mul(16).add(simTime.mul(0.6)), simTime.mul(0.9))), 0, mx_noise_float(vec3(positionWorld.xz.mul(19).sub(simTime.mul(0.5)), 3.7))).mul(0.16)));
     const sparkle = pow(dot(reflect(body.rd, facet), toSun).max(0), 1400);
     const glint = sparkle.mul(140).add(pow(sunDot, 40).mul(0.22)).min(7);
     // Shoreline foam from the depth below the surface.
     const depthBelow = body.path.mul(body.rd.y.abs());
-    const swirl = mx_noise_float(vec3(positionWorld.xz.mul(4.2), simTime.mul(0.35))).mul(0.5).add(0.5);
-    const lap = float(0.2).add(sin(simTime.mul(1.1).add(swirl.mul(6))).mul(0.06));
-    const foam = smoothstep(lap, lap.mul(0.35), depthBelow).mul(smoothstep(0.35, 0.75, swirl.add(mx_noise_float(positionWorld.mul(9)).mul(0.25)))).mul(0.85)
-      .add(smoothstep(0.55, 0.0, depthBelow).mul(0.18).mul(swirl));
+    const swirl = mx_noise_float(vec3(positionWorld.xz.mul(2), simTime.mul(0.35))).mul(0.5).add(0.5);
+    const lap = float(0.4).add(sin(simTime.mul(1.1).add(swirl.mul(6))).mul(0.12));
+    const foam = smoothstep(lap, lap.mul(0.35), depthBelow).mul(smoothstep(0.35, 0.75, swirl.add(mx_noise_float(positionWorld.mul(4)).mul(0.25)))).mul(0.85)
+      .add(smoothstep(1.1, 0.0, depthBelow).mul(0.18).mul(swirl));
     const surfaceLight = vec3(0.95, 0.98, 1.0);
     const base = body.color.mul(float(1).sub(F)).add(reflected.mul(F)).add(vec3(1.0, 0.86, 0.62).mul(glint).mul(F.mul(6).min(1).max(0.25)));
     const rippleSlope = smoothstep(0.22, 0.65, N.xz.length());
@@ -146,14 +146,14 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   })();
   surfaceMaterial.opacityNode = float(1);
   surfaceMaterial.maskNode = hullOutside(positionWorld.xz);
-  const geometry = new PlaneGeometry(R * 2, R * 2, 224, 224); geometry.rotateX(-Math.PI / 2);
+  const geometry = new PlaneGeometry(R * 2, R * 2, 352, 352); geometry.rotateX(-Math.PI / 2);
   geometry.boundingSphere = new Sphere(new Vector3(0, WORLD.surface, 0), R * 1.6);
   const surface = new Mesh(geometry, surfaceMaterial);
   surface.name = 'Water surface'; surface.renderOrder = 4; surface.frustumCulled = false;
   scene.add(surface);
 
   // ---- Side faces --------------------------------------------------------------------------------------------
-  const segments = 192;
+  const segments = 384;
   const positions: number[] = [], bottoms: number[] = [], isTop: number[] = [], normals: number[] = [], sideId: number[] = [], indices: number[] = [];
   const outward = [[0, 0, -1], [1, 0, 0], [0, 0, 1], [-1, 0, 0]];
   edges.forEach((profile, side) => {
@@ -183,22 +183,22 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   const sideField = oceanField(positionGeometry.xz, simTime);
   const topY = max(aBottom, waterLevel.add(sideField.h)).toVarying();
   const sideNormal = attribute('normal', 'vec3');
-  const sidePosition = vec3(positionGeometry.x, mix(aBottom, topY, aTop), positionGeometry.z).add(sideNormal.mul(0.004));
+  const sidePosition = vec3(positionGeometry.x, mix(aBottom, topY, aTop), positionGeometry.z).add(sideNormal.mul(0.012));
 
   /** Bright lines: the surface meniscus and the vertical cube corners. */
   const edgeLines = (p: Node<'vec3'>, top: Node<'float'>) => {
     const below = top.sub(p.y).max(0);
-    const meniscus = exp(below.div(0.03).mul(below.div(0.03)).negate()).add(exp(below.div(0.16).negate()).mul(0.16));
+    const meniscus = exp(below.div(0.07).mul(below.div(0.07)).negate()).add(exp(below.div(0.3).negate()).mul(0.16));
     const cornerDist = max(float(R).sub(abs(p.x)), float(R).sub(abs(p.z))).max(0);
-    return { meniscus, corner: exp(cornerDist.div(0.035).mul(cornerDist.div(0.035)).negate()) };
+    return { meniscus, corner: exp(cornerDist.div(0.07).mul(cornerDist.div(0.07)).negate()) };
   };
 
   const frontMaterial = new MeshBasicNodeMaterial({ transparent: true, depthWrite: false });
   frontMaterial.fog = false;
   frontMaterial.positionNode = sidePosition;
   frontMaterial.colorNode = Fn(() => {
-    const wobble = mx_noise_float(vec3(positionWorld.xz.mul(1.3).add(positionWorld.y.mul(0.9)), simTime.mul(0.3)));
-    const wobbleB = mx_noise_float(vec3(positionWorld.y.mul(3.0), positionWorld.x.add(positionWorld.z).mul(2.2), simTime.mul(0.45)));
+    const wobble = mx_noise_float(vec3(positionWorld.xz.mul(0.6).add(positionWorld.y.mul(0.4)), simTime.mul(0.3)));
+    const wobbleB = mx_noise_float(vec3(positionWorld.y.mul(1.4), positionWorld.x.add(positionWorld.z).mul(1.0), simTime.mul(0.45)));
     const n0 = normalize(sideNormal);
     const N = normalize(n0.add(vec3(wobble, wobbleB.mul(0.5), wobbleB).mul(0.05).mul(vec3(1, 1, 1)))).toVar();
     const body = volume(positionWorld, N);

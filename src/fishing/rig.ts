@@ -1,6 +1,6 @@
 import { BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, DoubleSide, DynamicDrawUsage, Group, Mesh, MeshBasicNodeMaterial, MeshStandardNodeMaterial, PerspectiveCamera, Quaternion, Scene, SphereGeometry, TorusGeometry, Vector3 } from 'three/webgpu';
 import type { World } from '../contracts';
-import { clamp, flatMaterial, merge, mk } from './build';
+import { clamp, RIG_SCALE, merge, mk, smoothMaterial } from './build';
 import type { Game } from './game';
 
 const A = 22; // points tip -> bobber
@@ -23,17 +23,17 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
 
   // ---- bobber ----
   const bobber = new Group(); bobber.name = "Fishing bobber";
-  const sph = (r: number, ts: number, tl: number) => new SphereGeometry(r, 10, 6, 0, Math.PI * 2, ts, tl);
+  const sph = (r: number, ts: number, tl: number) => new SphereGeometry(r, 24, 12, 0, Math.PI * 2, ts, tl);
   const bobberMesh = new Mesh(merge([
-    mk(sph(0.08, 0, Math.PI / 2), '#e8433a', [0, 0, 0], [0, 0, 0], [1, 1, 1], 0.03),
-    mk(sph(0.08, Math.PI / 2, Math.PI / 2), '#f7f4ea', [0, 0, 0], [0, 0, 0], [1, 1, 1], 0.03),
-    mk(new CylinderGeometry(0.085, 0.085, 0.014, 10), '#f7f4ea', [0, 0.02, 0]),
+    mk(sph(0.08, 0, Math.PI / 2), '#e8433a', [0, 0, 0], [0, 0, 0], [1, 1, 1]),
+    mk(sph(0.08, Math.PI / 2, Math.PI / 2), '#f7f4ea', [0, 0, 0], [0, 0, 0], [1, 1, 1]),
+    mk(new CylinderGeometry(0.085, 0.085, 0.014, 24), '#f7f4ea', [0, 0.02, 0]),
     mk(new CylinderGeometry(0.008, 0.008, 0.16, 5), '#e8433a', [0, 0.155, 0]),
     mk(new CylinderGeometry(0.008, 0.008, 0.06, 5), '#f7f4ea', [0, 0.105, 0]),
     mk(new SphereGeometry(0.014, 6, 4), '#ffef7a', [0, 0.24, 0]),
     mk(new CylinderGeometry(0.006, 0.006, 0.12, 5), '#333', [0, -0.12, 0]),
-  ]), flatMaterial(0.5));
-  bobberMesh.castShadow = true; bobber.add(bobberMesh); bobber.scale.setScalar(1.15); scene.add(bobber);
+  ]), smoothMaterial({ roughness: 0.45 }));
+  bobberMesh.castShadow = true; bobber.add(bobberMesh); bobber.scale.setScalar(1.15 * RIG_SCALE / 1.35); scene.add(bobber);
 
   // ---- lure (spoon + hook + glint) ----
   const lure = new Group();
@@ -45,21 +45,21 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
   bead.position.y = 0.045;
   const glowMat = new MeshBasicNodeMaterial({ color: new Color(1.8, 1.9, 1.6), transparent: true, opacity: 0.3, depthWrite: false });
   const glow = new Mesh(new SphereGeometry(0.045, 8, 6), glowMat);
-  lure.add(spoon, hook, bead, glow); lure.scale.setScalar(1.25); scene.add(lure);
+  lure.add(spoon, hook, bead, glow); lure.scale.setScalar(1.25 * RIG_SCALE / 1.35); scene.add(lure);
   spoon.castShadow = true;
 
   // ---- placeholder fish (used only with the mock school) ----
   const fish = new Group();
   const fishMesh = new Mesh(merge([
-    mk(new SphereGeometry(1, 8, 6), '#f28a30', [0, 0, 0], [0, 0, 0], [0.17, 0.065, 0.045]),
-    mk(new SphereGeometry(1, 8, 6), '#f6e2c0', [0.01, -0.02, 0], [0, 0, 0], [0.14, 0.04, 0.046]),
+    mk(new SphereGeometry(1, 20, 12), '#f28a30', [0, 0, 0], [0, 0, 0], [0.17, 0.065, 0.045]),
+    mk(new SphereGeometry(1, 20, 12), '#f6e2c0', [0.01, -0.02, 0], [0, 0, 0], [0.14, 0.04, 0.046]),
     mk(new ConeGeometry(1, 1, 4), '#e2662a', [-0.21, 0, 0], [0, 0, Math.PI / 2], [0.07, 0.11, 0.012]),
     mk(new ConeGeometry(1, 1, 4), '#e2662a', [0, 0.07, 0], [0, 0, 0], [0.05, 0.07, 0.01]),
-    mk(new SphereGeometry(1, 6, 4), '#111', [0.13, 0.02, 0.035], [0, 0, 0], [0.012, 0.012, 0.012], 0),
-    mk(new SphereGeometry(1, 6, 4), '#111', [0.13, 0.02, -0.035], [0, 0, 0], [0.012, 0.012, 0.012], 0),
-  ]), flatMaterial(0.5));
+    mk(new SphereGeometry(1, 6, 4), '#111', [0.13, 0.02, 0.035], [0, 0, 0], [0.012, 0.012, 0.012]),
+    mk(new SphereGeometry(1, 6, 4), '#111', [0.13, 0.02, -0.035], [0, 0, 0], [0.012, 0.012, 0.012]),
+  ]), smoothMaterial({ roughness: 0.45 }));
   fishMesh.position.x = -0.17;
-  fish.scale.setScalar(1.3); fishMesh.castShadow = true; fish.add(fishMesh); fish.visible = false; scene.add(fish);
+  fish.scale.setScalar(1.3 * RIG_SCALE / 1.35); fishMesh.castShadow = true; fish.add(fishMesh); fish.visible = false; scene.add(fish);
 
   // ---- debug markers ----
   const debug = new Group(); debug.visible = false; scene.add(debug);
@@ -98,7 +98,7 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
       const cd = toCam.length();
       side.crossVectors(dir, toCam);
       if (side.lengthSq() < 1e-12) side.set(1, 0, 0); else side.normalize();
-      const w = clamp(cd * 0.00085, 0.006, 0.028);
+      const w = clamp(cd * 0.0007, 0.008, 0.03);
       positions[i * 6] = p.x - side.x * w; positions[i * 6 + 1] = p.y - side.y * w; positions[i * 6 + 2] = p.z - side.z * w;
       positions[i * 6 + 3] = p.x + side.x * w; positions[i * 6 + 4] = p.y + side.y * w; positions[i * 6 + 5] = p.z + side.z * w;
     }

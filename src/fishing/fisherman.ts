@@ -1,7 +1,9 @@
-import { BoxGeometry, CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, Mesh, Object3D, Quaternion, SphereGeometry, Vector3 } from 'three/webgpu';
+import { BufferGeometry, CapsuleGeometry, CylinderGeometry, Group, LatheGeometry, Mesh, Object3D, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3 } from 'three/webgpu';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { Boat } from './boat';
 import type { Game } from './game';
-import { clamp, damp, flatMaterial, merge, mk } from './build';
+import { clamp, damp, merge, mk, smoothMaterial } from './build';
+import { fabricTexture, strawTexture } from './textures';
 
 /**
  * Low-poly fisherman sitting on the aft thwart. Frame of every group under `torsoLean`:
@@ -39,82 +41,143 @@ const POSES = {
 type PoseName = keyof typeof POSES;
 
 export function createFisherman(boat: Boat, game: Game) {
-  const skin = '#f0bf9a', jacket = '#e0a22e', jacketDark = '#c0841a', pants = '#4b6584', boot = '#3a2a20';
-  const box = new BoxGeometry(1, 1, 1), sphere = new SphereGeometry(1, 8, 6), cyl = new CylinderGeometry(1, 1, 1, 8);
-  const mat = flatMaterial(0.8);
+  // palette: yellow oilskin, navy trousers, green rubber boots, ruddy skin, white beard, straw hat
+  const skin = '#e3ab86', jacket = '#e3a72f', jacketDark = '#bf861f', pants = '#3f5670', pantsCuff = '#6f86a3', boot = '#2f4a35', hair = '#e7e3da';
+  const S = (r: number) => new SphereGeometry(r, 24, 16);
+  const cap = (r: number, len: number, rs = 16) => new CapsuleGeometry(r, len, 8, rs);
+  const cylG = (r0: number, r1: number, h: number, rs = 20) => new CylinderGeometry(r0, r1, h, rs);
+  const tor = (R: number, r: number, arc = Math.PI * 2, rs = 24) => new TorusGeometry(R, r, 10, rs, arc);
+  const rbox = (w: number, h: number, d: number, r = 0.01) => new RoundedBoxGeometry(w, h, d, 3, r);
+
+  const fabric = fabricTexture(), straw = strawTexture();
+  fabric.repeat.set(5, 5);
+  const cloth = smoothMaterial({ roughness: 0.88, map: fabric });
+  const skinMat = smoothMaterial({ roughness: 0.5 });
+  const strawMat = smoothMaterial({ roughness: 0.92, map: straw });
+
   const rig = new Group();
   boat.group.add(rig);
-  rig.position.set(-0.12, 0.09, 0);
+  rig.position.set(-0.12, 0.105, 0);
 
-  const meshOf = (parts: ReturnType<typeof mk>[]) => { const m = new Mesh(merge(parts), mat); m.castShadow = m.receiveShadow = true; return m; };
+  /** cloth + skin geometry lists -> a group with one mesh per material. */
+  const body = (clothParts: BufferGeometry[], skinParts: BufferGeometry[]) => {
+    const g = new Group();
+    for (const [list, mat] of [[clothParts, cloth], [skinParts, skinMat]] as const) {
+      if (!list.length) continue;
+      const m = new Mesh(merge(list), mat); m.castShadow = m.receiveShadow = true; g.add(m);
+    }
+    return g;
+  };
 
-  // legs (static): pelvis, thighs, shins, rolled cuffs, boots
-  const legParts = [mk(box, pants, [0, -0.005, 0], [0, 0, 0], [0.2, 0.1, 0.3])];
+  // ---- legs (static): pelvis, thighs, knees, shins, rolled cuffs, rubber boots ----
+  const legCloth: BufferGeometry[] = [mk(S(1), pants, [0, -0.01, 0], [0, 0, 0], [0.13, 0.08, 0.165])];
+  const legSkin: BufferGeometry[] = [];
   for (const s of [-1, 1]) {
-    legParts.push(mk(box, pants, [0.14, 0.0, s * 0.075], [0, 0, 0], [0.3, 0.11, 0.11]));
-    legParts.push(mk(box, pants, [0.285, -0.14, s * 0.075], [0, 0, 0], [0.11, 0.17, 0.11]));
-    legParts.push(mk(box, '#7d93b0', [0.285, -0.075, s * 0.075], [0, 0, 0], [0.125, 0.035, 0.125]));
-    legParts.push(mk(box, boot, [0.335, -0.215, s * 0.075], [0, 0, 0], [0.21, 0.09, 0.12]));
+    const z = s * 0.08;
+    legCloth.push(mk(cap(0.06, 0.17), pants, [0.15, 0, z], [0, 0, Math.PI / 2]));
+    legCloth.push(mk(S(0.062), pants, [0.29, 0, z]));
+    legCloth.push(mk(cap(0.05, 0.06), pants, [0.29, -0.115, z]));
+    legCloth.push(mk(tor(0.056, 0.02), pantsCuff, [0.29, -0.16, z], [Math.PI / 2, 0, 0]));
+    legSkin.push(mk(cylG(0.056, 0.06, 0.105), boot, [0.29, -0.205, z]));
+    legSkin.push(mk(cap(0.054, 0.1), boot, [0.33, -0.21, z], [0, 0, Math.PI / 2], [1, 1, 0.98]));
+    legSkin.push(mk(rbox(0.23, 0.02, 0.112, 0.008), '#1d1d1d', [0.335, -0.255, z]));
   }
-  rig.add(meshOf(legParts));
+  rig.add(body(legCloth, legSkin));
 
   const torsoYaw = new Group(); torsoYaw.position.set(0, 0.03, 0); rig.add(torsoYaw);
   const torsoLean = new Group(); torsoYaw.add(torsoLean);
-  torsoLean.add(meshOf([
-    mk(new CapsuleGeometry(0.14, 0.2, 2, 8), jacket, [0, 0.23, 0], [0, 0, 0], [0.78, 1, 1.18]),
-    mk(box, '#5a3b22', [0, 0.06, 0], [0, 0, 0], [0.23, 0.035, 0.36]), // belt
-    mk(box, '#f5e9c8', [0.001, 0.06, 0], [0, 0, 0], [0.232, 0.03, 0.04]), // buckle band
-    mk(box, jacketDark, [0.11, 0.27, 0], [0, 0, 0], [0.02, 0.2, 0.05]), // front placket
-    mk(cyl, jacketDark, [0, 0.43, 0], [0, 0, 0], [0.11, 0.045, 0.11]), // collar
-  ]));
+  const oval: [number, number, number] = [0.82, 1, 1.12];
+  const torsoProfile = [[0.001, -0.02], [0.1, -0.015], [0.135, 0.02], [0.145, 0.08], [0.138, 0.15], [0.15, 0.24], [0.162, 0.32], [0.155, 0.37], [0.11, 0.415], [0.06, 0.44], [0.001, 0.452]].map(p => new Vector2(p[0], p[1]));
+  const torsoCloth: BufferGeometry[] = [
+    mk(new LatheGeometry(torsoProfile, 40), jacket, [0, 0, 0], [0, 0, 0], oval),
+    mk(tor(0.146, 0.016), '#5a3b22', [0, 0.07, 0], [Math.PI / 2, 0, 0], [0.82, 1.12, 1]),
+    mk(rbox(0.018, 0.03, 0.05, 0.006), '#c9a24b', [0.121, 0.07, 0]),
+    mk(tor(0.108, 0.03), jacketDark, [0, 0.415, 0], [Math.PI / 2, 0, 0], [0.82, 1.12, 1]),
+  ];
+  for (const [y, x] of [[0.14, 0.113], [0.21, 0.12], [0.28, 0.13], [0.34, 0.132]] as const) torsoCloth.push(mk(S(0.011), '#4a3a22', [x, y, 0], [0, 0, 0], [0.7, 1, 1]));
+  for (const s of [-1, 1]) torsoCloth.push(mk(rbox(0.024, 0.07, 0.1, 0.01), jacketDark, [0.1, 0.13, s * 0.085], [0, s * -0.55, 0]));
+  torsoCloth.push(mk(rbox(0.012, 0.3, 0.05, 0.005), jacketDark, [0.122, 0.235, 0]));
+  torsoLean.add(body(torsoCloth, [mk(cylG(0.046, 0.05, 0.09), skin, [0, 0.46, 0])]));
 
-  // head
+  // ---- head: skull, nose, ears, brows, eyes, moustache & beard, straw hat with a woven texture ----
   const head = new Group(); head.position.set(0, 0.5, 0); torsoLean.add(head);
   const headYaw = new Group(); head.add(headYaw);
   const headPitch = new Group(); headYaw.add(headPitch);
-  headPitch.add(meshOf([
-    mk(sphere, skin, [0, 0.1, 0], [0, 0, 0], [0.1, 0.105, 0.098]),
-    mk(sphere, skin, [0.095, 0.09, 0], [0, 0, 0], [0.028, 0.028, 0.028]), // nose
-    mk(sphere, '#222', [0.085, 0.125, 0.04], [0, 0, 0], [0.014, 0.016, 0.014], 0),
-    mk(sphere, '#222', [0.085, 0.125, -0.04], [0, 0, 0], [0.014, 0.016, 0.014], 0),
-    mk(new ConeGeometry(1, 1, 6), '#e9e4d8', [0.06, 0.03, 0], [Math.PI, 0, -0.35], [0.07, 0.09, 0.09]), // beard
-    mk(cyl, '#e8cf7a', [0, 0.18, 0], [0, 0, 0], [0.235, 0.014, 0.235], 0.08), // straw hat brim
-    mk(cyl, '#e8cf7a', [0, 0.225, 0], [0, 0, 0], [0.118, 0.06, 0.118], 0.08), // crown
-    mk(cyl, '#c8493d', [0, 0.2, 0], [0, 0, 0], [0.122, 0.018, 0.122], 0), // hat band
-  ]));
+  const headSkin: BufferGeometry[] = [
+    mk(S(1), skin, [0, 0.1, 0], [0, 0, 0], [0.095, 0.105, 0.09]),
+    mk(S(1), '#e9a184', [0.07, 0.083, 0.052], [0, 0, 0], [0.03, 0.03, 0.03]),
+    mk(S(1), '#e9a184', [0.07, 0.083, -0.052], [0, 0, 0], [0.03, 0.03, 0.03]),
+    mk(S(1), '#e9a184', [0.094, 0.09, 0], [0, 0, 0], [0.025, 0.03, 0.023]),
+    mk(S(1), skin, [-0.005, 0.1, 0.092], [0, 0, 0], [0.015, 0.03, 0.02]),
+    mk(S(1), skin, [-0.005, 0.1, -0.092], [0, 0, 0], [0.015, 0.03, 0.02]),
+    mk(S(1), '#f4f1ea', [0.078, 0.117, 0.036], [0, 0, 0], [0.012, 0.014, 0.014]),
+    mk(S(1), '#f4f1ea', [0.078, 0.117, -0.036], [0, 0, 0], [0.012, 0.014, 0.014]),
+    mk(S(1), '#2b4a63', [0.088, 0.117, 0.036], [0, 0, 0], [0.007, 0.009, 0.009]),
+    mk(S(1), '#2b4a63', [0.088, 0.117, -0.036], [0, 0, 0], [0.007, 0.009, 0.009]),
+    mk(cap(0.0085, 0.03), '#cfcabf', [0.083, 0.143, 0.038], [Math.PI / 2, 0, 0.12]),
+    mk(cap(0.0085, 0.03), '#cfcabf', [0.083, 0.143, -0.038], [Math.PI / 2, 0, -0.12]),
+    mk(cap(0.011, 0.034), hair, [0.09, 0.066, 0.024], [Math.PI / 2, 0, 0.25]),
+    mk(cap(0.011, 0.034), hair, [0.09, 0.066, -0.024], [Math.PI / 2, 0, -0.25]),
+    mk(S(1), hair, [0.03, 0.028, 0], [0, 0, 0], [0.072, 0.055, 0.078]),
+    mk(S(1), hair, [0.06, -0.012, 0], [0, 0, 0], [0.04, 0.05, 0.045]),
+    mk(S(1), hair, [-0.03, 0.13, 0.084], [0, 0, 0], [0.032, 0.036, 0.03]),
+    mk(S(1), hair, [-0.03, 0.13, -0.084], [0, 0, 0], [0.032, 0.036, 0.03]),
+    mk(S(1), hair, [-0.075, 0.115, 0], [0, 0, 0], [0.04, 0.05, 0.06]),
+  ];
+  headPitch.add(body([mk(tor(0.108, 0.013), '#c8493d', [0, 0.198, 0], [Math.PI / 2, 0, 0])], headSkin));
+  const hatProfile = [[0.001, 0.292], [0.05, 0.29], [0.088, 0.278], [0.104, 0.245], [0.108, 0.2], [0.14, 0.192], [0.19, 0.192], [0.232, 0.202], [0.245, 0.218], [0.24, 0.212], [0.23, 0.192], [0.19, 0.181], [0.14, 0.181], [0.106, 0.185]].map(p => new Vector2(p[0], p[1]));
+  const hat = new Mesh(merge([mk(new LatheGeometry(hatProfile, 48), '#ffffff', [0, 0, 0], [0, 0, 0], [1, 1, 1], [8, 3])]), strawMat);
+  hat.castShadow = hat.receiveShadow = true; headPitch.add(hat);
 
-  // arms
+  // ---- arms: sleeve + rolled cuff + hand (thumb + fist) ----
   interface Arm { shoulder: Group; elbow: Group; side: number }
   const arms: Arm[] = [];
   for (const side of [1, -1]) {
     const shoulder = new Group(); shoulder.position.set(0, SHOULDER_Y, side * SHOULDER_Z); torsoLean.add(shoulder);
-    shoulder.add(meshOf([mk(new CapsuleGeometry(0.05, 0.14, 2, 6), jacket, [0, -0.11, 0]), mk(sphere, jacket, [0, 0, 0], [0, 0, 0], [0.058, 0.058, 0.058])]));
+    shoulder.add(body([mk(S(0.058), jacket), mk(cap(0.047, 0.13), jacket, [0, -0.112, 0])], []));
     const elbow = new Group(); elbow.position.set(0, -L1, 0); shoulder.add(elbow);
-    elbow.add(meshOf([mk(new CapsuleGeometry(0.041, 0.13, 2, 6), jacket, [0, -0.11, 0]), mk(cyl, jacketDark, [0, -0.19, 0], [0, 0, 0], [0.046, 0.02, 0.046]), mk(sphere, skin, [0, -L2 + 0.01, 0], [0, 0, 0], [0.05, 0.05, 0.05])]));
+    elbow.add(body([mk(S(0.045), jacket), mk(cap(0.039, 0.115), jacket, [0, -0.105, 0]), mk(tor(0.043, 0.016), jacketDark, [0, -0.19, 0], [Math.PI / 2, 0, 0])],
+      [mk(S(1), skin, [0, -L2 - 0.004, 0], [0, 0, 0], [0.04, 0.05, 0.036]), mk(cap(0.012, 0.03), skin, [0.03, -L2 + 0.02, 0], [0, 0, -0.6]), mk(S(1), skin, [0.006, -L2 - 0.03, 0], [0, 0, 0], [0.034, 0.028, 0.03])]));
     arms.push({ shoulder, elbow, side });
   }
   const [armR, armL] = arms;
 
-  // rod (child of torso space, positioned at the right-hand grip), tapered segments that bend under tension
+  // ---- rod: cork grip, detailed reel with a crank, carbon blank in bending segments with guides ----
   const rod = new Group(); rod.rotation.order = 'YZX'; torsoLean.add(rod);
-  const rodMat = mat;
-  rod.add(meshOf([
-    mk(cyl, '#c9a26b', [-0.02, 0, 0], [0, 0, Math.PI / 2], [0.028, 0.32, 0.028]),
-    mk(cyl, '#3a3a40', [0.06, -0.055, 0], [Math.PI / 2, 0, 0], [0.05, 0.04, 0.05]), // reel body
-    mk(cyl, '#8c95a0', [0.06, -0.055, 0.0], [Math.PI / 2, 0, 0], [0.036, 0.048, 0.036]),
-    mk(box, '#3a3a40', [0.06, -0.03, 0], [0, 0, 0], [0.05, 0.03, 0.02]), // reel foot
-  ]));
-  const crank = new Group(); crank.position.set(0.06, -0.055, -0.03); rod.add(crank);
-  crank.add(meshOf([mk(box, '#8c95a0', [0.03, 0, 0], [0, 0, 0], [0.06, 0.01, 0.01]), mk(sphere, '#c8493d', [0.06, 0, -0.012], [0, 0, 0], [0.016, 0.016, 0.016])]));
-  const CRANK_R = 0.06;
+  const cork = new Mesh(merge([
+    mk(cylG(0.03, 0.031, 0.27, 20), '#c79b62', [-0.03, 0, 0], [0, 0, Math.PI / 2], [1, 1, 1], [4, 1]),
+    mk(cylG(0.034, 0.034, 0.03, 20), '#1d1d21', [-0.175, 0, 0], [0, 0, Math.PI / 2]),
+    mk(cylG(0.034, 0.03, 0.02, 20), '#1d1d21', [0.11, 0, 0], [0, 0, Math.PI / 2]),
+    ...[-0.12, -0.06, 0.0, 0.05].map(x => mk(tor(0.031, 0.0035, Math.PI * 2, 20), '#8d6a3e', [x, 0, 0], [0, Math.PI / 2, 0])),
+  ]), smoothMaterial({ roughness: 0.95 }));
+  cork.castShadow = true; rod.add(cork);
+  const reelParts: BufferGeometry[] = [
+    mk(cylG(0.046, 0.046, 0.05, 28), '#25272c', [0.06, -0.06, 0], [Math.PI / 2, 0, 0]),
+    mk(cylG(0.052, 0.052, 0.008, 28), '#c9a24b', [0.06, -0.06, 0.03], [Math.PI / 2, 0, 0]),
+    mk(cylG(0.052, 0.052, 0.008, 28), '#c9a24b', [0.06, -0.06, -0.03], [Math.PI / 2, 0, 0]),
+    mk(cylG(0.038, 0.038, 0.042, 24), '#d9dde2', [0.06, -0.06, 0], [Math.PI / 2, 0, 0]),
+    mk(cylG(0.01, 0.01, 0.075, 12), '#9aa0a8', [0.06, -0.06, 0], [Math.PI / 2, 0, 0]),
+    mk(rbox(0.07, 0.024, 0.03, 0.008), '#25272c', [0.06, -0.012, 0]),
+    mk(cylG(0.014, 0.014, 0.014, 12), '#c8493d', [0.02, -0.066, 0.036], [Math.PI / 2, 0, 0]),
+  ];
+  const reel = new Mesh(merge(reelParts), smoothMaterial({ roughness: 0.35, metalness: 0.8 })); reel.castShadow = true; rod.add(reel);
+  const crank = new Group(); crank.position.set(0.06, -0.06, -0.036); rod.add(crank);
+  const crankMesh = new Mesh(merge([
+    mk(rbox(0.066, 0.011, 0.008, 0.004), '#c0c7cf', [0.03, 0, 0]),
+    mk(cylG(0.006, 0.006, 0.03, 10), '#3a3a40', [0.062, 0, -0.014], [Math.PI / 2, 0, 0]),
+    mk(S(0.014), '#c8493d', [0.062, 0, -0.03], [0, 0, 0], [1, 1, 1.5]),
+  ]), smoothMaterial({ roughness: 0.4, metalness: 0.6 })); crankMesh.castShadow = true; crank.add(crankMesh);
+  const CRANK_R = 0.062;
+  const blankMat = smoothMaterial({ roughness: 0.26, metalness: 0.35 });
   const segs: Group[] = [];
   let parent: Object3D = rod;
   for (let i = 0; i < ROD_SEGMENTS; i++) {
     const seg = new Group(); seg.position.set(i === 0 ? 0.14 : ROD_SEG_LEN, 0, 0);
-    const r0 = 0.02 - i * 0.0026, r1 = 0.02 - (i + 1) * 0.0026;
-    const g = new CylinderGeometry(Math.max(r1, 0.004), r0, ROD_SEG_LEN, 6); g.rotateZ(-Math.PI / 2); g.translate(ROD_SEG_LEN / 2, 0, 0);
-    const m = new Mesh(merge([mk(g, i % 2 ? '#2b2b30' : '#1f1f24', [0, 0, 0], [0, 0, 0], [1, 1, 1], 0.03), ...(i > 0 ? [mk(cyl, '#c8493d', [0.01, 0, 0], [0, 0, Math.PI / 2], [r0 * 1.5, 0.014, r0 * 1.5], 0)] : [])]), rodMat);
-    m.castShadow = true; seg.add(m); parent.add(seg); segs.push(seg); parent = seg;
+    const r0 = 0.019 - i * 0.0027, r1 = 0.019 - (i + 1) * 0.0027;
+    const g = new CylinderGeometry(Math.max(r1, 0.0045), r0, ROD_SEG_LEN, 12, 1); g.rotateZ(-Math.PI / 2); g.translate(ROD_SEG_LEN / 2, 0, 0);
+    const list = [mk(g, '#17191e'), mk(tor(r0 * 1.06, 0.0035, Math.PI * 2, 14), '#c8493d', [0.004, 0, 0], [0, Math.PI / 2, 0]),
+      mk(tor(0.012, 0.0022, Math.PI * 2, 12), '#a9b0b8', [ROD_SEG_LEN * 0.55, -(r0 + r1) / 2 - 0.011, 0], [0, Math.PI / 2, 0])];
+    const m = new Mesh(merge(list), blankMat); m.castShadow = true; seg.add(m); parent.add(seg); segs.push(seg); parent = seg;
   }
   const tip = new Object3D(); tip.position.set(ROD_SEG_LEN, 0, 0); parent.add(tip);
 
