@@ -1,0 +1,7 @@
+{
+  shards: 399,
+  awake8: 77,
+  awake10: 79,
+  maxDisplacement: 0.012810129979945281,
+  maxRotation: 0.11234227065304492
+}

@@ -1,0 +1,120 @@
+import { AgXToneMapping, FogExp2, Raycaster, Scene, Vector2, Vector3, WebGPURenderer } from 'three/webgpu';
+import { createStage } from './scene/stage';
+import { createCamera } from './camera';
+import { createPost } from './post';
+import { createTank } from './scene/tank';
+import { createWater } from './scene/water';
+import { createIsland } from './scene/island';
+import { createLighting } from './scene/lighting';
+import { createShafts } from './scene/shafts';
+import { createDust } from './scene/dust';
+import { simTime, state, TANK, waterHeight, waterNormal } from './state';
+import { createSpill } from './scene/spill';
+import { createAudio } from './audio';
+import { createUI } from './ui';
+
+const loading = document.querySelector<HTMLElement>('#loading')!;
+function fail(message: string, error?: unknown, status = 'error') {
+  loading.hidden = false; loading.textContent = message;
+  document.documentElement.dataset.status = status;
+  if (error) console.error(message, error);
+}
+async function boot() {
+  if (!('gpu' in navigator)) { fail('WebGPU is unavailable. Open this study in current Chrome or Edge on a WebGPU-capable device (localhost or HTTPS).', undefined, 'unavailable'); return; }
+  const renderer = new WebGPURenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.setSize(innerWidth, innerHeight);
+  renderer.toneMapping = AgXToneMapping; renderer.toneMappingExposure = 1.05;
+  renderer.shadowMap.enabled = true;
+  try { await renderer.init(); } catch (error) { fail('WebGPU could not start. Enable hardware acceleration and open in current Chrome or Edge.', error, 'unavailable'); return; }
+  if (!('isWebGPUBackend' in renderer.backend) || !renderer.backend.isWebGPUBackend) { renderer.dispose(); fail('No WebGPU adapter is available. Enable hardware acceleration and try Chrome or Edge.', undefined, 'unavailable'); return; }
+  document.querySelector('#app')!.appendChild(renderer.domElement);
+  const scene = new Scene(); scene.fog = new FogExp2('#26333e', 0.025);
+  const rig = createCamera(renderer.domElement);
+  const lighting = await createLighting(scene, renderer);
+  // Match the fully fogged floor exactly; the HDRI remains scene.environment.
+  scene.background = scene.fog.color;
+  createStage(scene);
+  const tank = await createTank(scene), water = createWater(scene);
+  createIsland(scene);
+  const spill = createSpill(scene, water.ripple), audio = createAudio();
+  state.muted = audio.muted;
+  addEventListener('pointerdown', () => { void audio.gesture(); }, { once: true });
+  addEventListener('keydown', () => { void audio.gesture(); }, { once: true });
+  const shafts = createShafts(scene); createDust(scene);
+  const post = createPost(renderer, scene, rig.camera);
+  const actions = {
+    shatter() {
+      if (state.mode === 'shattered') return;
+      const openings = tank.shatter(state.impact, state.wall);
+      state.mode = 'shattered'; state.shatterTime = state.elapsed; state.brokenCount = tank.shards.length;
+      state.cracks = tank.cracks;
+      for (const opening of openings) spill.add(opening);
+      water.drain(TANK.floor, true); water.ripple(state.impact, 2); rig.shatter(state.impact); void audio.play(true);
+    },
+    reset() {
+      state.mode = 'idle'; state.brokenCount = 0; state.cracks = 0; state.spilling = false; state.hasImpact = false;
+      state.wall = 0; state.impact.set(0.6, TANK.base - 0.44, TANK.depth / 2);
+      tank.reset(); water.reset(); spill.reset(); audio.reset(); rig.reset();
+    },
+    toggleSound() { audio.toggle(); state.muted = audio.muted; },
+    toggleTime() { state.timeScale = state.timeScale === 1 ? 0.15 : 1; },
+  };
+  const ui = createUI(actions);
+  const pointer = new Vector2(), raycaster = new Raycaster();
+  let down: { x: number; y: number; id: number; moved: boolean } | null = null;
+  const canvas = renderer.domElement;
+  canvas.addEventListener('pointerdown', e => { if (e.button === 0) down = { x: e.clientX, y: e.clientY, id: e.pointerId, moved: false }; });
+  canvas.addEventListener('pointermove', e => { if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) down.moved = true; });
+  canvas.addEventListener('pointercancel', () => { down = null; });
+  canvas.addEventListener('pointerup', e => {
+    if (!down || down.id !== e.pointerId) return;
+    const click = !down.moved && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6; down = null;
+    if (!click || state.mode === 'shattered') return;
+    const rect = canvas.getBoundingClientRect();
+    pointer.set((e.clientX - rect.left) / rect.width * 2 - 1, -(e.clientY - rect.top) / rect.height * 2 + 1);
+    raycaster.setFromCamera(pointer, rig.camera);
+    const hit = raycaster.intersectObjects(tank.panels, false)[0];
+    if (hit) {
+      state.impact.copy(hit.point); state.wall = hit.object.userData.wall; state.hasImpact = true;
+      const opening = tank.crack(hit.point, state.wall);
+      if (opening) {
+        state.mode = 'cracked'; state.cracks = tank.cracks; state.brokenCount = tank.shards.length;
+        water.ripple(hit.point); water.slosh(hit.point); water.drain(opening.bottom); spill.add(opening); void audio.play(false);
+      }
+    }
+  });
+  addEventListener('resize', () => {
+    rig.camera.aspect = innerWidth / innerHeight; rig.camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.setSize(innerWidth, innerHeight);
+  });
+  // A small read-only diagnostics surface makes runtime verification observable.
+  const screenPoint = (point: Vector3) => {
+    const p = point.project(rig.camera);
+    return { x: (p.x * 0.5 + 0.5) * innerWidth, y: (-p.y * 0.5 + 0.5) * innerHeight };
+  };
+  Object.defineProperty(window, 'aquarium', { get: () => ({
+    crackTarget: screenPoint(new Vector3(0.6, 1.75, TANK.depth / 2 + 0.026)),
+    aboveTarget: screenPoint(new Vector3(0.6, 3.3, TANK.depth / 2 + 0.026)),
+    wallTargets: [new Vector3(0, 1.5, 1.776), new Vector3(0, 1.5, -1.776), new Vector3(3.026, 1.5, 0), new Vector3(-3.026, 1.5, 0)].map(screenPoint),
+    cracks: state.cracks, spilling: state.spilling,
+    holeBottom: tank.openings.length ? Math.min(...tank.openings.map(o => o.bottom)) : null,
+    holes: tank.openings.map(o => ({ wall: o.wall, bottom: o.bottom })),
+    fps: state.fps, pixelRatio: renderer.getPixelRatio(), mode: state.mode,
+    timeScale: state.timeScale, elapsed: state.elapsed, brokenCount: state.brokenCount,
+    hasImpact: state.hasImpact, impact: state.impact.toArray(), wall: state.wall,
+    height: waterHeight.value, normal: waterNormal.value.toArray(), renderer: 'WebGPU',
+    environment: lighting.environment, drawCalls: renderer.info.render.drawCalls,
+  }) });
+  let previous = performance.now(), rendered = false;
+  renderer.setAnimationLoop(() => {
+    const now = performance.now(), realDt = Math.max(0.001, (now - previous) / 1000); previous = now;
+    const dt = Math.min(realDt, 0.05) * state.timeScale;
+    state.elapsed += dt; simTime.value = state.elapsed;
+    water.update(dt); tank.update(dt); spill.update(dt); state.spilling = spill.active; audio.update(spill.strength, state.timeScale); lighting.update(state.elapsed); shafts.update(); rig.update(dt); ui.update(realDt);
+    try {
+      renderer.info.reset(); post.render();
+      if (!rendered) { rendered = true; loading.hidden = true; document.documentElement.dataset.status = 'ready'; }
+    } catch (error) { renderer.setAnimationLoop(null); fail('The WebGPU scene could not render. See the browser console for details.', error); }
+  });
+}
+boot().catch(error => fail('The aquarium could not load. See the browser console for details.', error));

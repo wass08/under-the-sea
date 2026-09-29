@@ -1,0 +1,54 @@
+[
+  {
+    "profile": "economy",
+    "trial": 0,
+    "impact": [
+      0.02,
+      0.01
+    ],
+    "count": 75,
+    "maxRotation": 5.960464477539063e-8,
+    "maxDisplacement": 0,
+    "worst": 44,
+    "awake5": 0
+  },
+  {
+    "profile": "economy",
+    "trial": 1,
+    "impact": [
+      0.02,
+      0.01
+    ],
+    "count": 75,
+    "maxRotation": 5.960464477539063e-8,
+    "maxDisplacement": 0,
+    "worst": 44,
+    "awake5": 0
+  },
+  {
+    "profile": "launch",
+    "trial": 0,
+    "impact": [
+      0.02,
+      0.01
+    ],
+    "count": 75,
+    "maxRotation": 0.05931066841615742,
+    "maxDisplacement": 0.00520194814504946,
+    "worst": 24,
+    "awake5": 0
+  },
+  {
+    "profile": "launch",
+    "trial": 1,
+    "impact": [
+      0.02,
+      0.01
+    ],
+    "count": 75,
+    "maxRotation": 5.960464477539063e-8,
+    "maxDisplacement": 0,
+    "worst": 44,
+    "awake5": 0
+  }
+]

@@ -1,0 +1,7199 @@
+{
+  "searched": 240,
+  "chosen": [
+    {
+      "seed": 38,
+      "score": 86.709,
+      "peak": 2.85,
+      "secondary": 2.342,
+      "saddle": 2.072,
+      "beachPct": 5.99,
+      "biomePct": [
+        20.94,
+        17.38,
+        60.72,
+        0.97
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7551,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.69178035701658,
+        "saddle": 12.87099712694065,
+        "beach": 11.626976015039622,
+        "biomes": 7.519015510256608,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 219,
+      "score": 85.701,
+      "peak": 2.85,
+      "secondary": 2.553,
+      "saddle": 2.178,
+      "beachPct": 7.39,
+      "biomePct": [
+        22.99,
+        13.99,
+        61.89,
+        1.12
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.7638,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.654023408713249,
+        "saddle": 13.844975809967194,
+        "beach": 14.460179266681209,
+        "biomes": 8.74179853799406,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 225,
+      "score": 85.542,
+      "peak": 2.85,
+      "secondary": 2.213,
+      "saddle": 2.098,
+      "beachPct": 7.48,
+      "biomePct": [
+        22.49,
+        15.62,
+        60.6,
+        1.28
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7168,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.361521496678026,
+        "saddle": 6.570081325074438,
+        "beach": 14.62394123713328,
+        "biomes": 9.986903788022877,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 13,
+      "score": 85.096,
+      "peak": 2.85,
+      "secondary": 2.242,
+      "saddle": 1.839,
+      "beachPct": 4.17,
+      "biomePct": [
+        19.32,
+        18.43,
+        60.95,
+        1.3
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 10,
+      "silhouetteVariance": 0.6568,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.7482411699744,
+        "saddle": 13.40470607506448,
+        "beach": 7.600556204920517,
+        "biomes": 10.083876309483285,
+        "silhouette": 11.258630732715673,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 21,
+      "score": 84.492,
+      "peak": 2.85,
+      "secondary": 2.509,
+      "saddle": 2.103,
+      "beachPct": 7.51,
+      "biomePct": [
+        23.62,
+        14.43,
+        61.16,
+        0.79
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.8337,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.330121501956617,
+        "saddle": 13.348815006137858,
+        "beach": 14.685678606098772,
+        "biomes": 6.127107812070955,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 72,
+      "score": 84.042,
+      "peak": 2.85,
+      "secondary": 2.442,
+      "saddle": 2.073,
+      "beachPct": 6.11,
+      "biomePct": [
+        19.83,
+        14.64,
+        64.8,
+        0.73
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7324,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.572706526021113,
+        "saddle": 13.912127756389042,
+        "beach": 11.88122673944663,
+        "biomes": 5.676343361836133,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 240,
+      "score": 83.964,
+      "peak": 2.85,
+      "secondary": 2.394,
+      "saddle": 2.131,
+      "beachPct": 5.97,
+      "biomePct": [
+        19.24,
+        15.36,
+        64.62,
+        0.79
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.688,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.821544025849285,
+        "saddle": 12.665043047605602,
+        "beach": 11.565656379679227,
+        "biomes": 6.117152662102692,
+        "silhouette": 11.794834705851509,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 76,
+      "score": 83.959,
+      "peak": 2.85,
+      "secondary": 2.417,
+      "saddle": 2.137,
+      "beachPct": 3.67,
+      "biomePct": [
+        18.61,
+        16.69,
+        63.29,
+        1.41
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7467,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.250040930803255,
+        "saddle": 13.159379512564747,
+        "beach": 6.577080291030955,
+        "biomes": 10.972950465815627,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    }
+  ],
+  "candidates": [
+    {
+      "seed": 38,
+      "score": 86.709,
+      "peak": 2.85,
+      "secondary": 2.342,
+      "saddle": 2.072,
+      "beachPct": 5.99,
+      "biomePct": [
+        20.94,
+        17.38,
+        60.72,
+        0.97
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7551,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.69178035701658,
+        "saddle": 12.87099712694065,
+        "beach": 11.626976015039622,
+        "biomes": 7.519015510256608,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 219,
+      "score": 85.701,
+      "peak": 2.85,
+      "secondary": 2.553,
+      "saddle": 2.178,
+      "beachPct": 7.39,
+      "biomePct": [
+        22.99,
+        13.99,
+        61.89,
+        1.12
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.7638,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.654023408713249,
+        "saddle": 13.844975809967194,
+        "beach": 14.460179266681209,
+        "biomes": 8.74179853799406,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 225,
+      "score": 85.542,
+      "peak": 2.85,
+      "secondary": 2.213,
+      "saddle": 2.098,
+      "beachPct": 7.48,
+      "biomePct": [
+        22.49,
+        15.62,
+        60.6,
+        1.28
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7168,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.361521496678026,
+        "saddle": 6.570081325074438,
+        "beach": 14.62394123713328,
+        "biomes": 9.986903788022877,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 13,
+      "score": 85.096,
+      "peak": 2.85,
+      "secondary": 2.242,
+      "saddle": 1.839,
+      "beachPct": 4.17,
+      "biomePct": [
+        19.32,
+        18.43,
+        60.95,
+        1.3
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 10,
+      "silhouetteVariance": 0.6568,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.7482411699744,
+        "saddle": 13.40470607506448,
+        "beach": 7.600556204920517,
+        "biomes": 10.083876309483285,
+        "silhouette": 11.258630732715673,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 21,
+      "score": 84.492,
+      "peak": 2.85,
+      "secondary": 2.509,
+      "saddle": 2.103,
+      "beachPct": 7.51,
+      "biomePct": [
+        23.62,
+        14.43,
+        61.16,
+        0.79
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.8337,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.330121501956617,
+        "saddle": 13.348815006137858,
+        "beach": 14.685678606098772,
+        "biomes": 6.127107812070955,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 72,
+      "score": 84.042,
+      "peak": 2.85,
+      "secondary": 2.442,
+      "saddle": 2.073,
+      "beachPct": 6.11,
+      "biomePct": [
+        19.83,
+        14.64,
+        64.8,
+        0.73
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7324,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.572706526021113,
+        "saddle": 13.912127756389042,
+        "beach": 11.88122673944663,
+        "biomes": 5.676343361836133,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 240,
+      "score": 83.964,
+      "peak": 2.85,
+      "secondary": 2.394,
+      "saddle": 2.131,
+      "beachPct": 5.97,
+      "biomePct": [
+        19.24,
+        15.36,
+        64.62,
+        0.79
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.688,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.821544025849285,
+        "saddle": 12.665043047605602,
+        "beach": 11.565656379679227,
+        "biomes": 6.117152662102692,
+        "silhouette": 11.794834705851509,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 76,
+      "score": 83.959,
+      "peak": 2.85,
+      "secondary": 2.417,
+      "saddle": 2.137,
+      "beachPct": 3.67,
+      "biomePct": [
+        18.61,
+        16.69,
+        63.29,
+        1.41
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7467,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.250040930803255,
+        "saddle": 13.159379512564747,
+        "beach": 6.577080291030955,
+        "biomes": 10.972950465815627,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 214,
+      "score": 83.896,
+      "peak": 2.85,
+      "secondary": 2.446,
+      "saddle": 2.097,
+      "beachPct": 3.8,
+      "biomePct": [
+        20.16,
+        18.98,
+        59.5,
+        1.37
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.8291,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.435423884871286,
+        "saddle": 13.999025473930503,
+        "beach": 6.840695321818418,
+        "biomes": 10.620655446133624,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 107,
+      "score": 83.878,
+      "peak": 2.85,
+      "secondary": 2.438,
+      "saddle": 2.169,
+      "beachPct": 6.58,
+      "biomePct": [
+        20.79,
+        16.46,
+        62.05,
+        0.7
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7328,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.675188350198866,
+        "saddle": 12.859982860431735,
+        "beach": 12.889971115980755,
+        "biomes": 5.45268932120392,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 221,
+      "score": 82.718,
+      "peak": 2.85,
+      "secondary": 2.39,
+      "saddle": 1.944,
+      "beachPct": 6.12,
+      "biomePct": [
+        19.69,
+        18.13,
+        61.57,
+        0.61
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6965,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.901017136110276,
+        "saddle": 12.215448847345938,
+        "beach": 11.901388888482531,
+        "biomes": 4.760547632284589,
+        "silhouette": 11.939773707885253,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 77,
+      "score": 82.656,
+      "peak": 2.85,
+      "secondary": 2.307,
+      "saddle": 1.817,
+      "beachPct": 4.27,
+      "biomePct": [
+        17.64,
+        17.61,
+        63.53,
+        1.21
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.698,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.963060978292216,
+        "saddle": 10.473774235621718,
+        "beach": 7.825878848344465,
+        "biomes": 9.428231740277674,
+        "silhouette": 11.965276367484526,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 213,
+      "score": 82.594,
+      "peak": 2.85,
+      "secondary": 2.214,
+      "saddle": 1.886,
+      "beachPct": 1.95,
+      "biomePct": [
+        16.39,
+        21.12,
+        61.13,
+        1.37
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7459,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.370959361088005,
+        "saddle": 13.926169052679652,
+        "beach": 3.6656778376755668,
+        "biomes": 10.63101099094334,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 94,
+      "score": 82.496,
+      "peak": 2.85,
+      "secondary": 2.194,
+      "saddle": 1.831,
+      "beachPct": 4.5,
+      "biomePct": [
+        20.18,
+        18.13,
+        60.9,
+        0.8
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7779,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.00467179149011,
+        "saddle": 13.954281280311848,
+        "beach": 8.317224771028803,
+        "biomes": 6.219343043825876,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 180,
+      "score": 82.389,
+      "peak": 2.85,
+      "secondary": 2.21,
+      "saddle": 1.902,
+      "beachPct": 0.81,
+      "biomePct": [
+        14.19,
+        23.74,
+        60.46,
+        1.62
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6709,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.30869316034819,
+        "saddle": 13.697207023746977,
+        "beach": 2.3015630390372857,
+        "biomes": 12.580053451822277,
+        "silhouette": 11.501837264281257,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 204,
+      "score": 82.337,
+      "peak": 2.85,
+      "secondary": 2.37,
+      "saddle": 2.183,
+      "beachPct": 8.02,
+      "biomePct": [
+        21.93,
+        14.63,
+        63.08,
+        0.36
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.8259,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.28033620611136,
+        "saddle": 9.760691368330273,
+        "beach": 15.492778943821852,
+        "biomes": 2.803302228576029,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 134,
+      "score": 82.249,
+      "peak": 2.85,
+      "secondary": 2.411,
+      "saddle": 2.026,
+      "beachPct": 4.54,
+      "biomePct": [
+        17.18,
+        17.85,
+        64.08,
+        0.89
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6882,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.418449671178,
+        "saddle": 13.721349244275428,
+        "beach": 8.396706108700966,
+        "biomes": 6.915155828200667,
+        "silhouette": 11.797060114938647,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 226,
+      "score": 82.207,
+      "peak": 2.85,
+      "secondary": 2.487,
+      "saddle": 2.238,
+      "beachPct": 5.53,
+      "biomePct": [
+        19.41,
+        14.66,
+        64.43,
+        1.49
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 2,
+      "silhouetteVariance": 0.7387,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.104128923501584,
+        "saddle": 12.230986686317253,
+        "beach": 10.5982009993252,
+        "biomes": 11.60666015119159,
+        "silhouette": 12,
+        "gullies": 6.666666666666666,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 52,
+      "score": 82.023,
+      "peak": 2.85,
+      "secondary": 2.423,
+      "saddle": 2.125,
+      "beachPct": 4.73,
+      "biomePct": [
+        20.49,
+        18.73,
+        59.93,
+        0.85
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7134,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.091569025530365,
+        "saddle": 13.548316209433352,
+        "beach": 8.806355414114384,
+        "biomes": 6.5768319242344475,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 41,
+      "score": 81.89,
+      "peak": 2.85,
+      "secondary": 2.324,
+      "saddle": 1.947,
+      "beachPct": 3.21,
+      "biomePct": [
+        17.99,
+        21.51,
+        59.47,
+        1.04
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6667,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.868462355271177,
+        "saddle": 13.825136221523783,
+        "beach": 5.710682606774956,
+        "biomes": 8.057120467477652,
+        "silhouette": 11.428732765468425,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 237,
+      "score": 81.723,
+      "peak": 2.85,
+      "secondary": 2.231,
+      "saddle": 2.064,
+      "beachPct": 6.09,
+      "biomePct": [
+        22.34,
+        15.95,
+        60.71,
+        1
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6206,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.62474282485193,
+        "saddle": 8.867700670458989,
+        "beach": 11.849168597556792,
+        "biomes": 7.742338379407632,
+        "silhouette": 10.639209410905332,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 51,
+      "score": 81.002,
+      "peak": 2.85,
+      "secondary": 2.517,
+      "saddle": 2.184,
+      "beachPct": 5.71,
+      "biomePct": [
+        20.52,
+        14.07,
+        64.63,
+        0.77
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.7764,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.039883669145595,
+        "saddle": 13.956703656895785,
+        "beach": 10.9935742617715,
+        "biomes": 6.011709955854762,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 112,
+      "score": 80.71,
+      "peak": 2.85,
+      "secondary": 2.359,
+      "saddle": 2.152,
+      "beachPct": 5.03,
+      "biomePct": [
+        18.77,
+        15.81,
+        64.64,
+        0.79
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7537,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.459336499613173,
+        "saddle": 10.644653148841304,
+        "beach": 9.483068597198404,
+        "biomes": 6.123079526400144,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 157,
+      "score": 80.622,
+      "peak": 2.85,
+      "secondary": 2.441,
+      "saddle": 2.159,
+      "beachPct": 3.3,
+      "biomePct": [
+        19.59,
+        19.64,
+        59.62,
+        1.15
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7374,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.585747755897994,
+        "saddle": 13.196146305442351,
+        "beach": 5.866901808219889,
+        "biomes": 8.97279635070764,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 119,
+      "score": 80.508,
+      "peak": 2.85,
+      "secondary": 2.438,
+      "saddle": 2.105,
+      "beachPct": 3.64,
+      "biomePct": [
+        19.44,
+        21.03,
+        58.58,
+        0.94
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7987,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.685859985963376,
+        "saddle": 13.959409635326754,
+        "beach": 6.527406339839639,
+        "biomes": 7.33565594572009,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 195,
+      "score": 80.384,
+      "peak": 2.85,
+      "secondary": 2.379,
+      "saddle": 2.114,
+      "beachPct": 4.37,
+      "biomePct": [
+        18.55,
+        16.78,
+        63.96,
+        0.71
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8397,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.10981244000096,
+        "saddle": 12.750451464265117,
+        "beach": 8.029813835621766,
+        "biomes": 5.493808979060454,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 100,
+      "score": 80.361,
+      "peak": 2.85,
+      "secondary": 2.359,
+      "saddle": 2.037,
+      "beachPct": 3.5,
+      "biomePct": [
+        16.91,
+        19.62,
+        62.73,
+        0.74
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7757,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.45898795104923,
+        "saddle": 13.879261574978795,
+        "beach": 6.254263279216479,
+        "biomes": 5.76894959826439,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 137,
+      "score": 80.27,
+      "peak": 2.85,
+      "secondary": 2.406,
+      "saddle": 1.909,
+      "beachPct": 6.54,
+      "biomePct": [
+        21.25,
+        18.51,
+        59.77,
+        0.48
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7038,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.53366190563143,
+        "saddle": 10.208640578133176,
+        "beach": 12.808956809281138,
+        "biomes": 3.718564523719817,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 90,
+      "score": 80.176,
+      "peak": 2.85,
+      "secondary": 2.209,
+      "saddle": 1.921,
+      "beachPct": 2.31,
+      "biomePct": [
+        18.59,
+        22.56,
+        57.73,
+        1.12
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 3,
+      "silhouetteVariance": 0.6798,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.294498474422042,
+        "saddle": 13.343613401618336,
+        "beach": 4.1935309386290145,
+        "biomes": 8.690855521035369,
+        "silhouette": 11.653572426940459,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 193,
+      "score": 80.147,
+      "peak": 2.85,
+      "secondary": 2.225,
+      "saddle": 1.953,
+      "beachPct": 4.1,
+      "biomePct": [
+        18.45,
+        16.19,
+        64.57,
+        0.8
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6398,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.545263206249867,
+        "saddle": 12.94782710361524,
+        "beach": 7.448124110904611,
+        "biomes": 6.238576394192365,
+        "silhouette": 10.967265209161503,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 158,
+      "score": 80.146,
+      "peak": 2.85,
+      "secondary": 2.429,
+      "saddle": 2.043,
+      "beachPct": 4.37,
+      "biomePct": [
+        16.97,
+        16.52,
+        65.8,
+        0.71
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7615,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.92476773807021,
+        "saddle": 13.697051176509895,
+        "beach": 8.02810239039876,
+        "biomes": 5.496091152206462,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 93,
+      "score": 80.123,
+      "peak": 2.85,
+      "secondary": 2.272,
+      "saddle": 1.966,
+      "beachPct": 3.81,
+      "biomePct": [
+        18.82,
+        18.58,
+        62.01,
+        0.59
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.791,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.964843571789125,
+        "saddle": 13.66438852608782,
+        "beach": 6.872625314303505,
+        "biomes": 4.620810225913486,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 20,
+      "score": 80.104,
+      "peak": 2.85,
+      "secondary": 2.509,
+      "saddle": 2.12,
+      "beachPct": 5.77,
+      "biomePct": [
+        19.29,
+        18.07,
+        62,
+        0.64
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7559,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.323684056204456,
+        "saddle": 13.659398385524623,
+        "beach": 11.120045008374031,
+        "biomes": 5.000644297228217,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 224,
+      "score": 79.941,
+      "peak": 2.85,
+      "secondary": 2.256,
+      "saddle": 2.036,
+      "beachPct": 2.99,
+      "biomePct": [
+        18.48,
+        23.89,
+        56.5,
+        1.12
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6949,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.873703627972716,
+        "saddle": 11.133504220422155,
+        "beach": 5.318438690606269,
+        "biomes": 8.703063663733746,
+        "silhouette": 11.912322268326854,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 33,
+      "score": 79.939,
+      "peak": 2.85,
+      "secondary": 2.335,
+      "saddle": 1.831,
+      "beachPct": 5.54,
+      "biomePct": [
+        18.55,
+        17.15,
+        63.71,
+        0.59
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7193,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.770379524416803,
+        "saddle": 9.938443545920263,
+        "beach": 10.625705482258379,
+        "biomes": 4.604235403549366,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 227,
+      "score": 79.846,
+      "peak": 2.85,
+      "secondary": 2.458,
+      "saddle": 2.132,
+      "beachPct": 5.02,
+      "biomePct": [
+        20.23,
+        20.72,
+        58.48,
+        0.57
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.8193,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.069480185273337,
+        "saddle": 13.916243815038602,
+        "beach": 9.4616985495882,
+        "biomes": 4.3987694566891005,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 151,
+      "score": 79.657,
+      "peak": 2.85,
+      "secondary": 2.539,
+      "saddle": 2.004,
+      "beachPct": 6.03,
+      "biomePct": [
+        19.83,
+        14.23,
+        64.63,
+        1.31
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.8403,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.200615434578747,
+        "saddle": 8.54483155534892,
+        "beach": 11.711258970616358,
+        "biomes": 10.199867383086282,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 1,
+      "score": 79.442,
+      "peak": 2.85,
+      "secondary": 2.527,
+      "saddle": 2.108,
+      "beachPct": 3.94,
+      "biomePct": [
+        21.13,
+        17.17,
+        60.46,
+        1.24
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.8918,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.650199406957412,
+        "saddle": 13.00728624960622,
+        "beach": 7.126650808776897,
+        "biomes": 9.657824943545453,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 56,
+      "score": 79.395,
+      "peak": 2.85,
+      "secondary": 2.279,
+      "saddle": 2.055,
+      "beachPct": 4.04,
+      "biomePct": [
+        17.7,
+        18.61,
+        62.93,
+        0.76
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6885,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.98861591254944,
+        "saddle": 11.344000536225819,
+        "beach": 7.337930904410803,
+        "biomes": 5.921695930176631,
+        "silhouette": 11.802792969739041,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 118,
+      "score": 79.378,
+      "peak": 2.85,
+      "secondary": 2.376,
+      "saddle": 2.05,
+      "beachPct": 2.64,
+      "biomePct": [
+        16.56,
+        18,
+        64.6,
+        0.84
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7929,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.170386317845875,
+        "saddle": 13.913349949920597,
+        "beach": 4.724045333467922,
+        "biomes": 6.570144162317503,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 92,
+      "score": 79.079,
+      "peak": 2.85,
+      "secondary": 2.399,
+      "saddle": 2.012,
+      "beachPct": 2.21,
+      "biomePct": [
+        16.29,
+        24.06,
+        58.6,
+        1.06
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6668,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.694729073920612,
+        "saddle": 13.692936675691826,
+        "beach": 4.038730860300022,
+        "biomes": 8.22189587656538,
+        "silhouette": 11.430587148073686,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 97,
+      "score": 79.017,
+      "peak": 2.85,
+      "secondary": 2.374,
+      "saddle": 2.214,
+      "beachPct": 3.19,
+      "biomePct": [
+        18.5,
+        16.4,
+        63.73,
+        1.36
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.8051,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.216906018553846,
+        "saddle": 8.56351120654394,
+        "beach": 5.663026989775462,
+        "biomes": 10.573819814478256,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 49,
+      "score": 78.611,
+      "peak": 2.85,
+      "secondary": 2.377,
+      "saddle": 2.118,
+      "beachPct": 3.19,
+      "biomePct": [
+        16.49,
+        18.45,
+        64.26,
+        0.8
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7695,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.15172349529288,
+        "saddle": 12.556792109611758,
+        "beach": 5.678676797151617,
+        "biomes": 6.223400794315979,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 34,
+      "score": 78.574,
+      "peak": 2.85,
+      "secondary": 2.324,
+      "saddle": 1.985,
+      "beachPct": 1.88,
+      "biomePct": [
+        16.16,
+        19.34,
+        63.54,
+        0.95
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 3,
+      "silhouetteVariance": 0.6269,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.863566234823505,
+        "saddle": 13.987562490058771,
+        "beach": 3.5702646645658125,
+        "biomes": 7.4058119603233665,
+        "silhouette": 10.746642532706886,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 175,
+      "score": 78.568,
+      "peak": 2.85,
+      "secondary": 2.501,
+      "saddle": 2.09,
+      "beachPct": 4.19,
+      "biomePct": [
+        17.84,
+        15.18,
+        66.07,
+        0.91
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.8379,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.613251914951775,
+        "saddle": 13.221622163803433,
+        "beach": 7.650217428135813,
+        "biomes": 7.082662141278227,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 15,
+      "score": 78.501,
+      "peak": 2.85,
+      "secondary": 2.189,
+      "saddle": 1.807,
+      "beachPct": 4.05,
+      "biomePct": [
+        17.72,
+        18.1,
+        63.58,
+        0.61
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6268,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.902509840119393,
+        "saddle": 13.767738472117106,
+        "beach": 7.359897257334533,
+        "biomes": 4.726719518881849,
+        "silhouette": 10.744622823756545,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 22,
+      "score": 78.381,
+      "peak": 2.85,
+      "secondary": 2.36,
+      "saddle": 1.886,
+      "beachPct": 1.08,
+      "biomePct": [
+        15.89,
+        17.37,
+        65.43,
+        1.31
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7138,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.454479889127253,
+        "saddle": 11.17252256821729,
+        "beach": 2.590852255108776,
+        "biomes": 10.162668119688327,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 152,
+      "score": 78.319,
+      "peak": 2.85,
+      "secondary": 2.352,
+      "saddle": 1.852,
+      "beachPct": 4.26,
+      "biomePct": [
+        18.37,
+        18.77,
+        62.05,
+        0.81
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6783,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.559757342518377,
+        "saddle": 10.056479567189498,
+        "beach": 7.796457039217859,
+        "biomes": 6.27872564449756,
+        "silhouette": 11.627579609692507,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 128,
+      "score": 78.295,
+      "peak": 2.85,
+      "secondary": 2.312,
+      "saddle": 1.956,
+      "beachPct": 2.8,
+      "biomePct": [
+        18.81,
+        22.25,
+        58.36,
+        0.58
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6919,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.942018087443923,
+        "saddle": 13.983887575454686,
+        "beach": 4.979340135800675,
+        "biomes": 4.528790484616126,
+        "silhouette": 11.86084449010217,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 65,
+      "score": 78.288,
+      "peak": 2.85,
+      "secondary": 2.51,
+      "saddle": 2.138,
+      "beachPct": 5.48,
+      "biomePct": [
+        19.89,
+        17.69,
+        61.96,
+        0.47
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7505,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.296450113514634,
+        "saddle": 13.880352405396684,
+        "beach": 10.492997568390674,
+        "biomes": 3.6182149469380698,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 122,
+      "score": 78.283,
+      "peak": 2.85,
+      "secondary": 2.278,
+      "saddle": 1.97,
+      "beachPct": 0,
+      "biomePct": [
+        12.13,
+        25.7,
+        61.14,
+        1.03
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7437,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.984727739502734,
+        "saddle": 13.699191506778012,
+        "beach": 1.5941639646626458,
+        "biomes": 8.004466029836161,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 84,
+      "score": 78.089,
+      "peak": 2.85,
+      "secondary": 2.406,
+      "saddle": 2.19,
+      "beachPct": 3.69,
+      "biomePct": [
+        17.94,
+        19.46,
+        61.71,
+        0.89
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7775,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.523018034407105,
+        "saddle": 11.022926665617048,
+        "beach": 6.6328375981514425,
+        "biomes": 6.910618877988013,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 10,
+      "score": 78.08,
+      "peak": 2.85,
+      "secondary": 2.466,
+      "saddle": 2.031,
+      "beachPct": 3.71,
+      "biomePct": [
+        17.59,
+        15.49,
+        66.02,
+        0.9
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.759,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.824124765664704,
+        "saddle": 12.58414385037146,
+        "beach": 6.671747242675191,
+        "biomes": 7.000180840400689,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 215,
+      "score": 77.739,
+      "peak": 2.85,
+      "secondary": 2.332,
+      "saddle": 2.135,
+      "beachPct": 3.26,
+      "biomePct": [
+        16.12,
+        19.47,
+        63.52,
+        0.89
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7101,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.8002574651831,
+        "saddle": 10.192383944789615,
+        "beach": 5.799892860778349,
+        "biomes": 6.9469520906316955,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 58,
+      "score": 77.641,
+      "peak": 2.85,
+      "secondary": 2.447,
+      "saddle": 2.009,
+      "beachPct": 4.74,
+      "biomePct": [
+        20.55,
+        15.93,
+        63.02,
+        0.5
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.8345,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.419612402317885,
+        "saddle": 12.458956724111399,
+        "beach": 8.837909081804721,
+        "biomes": 3.9240290098999,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 16,
+      "score": 77.618,
+      "peak": 2.85,
+      "secondary": 2.222,
+      "saddle": 1.82,
+      "beachPct": 0.55,
+      "biomePct": [
+        14.97,
+        21.16,
+        62.88,
+        0.99
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6954,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.501967584019297,
+        "saddle": 13.40692478348953,
+        "beach": 2.057550407297686,
+        "biomes": 7.730224506180836,
+        "silhouette": 11.921538446562238,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 238,
+      "score": 77.614,
+      "peak": 2.85,
+      "secondary": 2.351,
+      "saddle": 1.935,
+      "beachPct": 1.72,
+      "biomePct": [
+        17.43,
+        21.37,
+        60.35,
+        0.85
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7145,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.578549201729086,
+        "saddle": 13.098278289613136,
+        "beach": 3.3538068934682577,
+        "biomes": 6.583317093985956,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 233,
+      "score": 77.523,
+      "peak": 2.85,
+      "secondary": 2.316,
+      "saddle": 2.034,
+      "beachPct": 3.06,
+      "biomePct": [
+        17.87,
+        22.34,
+        59.18,
+        0.61
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 10,
+      "silhouetteVariance": 0.6561,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.917704588221422,
+        "saddle": 13.195538731132867,
+        "beach": 5.4348591130382475,
+        "biomes": 4.727009484087916,
+        "silhouette": 11.247739685897573,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 202,
+      "score": 77.404,
+      "peak": 2.85,
+      "secondary": 2.293,
+      "saddle": 1.789,
+      "beachPct": 4.16,
+      "biomePct": [
+        19.73,
+        15.92,
+        63.6,
+        0.75
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6487,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.998205628916242,
+        "saddle": 9.892343014325455,
+        "beach": 7.584255602421173,
+        "biomes": 5.808097989123895,
+        "silhouette": 11.120724179134374,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 27,
+      "score": 77.365,
+      "peak": 2.85,
+      "secondary": 2.496,
+      "saddle": 2.153,
+      "beachPct": 2.05,
+      "biomePct": [
+        17.03,
+        20.12,
+        61.72,
+        1.13
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.8484,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.782440602316806,
+        "saddle": 13.997757653818285,
+        "beach": 3.814133146078637,
+        "biomes": 8.77030353747676,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 168,
+      "score": 77.255,
+      "peak": 2.85,
+      "secondary": 2.411,
+      "saddle": 2.284,
+      "beachPct": 5.71,
+      "biomePct": [
+        22.73,
+        16.11,
+        60.41,
+        0.74
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7179,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.413947529380433,
+        "saddle": 7.093495319036497,
+        "beach": 10.992026963197084,
+        "biomes": 5.755680596818053,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 189,
+      "score": 77.173,
+      "peak": 2.85,
+      "secondary": 2.187,
+      "saddle": 1.971,
+      "beachPct": 3.14,
+      "biomePct": [
+        19.86,
+        21.49,
+        57.78,
+        0.86
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7437,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.8666857098099,
+        "saddle": 11.024418521797939,
+        "beach": 5.574010548796986,
+        "biomes": 6.708195120358186,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 120,
+      "score": 77.147,
+      "peak": 2.85,
+      "secondary": 2.328,
+      "saddle": 2.008,
+      "beachPct": 0.58,
+      "biomePct": [
+        16.9,
+        23.47,
+        58.69,
+        0.94
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.644,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.836910984749107,
+        "saddle": 13.848379311307134,
+        "beach": 2.07799501474302,
+        "biomes": 7.344476126174566,
+        "silhouette": 11.039322033202106,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 206,
+      "score": 77.097,
+      "peak": 2.85,
+      "secondary": 2.572,
+      "saddle": 2.196,
+      "beachPct": 4.82,
+      "biomePct": [
+        17.77,
+        17.11,
+        64.31,
+        0.81
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 11,
+      "silhouetteVariance": 0.7348,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.944978203273813,
+        "saddle": 13.835236233811221,
+        "beach": 9.002356268166004,
+        "biomes": 6.313951216400088,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 191,
+      "score": 76.988,
+      "peak": 2.85,
+      "secondary": 2.502,
+      "saddle": 2.078,
+      "beachPct": 4.28,
+      "biomePct": [
+        17.75,
+        20.08,
+        61.44,
+        0.73
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7642,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.571664773845535,
+        "saddle": 12.881675704356496,
+        "beach": 7.8405074742379615,
+        "biomes": 5.693880778814582,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 29,
+      "score": 76.887,
+      "peak": 2.85,
+      "secondary": 2.317,
+      "saddle": 1.987,
+      "beachPct": 1.44,
+      "biomePct": [
+        17.4,
+        23.65,
+        58.22,
+        0.73
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.663,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.91157479996116,
+        "saddle": 13.947883712452663,
+        "beach": 2.9952147063613723,
+        "biomes": 5.66635864806384,
+        "silhouette": 11.366162568230989,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 62,
+      "score": 76.77,
+      "peak": 2.85,
+      "secondary": 2.273,
+      "saddle": 2.251,
+      "beachPct": 6.19,
+      "biomePct": [
+        21.52,
+        17.14,
+        60.49,
+        0.85
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7831,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.969408371072806,
+        "saddle": 3.160012491467139,
+        "beach": 12.05707894756059,
+        "biomes": 6.583614316089258,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 115,
+      "score": 76.685,
+      "peak": 2.85,
+      "secondary": 2.299,
+      "saddle": 1.978,
+      "beachPct": 0.33,
+      "biomePct": [
+        17.47,
+        21.05,
+        60.64,
+        0.83
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.671,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.990060443155087,
+        "saddle": 13.867287635093431,
+        "beach": 1.857043112751207,
+        "biomes": 6.468334741018945,
+        "silhouette": 11.502524169312453,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 184,
+      "score": 76.598,
+      "peak": 2.85,
+      "secondary": 2.164,
+      "saddle": 1.838,
+      "beachPct": 0,
+      "biomePct": [
+        14.88,
+        23.91,
+        60.11,
+        1.1
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.6543,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.33224401925046,
+        "saddle": 13.914562535994174,
+        "beach": 1.5941639646626458,
+        "biomes": 8.54107211296676,
+        "silhouette": 11.216115608995882,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 129,
+      "score": 76.464,
+      "peak": 2.85,
+      "secondary": 2.444,
+      "saddle": 2.091,
+      "beachPct": 3.29,
+      "biomePct": [
+        17.33,
+        16.72,
+        65.38,
+        0.57
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6823,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.510263915408354,
+        "saddle": 13.993395439777455,
+        "beach": 5.865273536746852,
+        "biomes": 4.399261625585491,
+        "silhouette": 11.695847459620254,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 26,
+      "score": 76.066,
+      "peak": 2.85,
+      "secondary": 2.55,
+      "saddle": 2.095,
+      "beachPct": 3.78,
+      "biomePct": [
+        16.25,
+        19.29,
+        63.36,
+        1.1
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7872,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.801182607876992,
+        "saddle": 11.898894598829461,
+        "beach": 6.805337251095441,
+        "biomes": 8.56034127027225,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 48,
+      "score": 76.009,
+      "peak": 2.85,
+      "secondary": 2.239,
+      "saddle": 1.856,
+      "beachPct": 0,
+      "biomePct": [
+        15.15,
+        25.5,
+        58.48,
+        0.88
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6494,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.720206628590425,
+        "saddle": 13.746884671373744,
+        "beach": 1.5941639646626458,
+        "biomes": 6.815492225138274,
+        "silhouette": 11.132720846044867,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 200,
+      "score": 75.988,
+      "peak": 2.85,
+      "secondary": 2.305,
+      "saddle": 2.024,
+      "beachPct": 1.43,
+      "biomePct": [
+        16.21,
+        24.26,
+        58.87,
+        0.66
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6845,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.971312338157784,
+        "saddle": 13.170754230606336,
+        "beach": 2.9932233338185177,
+        "biomes": 5.1186987981274985,
+        "silhouette": 11.733534622542484,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 9,
+      "score": 75.965,
+      "peak": 2.85,
+      "secondary": 2.431,
+      "saddle": 2.112,
+      "beachPct": 3.12,
+      "biomePct": [
+        17.75,
+        19.61,
+        62.17,
+        0.47
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7533,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.879326577634961,
+        "saddle": 13.842144264254753,
+        "beach": 5.552295439269302,
+        "biomes": 3.691544113800234,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 30,
+      "score": 75.946,
+      "peak": 2.85,
+      "secondary": 2.214,
+      "saddle": 1.993,
+      "beachPct": 3.73,
+      "biomePct": [
+        18.43,
+        21.24,
+        59.85,
+        0.47
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7014,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.374087954471083,
+        "saddle": 11.189835978748492,
+        "beach": 6.696358257873459,
+        "biomes": 3.6854698787944447,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 108,
+      "score": 75.894,
+      "peak": 2.85,
+      "secondary": 2.472,
+      "saddle": 2.11,
+      "beachPct": 3.43,
+      "biomePct": [
+        18.66,
+        19.12,
+        61.67,
+        0.54
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.718,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.613238297782718,
+        "saddle": 13.954335425508178,
+        "beach": 6.128323675005083,
+        "biomes": 4.197733286528807,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 45,
+      "score": 75.821,
+      "peak": 2.85,
+      "secondary": 2.229,
+      "saddle": 1.83,
+      "beachPct": 0.74,
+      "biomePct": [
+        14.48,
+        23.51,
+        61.25,
+        0.76
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 11,
+      "silhouetteVariance": 0.6773,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.596871989417284,
+        "saddle": 13.48973125183552,
+        "beach": 2.2347987101545552,
+        "biomes": 5.8887660455379,
+        "silhouette": 11.61065594846767,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 124,
+      "score": 75.757,
+      "peak": 2.85,
+      "secondary": 2.236,
+      "saddle": 1.803,
+      "beachPct": 0.29,
+      "biomePct": [
+        16.04,
+        22.43,
+        60.68,
+        0.85
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7432,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.6865117852968,
+        "saddle": 12.628243760005102,
+        "beach": 1.8271929793632535,
+        "biomes": 6.615214438973249,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 61,
+      "score": 75.741,
+      "peak": 2.85,
+      "secondary": 2.31,
+      "saddle": 1.965,
+      "beachPct": 1.32,
+      "biomePct": [
+        18.16,
+        20.7,
+        60.55,
+        0.59
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 3,
+      "silhouetteVariance": 0.6626,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.953981674264522,
+        "saddle": 13.998496297531466,
+        "beach": 2.853698060808143,
+        "biomes": 4.57587643894882,
+        "silhouette": 11.35902024072837,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 165,
+      "score": 75.664,
+      "peak": 2.85,
+      "secondary": 2.344,
+      "saddle": 1.898,
+      "beachPct": 3.34,
+      "biomePct": [
+        19.15,
+        20.58,
+        59.89,
+        0.38
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6921,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.66539187602573,
+        "saddle": 12.1919427662003,
+        "beach": 5.952996165598702,
+        "biomes": 2.989558147202882,
+        "silhouette": 11.864103360224686,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 182,
+      "score": 75.418,
+      "peak": 2.85,
+      "secondary": 2.331,
+      "saddle": 2.071,
+      "beachPct": 0.73,
+      "biomePct": [
+        13.09,
+        24.77,
+        61.4,
+        0.75
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7729,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.802095768897757,
+        "saddle": 12.587313151269552,
+        "beach": 2.2218116261928684,
+        "biomes": 5.806378693680432,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 135,
+      "score": 75.356,
+      "peak": 2.85,
+      "secondary": 2.492,
+      "saddle": 2.063,
+      "beachPct": 3.01,
+      "biomePct": [
+        17.13,
+        20.06,
+        62,
+        0.81
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7548,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.93069555189066,
+        "saddle": 12.741291344123756,
+        "beach": 5.34749210117488,
+        "biomes": 6.336184384892081,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 3,
+      "score": 75.133,
+      "peak": 2.85,
+      "secondary": 2.448,
+      "saddle": 2.154,
+      "beachPct": 1.87,
+      "biomePct": [
+        15.37,
+        20.82,
+        63.07,
+        0.74
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7952,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.3877066874862,
+        "saddle": 13.450039793941986,
+        "beach": 3.560133375743654,
+        "biomes": 5.734721382189241,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 142,
+      "score": 75.041,
+      "peak": 2.85,
+      "secondary": 2.167,
+      "saddle": 1.954,
+      "beachPct": 2.87,
+      "biomePct": [
+        18.33,
+        17.46,
+        63.49,
+        0.73
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7029,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.40080229660179,
+        "saddle": 10.896750539349512,
+        "beach": 5.098283756948489,
+        "biomes": 5.645147609633844,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 6,
+      "score": 74.948,
+      "peak": 2.85,
+      "secondary": 2.536,
+      "saddle": 1.995,
+      "beachPct": 5.22,
+      "biomePct": [
+        21.55,
+        17.04,
+        60.46,
+        0.96
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6975,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.33236953594611,
+        "saddle": 8.297888737952889,
+        "beach": 9.909202724411351,
+        "biomes": 7.450402104853659,
+        "silhouette": 11.95771409067222,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 80,
+      "score": 74.925,
+      "peak": 2.85,
+      "secondary": 2.177,
+      "saddle": 2.005,
+      "beachPct": 0,
+      "biomePct": [
+        13.46,
+        27.64,
+        57.53,
+        1.37
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.693,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.644268691318118,
+        "saddle": 9.115994214219615,
+        "beach": 1.5941639646626458,
+        "biomes": 10.690438520190877,
+        "silhouette": 11.88038446174096,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 194,
+      "score": 74.879,
+      "peak": 2.85,
+      "secondary": 2.227,
+      "saddle": 2.1,
+      "beachPct": 4.7,
+      "biomePct": [
+        20.74,
+        21.21,
+        57.47,
+        0.58
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.728,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.56474637055278,
+        "saddle": 7.061895144701721,
+        "beach": 8.735077712438041,
+        "biomes": 4.517716766196893,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 205,
+      "score": 74.853,
+      "peak": 2.85,
+      "secondary": 2.451,
+      "saddle": 2.075,
+      "beachPct": 1.43,
+      "biomePct": [
+        16.84,
+        21.23,
+        61.2,
+        0.74
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8217,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.289121402085794,
+        "saddle": 13.834859644597119,
+        "beach": 2.9867254352541495,
+        "biomes": 5.742578872748006,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 179,
+      "score": 74.829,
+      "peak": 2.85,
+      "secondary": 2.424,
+      "saddle": 1.932,
+      "beachPct": 1.11,
+      "biomePct": [
+        15.16,
+        19.89,
+        63.83,
+        1.12
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 10,
+      "silhouetteVariance": 0.8317,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.06915646117026,
+        "saddle": 10.407570751031107,
+        "beach": 2.6184549851984733,
+        "biomes": 8.733746626870179,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 210,
+      "score": 74.812,
+      "peak": 2.85,
+      "secondary": 2.403,
+      "saddle": 1.852,
+      "beachPct": 5.26,
+      "biomePct": [
+        20.82,
+        19.35,
+        59.39,
+        0.44
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8053,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.594969348626766,
+        "saddle": 7.78513705905381,
+        "beach": 9.997576804069487,
+        "biomes": 3.4344617880090085,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 186,
+      "score": 74.721,
+      "peak": 2.85,
+      "secondary": 2.324,
+      "saddle": 2,
+      "beachPct": 0,
+      "biomePct": [
+        15.98,
+        23.15,
+        60.16,
+        0.72
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6303,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.86552019370393,
+        "saddle": 13.892670654504363,
+        "beach": 1.5941639646626458,
+        "biomes": 5.564579626002104,
+        "silhouette": 10.804398114557443,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 74,
+      "score": 74.629,
+      "peak": 2.85,
+      "secondary": 2.229,
+      "saddle": 2.012,
+      "beachPct": 0,
+      "biomePct": [
+        11.6,
+        27.08,
+        60.38,
+        0.95
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.808,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.60049022206655,
+        "saddle": 11.050139803925395,
+        "beach": 1.5941639646626458,
+        "biomes": 7.384456708836309,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 63,
+      "score": 74.572,
+      "peak": 2.85,
+      "secondary": 2.572,
+      "saddle": 2.125,
+      "beachPct": 4.67,
+      "biomePct": [
+        20.72,
+        16.99,
+        61.55,
+        0.74
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7148,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.95529996133718,
+        "saddle": 12.200715490704924,
+        "beach": 8.669382578835938,
+        "biomes": 5.747037033201135,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 99,
+      "score": 74.528,
+      "peak": 2.85,
+      "secondary": 2.287,
+      "saddle": 1.865,
+      "beachPct": 0,
+      "biomePct": [
+        12.95,
+        25.77,
+        60.59,
+        0.69
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6787,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.99931461442955,
+        "saddle": 12.95033308484999,
+        "beach": 1.5941639646626458,
+        "biomes": 5.349982485233879,
+        "silhouette": 11.634267148682104,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 203,
+      "score": 74.523,
+      "peak": 2.85,
+      "secondary": 2.226,
+      "saddle": 1.753,
+      "beachPct": 1.43,
+      "biomePct": [
+        15.58,
+        23.26,
+        60.34,
+        0.82
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6649,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.551448048578557,
+        "saddle": 11.205221793855543,
+        "beach": 2.988936120180818,
+        "biomes": 6.379047294352106,
+        "silhouette": 11.398482930105411,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 192,
+      "score": 74.419,
+      "peak": 2.85,
+      "secondary": 2.312,
+      "saddle": 2.154,
+      "beachPct": 2.73,
+      "biomePct": [
+        19.05,
+        20.3,
+        59.87,
+        0.79
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 3,
+      "silhouetteVariance": 0.8286,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.941458593053866,
+        "saddle": 8.492911359091401,
+        "beach": 4.8636254958482885,
+        "biomes": 6.121072858399124,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 114,
+      "score": 74.231,
+      "peak": 2.85,
+      "secondary": 2.312,
+      "saddle": 1.87,
+      "beachPct": 1.06,
+      "biomePct": [
+        15.35,
+        20.6,
+        63.48,
+        0.57
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7699,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.943038887831886,
+        "saddle": 12.328881978779323,
+        "beach": 2.5620927144593644,
+        "biomes": 4.396713698091869,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 187,
+      "score": 74.212,
+      "peak": 2.85,
+      "secondary": 2.217,
+      "saddle": 1.845,
+      "beachPct": 0.21,
+      "biomePct": [
+        15.98,
+        21.64,
+        61.8,
+        0.59
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6757,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.429371609067715,
+        "saddle": 13.874351366953174,
+        "beach": 1.7585584969174486,
+        "biomes": 4.567154919668557,
+        "silhouette": 11.58289120242058,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 4,
+      "score": 74.12,
+      "peak": 2.85,
+      "secondary": 2.279,
+      "saddle": 1.966,
+      "beachPct": 0,
+      "biomePct": [
+        17.19,
+        24.7,
+        57.63,
+        0.48
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7041,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.988093995021213,
+        "saddle": 13.776887713813798,
+        "beach": 1.5941639646626458,
+        "biomes": 3.7612920158174368,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 196,
+      "score": 73.977,
+      "peak": 2.85,
+      "secondary": 2.181,
+      "saddle": 1.961,
+      "beachPct": 1.17,
+      "biomePct": [
+        17.51,
+        19.78,
+        61.84,
+        0.87
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 3,
+      "silhouetteVariance": 0.6756,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.736001680679827,
+        "saddle": 11.182326971260204,
+        "beach": 2.682658916534237,
+        "biomes": 6.794680814597528,
+        "silhouette": 11.581025242827707,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 40,
+      "score": 73.954,
+      "peak": 2.85,
+      "secondary": 2.321,
+      "saddle": 1.878,
+      "beachPct": 1.1,
+      "biomePct": [
+        13.83,
+        18.09,
+        67.55,
+        0.53
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.8401,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.889919016127248,
+        "saddle": 12.312175278100394,
+        "beach": 2.609441997900588,
+        "biomes": 4.142884738686352,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 83,
+      "score": 73.862,
+      "peak": 2.85,
+      "secondary": 2.283,
+      "saddle": 1.944,
+      "beachPct": 0,
+      "biomePct": [
+        14.16,
+        27.99,
+        57.36,
+        0.49
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6703,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.99575519523912,
+        "saddle": 13.988549730219543,
+        "beach": 1.5941639646626458,
+        "biomes": 3.792157465979246,
+        "silhouette": 11.491158464911095,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 105,
+      "score": 73.792,
+      "peak": 2.85,
+      "secondary": 2.466,
+      "saddle": 2.13,
+      "beachPct": 1.15,
+      "biomePct": [
+        17.81,
+        23.51,
+        57.99,
+        0.69
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.8391,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.801889794871474,
+        "saddle": 13.977707395284229,
+        "beach": 2.6680274289774224,
+        "biomes": 5.3439822689078635,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 28,
+      "score": 73.708,
+      "peak": 2.85,
+      "secondary": 2.368,
+      "saddle": 1.935,
+      "beachPct": 0.95,
+      "biomePct": [
+        14.08,
+        18.82,
+        66.47,
+        0.63
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6683,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.315128129418554,
+        "saddle": 12.626160939294362,
+        "beach": 2.4446722778564247,
+        "biomes": 4.865824047887183,
+        "silhouette": 11.456604831790473,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 149,
+      "score": 73.662,
+      "peak": 2.85,
+      "secondary": 2.216,
+      "saddle": 1.812,
+      "beachPct": 0,
+      "biomePct": [
+        14.66,
+        27.38,
+        57.24,
+        0.73
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6192,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.403754804073312,
+        "saddle": 13.382177272811367,
+        "beach": 1.5941639646626458,
+        "biomes": 5.666453820911036,
+        "silhouette": 10.615687628835978,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 147,
+      "score": 73.526,
+      "peak": 2.85,
+      "secondary": 2.382,
+      "saddle": 2.181,
+      "beachPct": 1,
+      "biomePct": [
+        16.33,
+        21.56,
+        61.27,
+        0.85
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8089,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.055745895196143,
+        "saddle": 10.389767844793822,
+        "beach": 2.504267621748591,
+        "biomes": 6.575896925255067,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 113,
+      "score": 73.505,
+      "peak": 2.85,
+      "secondary": 2.283,
+      "saddle": 2.132,
+      "beachPct": 0.59,
+      "biomePct": [
+        16.84,
+        23.68,
+        58.3,
+        1.17
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6493,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.99506841630326,
+        "saddle": 8.168817018477485,
+        "beach": 2.0899506201670377,
+        "biomes": 9.119373562102291,
+        "silhouette": 11.131298321982612,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 188,
+      "score": 73.45,
+      "peak": 2.85,
+      "secondary": 2.472,
+      "saddle": 2.144,
+      "beachPct": 0.33,
+      "biomePct": [
+        13.87,
+        24.06,
+        61.29,
+        0.78
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7594,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.629089285583047,
+        "saddle": 13.929058465310025,
+        "beach": 1.8569503131837444,
+        "biomes": 6.035169861769697,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 212,
+      "score": 73.444,
+      "peak": 2.85,
+      "secondary": 2.458,
+      "saddle": 1.989,
+      "beachPct": 2.73,
+      "biomePct": [
+        14.37,
+        19.24,
+        65.73,
+        0.66
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.743,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.075861134982013,
+        "saddle": 11.384020379076645,
+        "beach": 4.865304394312866,
+        "biomes": 5.11878275941271,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 176,
+      "score": 73.399,
+      "peak": 2.85,
+      "secondary": 2.471,
+      "saddle": 2.17,
+      "beachPct": 1.59,
+      "biomePct": [
+        13.59,
+        21.92,
+        63.85,
+        0.64
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.8388,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.66640208691598,
+        "saddle": 13.574253272476318,
+        "beach": 3.1893486172754066,
+        "biomes": 4.968803803956767,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 146,
+      "score": 73.371,
+      "peak": 2.85,
+      "secondary": 2.515,
+      "saddle": 1.97,
+      "beachPct": 5.64,
+      "biomePct": [
+        18.43,
+        16.25,
+        64.76,
+        0.56
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.7243,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.105145169363256,
+        "saddle": 8.078715954103897,
+        "beach": 10.842651672355402,
+        "biomes": 4.344162656959975,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 57,
+      "score": 73.172,
+      "peak": 2.85,
+      "secondary": 2.186,
+      "saddle": 1.901,
+      "beachPct": 0,
+      "biomePct": [
+        15.28,
+        26.88,
+        57.18,
+        0.66
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6612,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.842181561544393,
+        "saddle": 13.252827561174719,
+        "beach": 1.5941639646626458,
+        "biomes": 5.148581949577254,
+        "silhouette": 11.33406175102861,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 53,
+      "score": 73.08,
+      "peak": 2.85,
+      "secondary": 2.24,
+      "saddle": 1.924,
+      "beachPct": 0,
+      "biomePct": [
+        15.15,
+        24.5,
+        59.93,
+        0.43
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6787,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.729457621180046,
+        "saddle": 13.813349722998701,
+        "beach": 1.5941639646626458,
+        "biomes": 3.3081123427891983,
+        "silhouette": 11.635413672347296,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 208,
+      "score": 73.043,
+      "peak": 2.85,
+      "secondary": 2.231,
+      "saddle": 1.976,
+      "beachPct": 0,
+      "biomePct": [
+        16.8,
+        25.97,
+        56.67,
+        0.57
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7106,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.623419818939475,
+        "saddle": 12.422083803775585,
+        "beach": 1.5941639646626458,
+        "biomes": 4.403463894699074,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 111,
+      "score": 73,
+      "peak": 2.85,
+      "secondary": 2.418,
+      "saddle": 2.137,
+      "beachPct": 2.06,
+      "biomePct": [
+        15.97,
+        20.58,
+        63.09,
+        0.36
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7603,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.22363690781119,
+        "saddle": 13.184924368427938,
+        "beach": 3.8297634712642012,
+        "biomes": 2.7611965658454247,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 143,
+      "score": 72.966,
+      "peak": 2.85,
+      "secondary": 2.499,
+      "saddle": 2.09,
+      "beachPct": 0.31,
+      "biomePct": [
+        12.9,
+        22.03,
+        64.15,
+        0.92
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7955,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.68146457885458,
+        "saddle": 13.26220640190593,
+        "beach": 1.8434526967638254,
+        "biomes": 7.179220528610378,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 178,
+      "score": 72.923,
+      "peak": 2.85,
+      "secondary": 2.45,
+      "saddle": 1.989,
+      "beachPct": 0.41,
+      "biomePct": [
+        13.26,
+        20.27,
+        65.57,
+        0.9
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7929,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.329174855001908,
+        "saddle": 11.681956804369376,
+        "beach": 1.9241247440864844,
+        "biomes": 6.987568381414294,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 88,
+      "score": 72.73,
+      "peak": 2.85,
+      "secondary": 2.254,
+      "saddle": 1.88,
+      "beachPct": 0,
+      "biomePct": [
+        14.09,
+        23.02,
+        62.45,
+        0.44
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.641,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.860206040446027,
+        "saddle": 13.860548812799664,
+        "beach": 1.5941639646626458,
+        "biomes": 3.427293702418006,
+        "silhouette": 10.987818255894485,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 68,
+      "score": 72.719,
+      "peak": 2.85,
+      "secondary": 2.617,
+      "saddle": 1.988,
+      "beachPct": 8.15,
+      "biomePct": [
+        20.3,
+        15.79,
+        63.11,
+        0.81
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.7767,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.199334925758672,
+        "saddle": 4.578415240007452,
+        "beach": 15.67749530471065,
+        "biomes": 6.263525943621494,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 50,
+      "score": 72.694,
+      "peak": 2.85,
+      "secondary": 2.411,
+      "saddle": 2.208,
+      "beachPct": 2.1,
+      "biomePct": [
+        14.56,
+        19.13,
+        65.47,
+        0.84
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6051,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.403903371681505,
+        "saddle": 10.470817367652158,
+        "beach": 3.884439096665731,
+        "biomes": 6.5618999544826755,
+        "silhouette": 10.373205975583655,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 239,
+      "score": 72.685,
+      "peak": 2.85,
+      "secondary": 2.234,
+      "saddle": 2.006,
+      "beachPct": 2.67,
+      "biomePct": [
+        16.38,
+        21.99,
+        61.41,
+        0.23
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7312,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.659799175396085,
+        "saddle": 11.48755356782753,
+        "beach": 4.760756684413045,
+        "biomes": 1.7766132703730184,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 5,
+      "score": 72.64,
+      "peak": 2.85,
+      "secondary": 2.251,
+      "saddle": 2.037,
+      "beachPct": 0.47,
+      "biomePct": [
+        17.61,
+        26.02,
+        55.62,
+        0.76
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6451,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.832775892888815,
+        "saddle": 10.888588730225568,
+        "beach": 1.9842854013038924,
+        "biomes": 5.875298724812483,
+        "silhouette": 11.058814321165404,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 123,
+      "score": 72.614,
+      "peak": 2.85,
+      "secondary": 2.562,
+      "saddle": 1.964,
+      "beachPct": 6.96,
+      "biomePct": [
+        19.29,
+        12.97,
+        67.11,
+        0.62
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.7628,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.306325233140488,
+        "saddle": 5.789477951039519,
+        "beach": 13.662302416954391,
+        "biomes": 4.855686586108521,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 17,
+      "score": 72.514,
+      "peak": 2.85,
+      "secondary": 2.221,
+      "saddle": 1.954,
+      "beachPct": 0,
+      "biomePct": [
+        12.86,
+        29.24,
+        57.32,
+        0.57
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6516,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.48859804582017,
+        "saddle": 12.800011127379793,
+        "beach": 1.5941639646626458,
+        "biomes": 4.4599894846510075,
+        "silhouette": 11.171084154624767,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 14,
+      "score": 72.462,
+      "peak": 2.85,
+      "secondary": 2.235,
+      "saddle": 1.841,
+      "beachPct": 0,
+      "biomePct": [
+        12.52,
+        26.6,
+        60.54,
+        0.34
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7118,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.675542746430715,
+        "saddle": 13.564885164249224,
+        "beach": 1.5941639646626458,
+        "biomes": 2.627772276226368,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 140,
+      "score": 72.421,
+      "peak": 2.85,
+      "secondary": 2.401,
+      "saddle": 2.306,
+      "beachPct": 3.1,
+      "biomePct": [
+        17.47,
+        20.14,
+        61.43,
+        0.97
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7951,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.660095173179947,
+        "saddle": 5.729483322793304,
+        "beach": 5.512585145800068,
+        "biomes": 7.519021058094575,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 66,
+      "score": 72.309,
+      "peak": 2.85,
+      "secondary": 2.368,
+      "saddle": 1.799,
+      "beachPct": 3.24,
+      "biomePct": [
+        19.96,
+        19.09,
+        60.2,
+        0.76
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6596,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.31979405166042,
+        "saddle": 7.040541088471494,
+        "beach": 5.7641363134560155,
+        "biomes": 5.8777421908276715,
+        "silhouette": 11.307237739445851,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 162,
+      "score": 72.281,
+      "peak": 2.85,
+      "secondary": 2.219,
+      "saddle": 1.883,
+      "beachPct": 0,
+      "biomePct": [
+        16.19,
+        27.74,
+        55.77,
+        0.29
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7137,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.455389630467685,
+        "saddle": 13.974508791707931,
+        "beach": 1.5941639646626458,
+        "biomes": 2.2571945207029698,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 98,
+      "score": 72.208,
+      "peak": 2.85,
+      "secondary": 2.068,
+      "saddle": 1.752,
+      "beachPct": 0.4,
+      "biomePct": [
+        13.76,
+        24.81,
+        60.55,
+        0.87
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.666,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.258286409948472,
+        "saddle": 13.813053804139237,
+        "beach": 1.9153427273420283,
+        "biomes": 6.804361626956392,
+        "silhouette": 11.417173973025491,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 236,
+      "score": 72.2,
+      "peak": 2.85,
+      "secondary": 2.259,
+      "saddle": 2.169,
+      "beachPct": 2.04,
+      "biomePct": [
+        16.69,
+        24.09,
+        58.17,
+        1.05
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6887,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.896583421163985,
+        "saddle": 5.54079709621394,
+        "beach": 3.7890338119620184,
+        "biomes": 8.16685281891855,
+        "silhouette": 11.806559102716172,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 153,
+      "score": 72.189,
+      "peak": 2.85,
+      "secondary": 2.427,
+      "saddle": 2.018,
+      "beachPct": 1.31,
+      "biomePct": [
+        15.85,
+        23.52,
+        60.23,
+        0.4
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7496,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.988517154536959,
+        "saddle": 13.259398865826025,
+        "beach": 2.843582114043941,
+        "biomes": 3.0974683031081427,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 207,
+      "score": 72.144,
+      "peak": 2.85,
+      "secondary": 2.422,
+      "saddle": 2.211,
+      "beachPct": 2.14,
+      "biomePct": [
+        18.63,
+        21.21,
+        59.62,
+        0.55
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.7061,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.12538721726866,
+        "saddle": 10.794177890942407,
+        "beach": 3.9324400069982164,
+        "biomes": 4.292193262661233,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 71,
+      "score": 72.093,
+      "peak": 2.85,
+      "secondary": 2.499,
+      "saddle": 1.997,
+      "beachPct": 3.95,
+      "biomePct": [
+        17.34,
+        18.58,
+        63.54,
+        0.55
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 11,
+      "silhouetteVariance": 0.7529,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.688655262888156,
+        "saddle": 9.99659801653167,
+        "beach": 7.146035691766815,
+        "biomes": 4.261638223139005,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 141,
+      "score": 72.088,
+      "peak": 2.85,
+      "secondary": 2.323,
+      "saddle": 2.238,
+      "beachPct": 0.6,
+      "biomePct": [
+        16.47,
+        22.9,
+        59.37,
+        1.25
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.8148,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.869638552760563,
+        "saddle": 5.356543573109166,
+        "beach": 2.101091834703439,
+        "biomes": 9.760357344420715,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 103,
+      "score": 72.069,
+      "peak": 2.85,
+      "secondary": 2.356,
+      "saddle": 1.859,
+      "beachPct": 1.09,
+      "biomePct": [
+        17.53,
+        23.42,
+        58.44,
+        0.62
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6966,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.50455555658544,
+        "saddle": 10.223623836491614,
+        "beach": 2.5992078066757647,
+        "biomes": 4.79950694155166,
+        "silhouette": 11.942328444236736,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 230,
+      "score": 71.938,
+      "peak": 2.85,
+      "secondary": 2.388,
+      "saddle": 1.886,
+      "beachPct": 2.86,
+      "biomePct": [
+        17.27,
+        19.8,
+        62.56,
+        0.38
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.8222,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.932767326163056,
+        "saddle": 9.970093012810644,
+        "beach": 5.090921156623277,
+        "biomes": 2.9447025211011755,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 216,
+      "score": 71.887,
+      "peak": 2.85,
+      "secondary": 2.552,
+      "saddle": 2.116,
+      "beachPct": 3.23,
+      "biomePct": [
+        17.09,
+        17.7,
+        64.58,
+        0.63
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.8181,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.723556171682867,
+        "saddle": 12.544027332715658,
+        "beach": 5.751738691518025,
+        "biomes": 4.867601269720692,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 25,
+      "score": 71.693,
+      "peak": 2.85,
+      "secondary": 2.125,
+      "saddle": 1.916,
+      "beachPct": 0,
+      "biomePct": [
+        15.08,
+        22.56,
+        61.33,
+        1.04
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6516,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.19688667226765,
+        "saddle": 10.676426968568546,
+        "beach": 1.5941639646626458,
+        "biomes": 8.05488152690863,
+        "silhouette": 11.17109750593561,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 138,
+      "score": 71.483,
+      "peak": 2.85,
+      "secondary": 2.439,
+      "saddle": 2.099,
+      "beachPct": 0,
+      "biomePct": [
+        15.72,
+        22.71,
+        60.72,
+        0.84
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 2,
+      "silhouetteVariance": 0.7721,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.664706254924223,
+        "saddle": 13.990135726467287,
+        "beach": 1.5941639646626458,
+        "biomes": 6.5676242564623415,
+        "silhouette": 12,
+        "gullies": 6.666666666666666,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 104,
+      "score": 71.464,
+      "peak": 2.85,
+      "secondary": 2.225,
+      "saddle": 2.008,
+      "beachPct": 2.64,
+      "biomePct": [
+        15.73,
+        21.42,
+        62.6,
+        0.25
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.6542,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.54702921679907,
+        "saddle": 11.044047076335278,
+        "beach": 4.714089226192567,
+        "biomes": 1.9443305691795474,
+        "silhouette": 11.214071893245116,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 145,
+      "score": 71.45,
+      "peak": 2.85,
+      "secondary": 2.442,
+      "saddle": 2.011,
+      "beachPct": 1.72,
+      "biomePct": [
+        17.52,
+        17.55,
+        64.56,
+        0.37
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7196,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.556377878325245,
+        "saddle": 12.678407327647799,
+        "beach": 3.3509317480442773,
+        "biomes": 2.86438999045141,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 64,
+      "score": 71.418,
+      "peak": 2.85,
+      "secondary": 2.591,
+      "saddle": 2.306,
+      "beachPct": 0.74,
+      "biomePct": [
+        15.09,
+        18.64,
+        65.15,
+        1.12
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7181,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.19219648884636,
+        "saddle": 13.263644568155273,
+        "beach": 2.2306788054134263,
+        "biomes": 8.73099757485263,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 159,
+      "score": 71.309,
+      "peak": 2.85,
+      "secondary": 2.617,
+      "saddle": 2.106,
+      "beachPct": 4.63,
+      "biomePct": [
+        18.87,
+        17.53,
+        62.71,
+        0.89
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8326,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.200313053268765,
+        "saddle": 9.592940304794986,
+        "beach": 8.587442092318861,
+        "biomes": 6.9285181864117,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 185,
+      "score": 71.188,
+      "peak": 2.85,
+      "secondary": 2.224,
+      "saddle": 1.968,
+      "beachPct": 1.01,
+      "biomePct": [
+        15.34,
+        25.16,
+        59.14,
+        0.36
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.636,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.53031067807491,
+        "saddle": 12.462553467868572,
+        "beach": 2.513122644507692,
+        "biomes": 2.7792335318041195,
+        "silhouette": 10.90315897662045,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 70,
+      "score": 71.096,
+      "peak": 2.85,
+      "secondary": 2.48,
+      "saddle": 2.09,
+      "beachPct": 0,
+      "biomePct": [
+        14.42,
+        20.4,
+        64.6,
+        0.58
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 3,
+      "silhouetteVariance": 0.7484,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.363560878067826,
+        "saddle": 13.647306323679821,
+        "beach": 1.5941639646626458,
+        "biomes": 4.491269904955664,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 155,
+      "score": 71.074,
+      "peak": 2.85,
+      "secondary": 2.309,
+      "saddle": 1.936,
+      "beachPct": 0.39,
+      "biomePct": [
+        16.03,
+        24.9,
+        58.84,
+        0.22
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6179,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.956828395302182,
+        "saddle": 13.872246498314187,
+        "beach": 1.910610933163759,
+        "biomes": 1.7424408658718589,
+        "silhouette": 10.592014454384683,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 235,
+      "score": 71.059,
+      "peak": 2.85,
+      "secondary": 2.499,
+      "saddle": 1.849,
+      "beachPct": 4.56,
+      "biomePct": [
+        20.19,
+        15.98,
+        62.79,
+        1.04
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7624,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.672333135197656,
+        "saddle": 3.841251109065886,
+        "beach": 8.448858840711939,
+        "biomes": 8.09620568167934,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 23,
+      "score": 71.05,
+      "peak": 2.85,
+      "secondary": 2.464,
+      "saddle": 2.045,
+      "beachPct": 0.72,
+      "biomePct": [
+        13.3,
+        21.22,
+        64.98,
+        0.5
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 12,
+      "silhouetteVariance": 0.862,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.891509661877139,
+        "saddle": 13.037864880116768,
+        "beach": 2.2143521376330684,
+        "biomes": 3.906764079116993,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 75,
+      "score": 70.769,
+      "peak": 2.85,
+      "secondary": 2.243,
+      "saddle": 1.761,
+      "beachPct": 0,
+      "biomePct": [
+        14.05,
+        22.72,
+        62.6,
+        0.63
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6243,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.759159876159515,
+        "saddle": 10.837096303956288,
+        "beach": 1.5941639646626458,
+        "biomes": 4.876304675382556,
+        "silhouette": 10.701989629831832,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 136,
+      "score": 70.769,
+      "peak": 2.85,
+      "secondary": 2.379,
+      "saddle": 1.941,
+      "beachPct": 0.73,
+      "biomePct": [
+        15.38,
+        21.48,
+        62.84,
+        0.3
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.6744,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.12839881593875,
+        "saddle": 12.49747588343969,
+        "beach": 2.222201953723245,
+        "biomes": 2.3601266801453464,
+        "silhouette": 11.56081735924779,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 2,
+      "score": 70.676,
+      "peak": 2.85,
+      "secondary": 2.19,
+      "saddle": 1.997,
+      "beachPct": 1.07,
+      "biomePct": [
+        12.52,
+        24.48,
+        62.47,
+        0.53
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7793,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.93116008813345,
+        "saddle": 10.05151088141198,
+        "beach": 2.5707789495152853,
+        "biomes": 4.122252942811269,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 69,
+      "score": 70.594,
+      "peak": 2.85,
+      "secondary": 2.106,
+      "saddle": 1.676,
+      "beachPct": 0,
+      "biomePct": [
+        13.81,
+        23.99,
+        61.29,
+        0.91
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 3,
+      "silhouetteVariance": 0.5617,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.590679623108732,
+        "saddle": 12.722718273186347,
+        "beach": 1.5941639646626458,
+        "biomes": 7.058093711479168,
+        "silhouette": 9.628340741107259,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 183,
+      "score": 70.54,
+      "peak": 2.85,
+      "secondary": 2.453,
+      "saddle": 2.159,
+      "beachPct": 0.7,
+      "biomePct": [
+        12.42,
+        21.24,
+        65.98,
+        0.37
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6889,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.244153570505176,
+        "saddle": 13.451872847032892,
+        "beach": 2.1916751283345506,
+        "biomes": 2.843096779990246,
+        "silhouette": 11.809449382676064,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 95,
+      "score": 70.421,
+      "peak": 2.85,
+      "secondary": 2.487,
+      "saddle": 1.814,
+      "beachPct": 6.58,
+      "biomePct": [
+        18.34,
+        15.3,
+        65.94,
+        0.42
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.7607,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.105016269250086,
+        "saddle": 3.1534788934797118,
+        "beach": 12.88982988203399,
+        "biomes": 3.273141228978908,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 173,
+      "score": 70.232,
+      "peak": 2.85,
+      "secondary": 2.585,
+      "saddle": 2.299,
+      "beachPct": 1.05,
+      "biomePct": [
+        17.37,
+        23.18,
+        58.55,
+        0.89
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7626,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.446555999519108,
+        "saddle": 13.269980513634849,
+        "beach": 2.558154781422297,
+        "biomes": 6.95772977303004,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 18,
+      "score": 70.21,
+      "peak": 2.85,
+      "secondary": 2.1,
+      "saddle": 1.772,
+      "beachPct": 0.13,
+      "biomePct": [
+        14.3,
+        25.18,
+        59.94,
+        0.59
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6197,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.405047274852539,
+        "saddle": 13.931076801108516,
+        "beach": 1.6969296853488827,
+        "biomes": 4.552991381460076,
+        "silhouette": 10.623505264688067,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 42,
+      "score": 70.122,
+      "peak": 2.85,
+      "secondary": 2.136,
+      "saddle": 1.635,
+      "beachPct": 1.05,
+      "biomePct": [
+        15.83,
+        22.44,
+        61.09,
+        0.64
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7166,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.536631532218072,
+        "saddle": 10.078852572881564,
+        "beach": 2.5477182243950987,
+        "biomes": 4.959125237911746,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 106,
+      "score": 69.852,
+      "peak": 2.85,
+      "secondary": 2.483,
+      "saddle": 2.246,
+      "beachPct": 0.29,
+      "biomePct": [
+        15.78,
+        18.58,
+        65,
+        0.64
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8588,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.24807768293628,
+        "saddle": 11.790922492993069,
+        "beach": 1.8236505945725903,
+        "biomes": 4.989501044340429,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 156,
+      "score": 69.813,
+      "peak": 2.85,
+      "secondary": 2.364,
+      "saddle": 1.796,
+      "beachPct": 2.56,
+      "biomePct": [
+        15.93,
+        17.84,
+        65.74,
+        0.49
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7474,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.38109105502416,
+        "saddle": 7.047672521817015,
+        "beach": 4.5875893434012065,
+        "biomes": 3.796987442189914,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 150,
+      "score": 69.789,
+      "peak": 2.85,
+      "secondary": 2.403,
+      "saddle": 1.851,
+      "beachPct": 2.33,
+      "biomePct": [
+        16.9,
+        20.27,
+        62.3,
+        0.54
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 10,
+      "silhouetteVariance": 0.715,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.60455873767421,
+        "saddle": 7.778193148526061,
+        "beach": 4.226083388592781,
+        "biomes": 4.179712380226116,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 47,
+      "score": 69.688,
+      "peak": 2.85,
+      "secondary": 2.499,
+      "saddle": 1.985,
+      "beachPct": 2.68,
+      "biomePct": [
+        15.43,
+        21.07,
+        62.78,
+        0.72
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.6505,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.681831438803119,
+        "saddle": 9.484306771120979,
+        "beach": 4.789876147404543,
+        "biomes": 5.581032660828729,
+        "silhouette": 11.151239218349376,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 132,
+      "score": 69.613,
+      "peak": 2.85,
+      "secondary": 2.355,
+      "saddle": 1.893,
+      "beachPct": 0,
+      "biomePct": [
+        14.33,
+        24.1,
+        61.34,
+        0.24
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7849,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.52876988824885,
+        "saddle": 11.657943366154045,
+        "beach": 1.5941639646626458,
+        "biomes": 1.8325564847847422,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 87,
+      "score": 69.553,
+      "peak": 2.85,
+      "secondary": 2.211,
+      "saddle": 1.953,
+      "beachPct": 0,
+      "biomePct": [
+        15.96,
+        26.16,
+        57.64,
+        0.25
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6528,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.328488169726434,
+        "saddle": 12.520027831259746,
+        "beach": 1.5941639646626458,
+        "biomes": 1.9195633736069146,
+        "silhouette": 11.190493436411465,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 199,
+      "score": 69.451,
+      "peak": 2.85,
+      "secondary": 2.245,
+      "saddle": 1.657,
+      "beachPct": 1.46,
+      "biomePct": [
+        17.36,
+        21.88,
+        59.88,
+        0.88
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.62,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.779331667480353,
+        "saddle": 6.2030286508436525,
+        "beach": 3.0237404629650766,
+        "biomes": 6.816666062148692,
+        "silhouette": 10.627825679561733,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 60,
+      "score": 69.444,
+      "peak": 2.85,
+      "secondary": 2.679,
+      "saddle": 2.161,
+      "beachPct": 3.97,
+      "biomePct": [
+        19.77,
+        18.37,
+        60.7,
+        1.16
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8232,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 6.985379114373459,
+        "saddle": 9.278926079422149,
+        "beach": 7.189190511500247,
+        "biomes": 8.990171650943811,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 171,
+      "score": 69.34,
+      "peak": 2.85,
+      "secondary": 2.451,
+      "saddle": 2.266,
+      "beachPct": 0.31,
+      "biomePct": [
+        15.55,
+        22.6,
+        61.09,
+        0.76
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6763,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.295546404319188,
+        "saddle": 9.695837607943242,
+        "beach": 1.8382498631511435,
+        "biomes": 5.9169605407497485,
+        "silhouette": 11.59333193362242,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 24,
+      "score": 69.249,
+      "peak": 2.85,
+      "secondary": 2.527,
+      "saddle": 1.918,
+      "beachPct": 4.39,
+      "biomePct": [
+        17.5,
+        18,
+        63.7,
+        0.79
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7955,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.669746235490804,
+        "saddle": 5.354977038323298,
+        "beach": 8.071888178130974,
+        "biomes": 6.152056015551173,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 126,
+      "score": 69.151,
+      "peak": 2.85,
+      "secondary": 2.077,
+      "saddle": 1.708,
+      "beachPct": 0,
+      "biomePct": [
+        13.89,
+        24.61,
+        61.01,
+        0.49
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6554,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.5803449312398,
+        "saddle": 13.905004270575613,
+        "beach": 1.5941639646626458,
+        "biomes": 3.8351727906756423,
+        "silhouette": 11.235991725755785,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 59,
+      "score": 69.114,
+      "peak": 2.85,
+      "secondary": 2.572,
+      "saddle": 2.234,
+      "beachPct": 1.38,
+      "biomePct": [
+        14.48,
+        20.37,
+        64.6,
+        0.55
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8296,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.934904561103654,
+        "saddle": 13.984850403525746,
+        "beach": 2.9336220855713626,
+        "biomes": 4.260917250931008,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 11,
+      "score": 69.077,
+      "peak": 2.85,
+      "secondary": 2.47,
+      "saddle": 1.985,
+      "beachPct": 0.81,
+      "biomePct": [
+        16.15,
+        23.41,
+        59.88,
+        0.56
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7137,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.685303262380478,
+        "saddle": 10.711218961705503,
+        "beach": 2.299870733550981,
+        "biomes": 4.380146960567589,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 31,
+      "score": 69.059,
+      "peak": 2.85,
+      "secondary": 2.2,
+      "saddle": 2.001,
+      "beachPct": 1.54,
+      "biomePct": [
+        20.62,
+        20.49,
+        58.48,
+        0.41
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6016,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.1300456875392,
+        "saddle": 10.295908164587171,
+        "beach": 3.127055016531634,
+        "biomes": 3.192895781171722,
+        "silhouette": 10.31358337339576,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 222,
+      "score": 68.974,
+      "peak": 2.85,
+      "secondary": 2.54,
+      "saddle": 1.836,
+      "beachPct": 5.21,
+      "biomePct": [
+        18.64,
+        17.29,
+        63.09,
+        0.98
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7081,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.164057645217133,
+        "saddle": 2.3435509720024,
+        "beach": 9.88272594877752,
+        "biomes": 7.58370380766289,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 82,
+      "score": 68.955,
+      "peak": 2.85,
+      "secondary": 2.11,
+      "saddle": 2.018,
+      "beachPct": 2.82,
+      "biomePct": [
+        18.85,
+        19.27,
+        60.92,
+        0.96
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6489,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.73339517237689,
+        "saddle": 5.63558596843325,
+        "beach": 5.0137018735662435,
+        "biomes": 7.4490943923776785,
+        "silhouette": 11.123443160566422,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 8,
+      "score": 68.764,
+      "peak": 2.85,
+      "secondary": 2.527,
+      "saddle": 2.029,
+      "beachPct": 1.36,
+      "biomePct": [
+        16.87,
+        23.12,
+        59.24,
+        0.77
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7368,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.670389830392024,
+        "saddle": 10.188224102761362,
+        "beach": 2.9078386817297703,
+        "biomes": 5.997576073920724,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 164,
+      "score": 68.707,
+      "peak": 2.85,
+      "secondary": 2.084,
+      "saddle": 1.896,
+      "beachPct": 0,
+      "biomePct": [
+        15.48,
+        27.25,
+        56.19,
+        1.08
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.5894,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.83632863326217,
+        "saddle": 9.7994440304884,
+        "beach": 1.5941639646626458,
+        "biomes": 8.373445275268633,
+        "silhouette": 10.103780290849524,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 116,
+      "score": 68.676,
+      "peak": 2.85,
+      "secondary": 2.459,
+      "saddle": 1.935,
+      "beachPct": 2.89,
+      "biomePct": [
+        19.85,
+        22.68,
+        57.15,
+        0.32
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7651,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.038876119282257,
+        "saddle": 9.01554091778721,
+        "beach": 5.133414258072483,
+        "biomes": 2.4877357887821483,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 32,
+      "score": 68.517,
+      "peak": 2.85,
+      "secondary": 2.221,
+      "saddle": 2.183,
+      "beachPct": 1.44,
+      "biomePct": [
+        16.75,
+        23.67,
+        58.57,
+        1
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.6732,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.484088529438658,
+        "saddle": 3.680233009221132,
+        "beach": 2.996660456794584,
+        "biomes": 7.814456048733268,
+        "silhouette": 11.54132774507988,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 55,
+      "score": 68.274,
+      "peak": 2.85,
+      "secondary": 2.403,
+      "saddle": 1.772,
+      "beachPct": 0.91,
+      "biomePct": [
+        15.73,
+        19.59,
+        63.68,
+        1
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7907,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.596805078122443,
+        "saddle": 4.51732337528146,
+        "beach": 2.4094809412620153,
+        "biomes": 7.7501461916707015,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 19,
+      "score": 68.078,
+      "peak": 2.85,
+      "secondary": 2.035,
+      "saddle": 1.904,
+      "beachPct": 1.26,
+      "biomePct": [
+        16.7,
+        21.46,
+        60.65,
+        1.19
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6835,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.032410041218185,
+        "saddle": 7.255517288161563,
+        "beach": 2.7841689576100004,
+        "biomes": 9.28934846357857,
+        "silhouette": 11.716444931154982,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 229,
+      "score": 68.058,
+      "peak": 2.85,
+      "secondary": 1.969,
+      "saddle": 1.686,
+      "beachPct": 0,
+      "biomePct": [
+        17.4,
+        22.89,
+        58.81,
+        0.9
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.6846,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.487976352252156,
+        "saddle": 13.204094249222287,
+        "beach": 1.5941639646626458,
+        "biomes": 7.036129956857648,
+        "silhouette": 11.736028729820214,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 78,
+      "score": 67.907,
+      "peak": 2.85,
+      "secondary": 2.43,
+      "saddle": 1.876,
+      "beachPct": 1.52,
+      "biomePct": [
+        16.42,
+        23.68,
+        59.36,
+        0.54
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 3,
+      "silhouetteVariance": 0.7485,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.910387651756883,
+        "saddle": 7.672370371147428,
+        "beach": 3.100173632425169,
+        "biomes": 4.2245656246692915,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 130,
+      "score": 67.811,
+      "peak": 2.85,
+      "secondary": 2.013,
+      "saddle": 1.772,
+      "beachPct": 1.85,
+      "biomePct": [
+        16.47,
+        22.25,
+        60.75,
+        0.53
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7059,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.187767830853165,
+        "saddle": 11.970167602706336,
+        "beach": 3.5332504122764936,
+        "biomes": 4.119362187152994,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 7,
+      "score": 67.804,
+      "peak": 2.85,
+      "secondary": 2.121,
+      "saddle": 1.956,
+      "beachPct": 0.95,
+      "biomePct": [
+        18.59,
+        22.33,
+        58.5,
+        0.58
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7027,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 15.07364000259678,
+        "saddle": 8.789215003866278,
+        "beach": 2.4508505536218816,
+        "biomes": 4.489986526959183,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 232,
+      "score": 67.564,
+      "peak": 2.85,
+      "secondary": 2.401,
+      "saddle": 1.578,
+      "beachPct": 4.92,
+      "biomePct": [
+        18.83,
+        15.18,
+        65.47,
+        0.53
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7799,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.642823012232707,
+        "saddle": 0.5795050757882633,
+        "beach": 9.224638762378445,
+        "biomes": 4.116674788339021,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 36,
+      "score": 67.527,
+      "peak": 2.85,
+      "secondary": 2.58,
+      "saddle": 1.906,
+      "beachPct": 4.84,
+      "biomePct": [
+        17.7,
+        16.01,
+        65.3,
+        0.99
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8054,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.63876538184938,
+        "saddle": 3.1389726047367246,
+        "beach": 9.043472959369687,
+        "biomes": 7.706016954974669,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 73,
+      "score": 67.229,
+      "peak": 2.85,
+      "secondary": 2.237,
+      "saddle": 2.08,
+      "beachPct": 0.35,
+      "biomePct": [
+        15.34,
+        20.23,
+        64.09,
+        0.34
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6767,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.69029661115563,
+        "saddle": 8.40333821727354,
+        "beach": 1.8720468002393589,
+        "biomes": 2.6628787856621323,
+        "silhouette": 11.600465677729671,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 46,
+      "score": 67.182,
+      "peak": 2.85,
+      "secondary": 2.101,
+      "saddle": 1.937,
+      "beachPct": 0,
+      "biomePct": [
+        14.88,
+        23.63,
+        60.8,
+        0.69
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7375,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.437423410278239,
+        "saddle": 8.748644812565178,
+        "beach": 1.5941639646626458,
+        "biomes": 5.401622438250256,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 217,
+      "score": 66.763,
+      "peak": 2.85,
+      "secondary": 2.032,
+      "saddle": 1.926,
+      "beachPct": 3.92,
+      "biomePct": [
+        20.41,
+        20.63,
+        58.37,
+        0.59
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7702,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.895864231543055,
+        "saddle": 6.183456325377227,
+        "beach": 7.093653799193695,
+        "biomes": 4.590019321068034,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 218,
+      "score": 66.728,
+      "peak": 2.85,
+      "secondary": 2.657,
+      "saddle": 2.213,
+      "beachPct": 3.57,
+      "biomePct": [
+        17.32,
+        17.07,
+        65.17,
+        0.43
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7893,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 7.730503571232779,
+        "saddle": 12.240858081611405,
+        "beach": 6.394090820631062,
+        "biomes": 3.362403101288227,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 117,
+      "score": 66.716,
+      "peak": 2.85,
+      "secondary": 2.165,
+      "saddle": 2.005,
+      "beachPct": 0,
+      "biomePct": [
+        17.61,
+        26.07,
+        55.77,
+        0.55
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6386,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.34519525220243,
+        "saddle": 8.575852562023345,
+        "beach": 1.5941639646626458,
+        "biomes": 4.253916822932743,
+        "silhouette": 10.947358096898945,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 85,
+      "score": 66.675,
+      "peak": 2.85,
+      "secondary": 2.221,
+      "saddle": 2.192,
+      "beachPct": 1.59,
+      "biomePct": [
+        18.8,
+        22.16,
+        58.21,
+        0.83
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.6495,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.48061830510852,
+        "saddle": 3.3935552552394155,
+        "beach": 3.1885951263029093,
+        "biomes": 6.47824681177846,
+        "silhouette": 11.13374840954732,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 209,
+      "score": 66.633,
+      "peak": 2.85,
+      "secondary": 2.169,
+      "saddle": 1.606,
+      "beachPct": 0.66,
+      "biomePct": [
+        13.76,
+        23.45,
+        62.21,
+        0.59
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6534,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.45369492193159,
+        "saddle": 7.254303112838658,
+        "beach": 2.1564389456270368,
+        "biomes": 4.566889127478068,
+        "silhouette": 11.201826425868918,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 201,
+      "score": 66.579,
+      "peak": 2.85,
+      "secondary": 2.509,
+      "saddle": 1.959,
+      "beachPct": 0.95,
+      "biomePct": [
+        16.67,
+        23.21,
+        59.35,
+        0.77
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7635,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.320403646147259,
+        "saddle": 7.834526509422155,
+        "beach": 2.4500772762219705,
+        "biomes": 5.974181128307645,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 101,
+      "score": 66.492,
+      "peak": 2.85,
+      "secondary": 2.09,
+      "saddle": 1.626,
+      "beachPct": 0,
+      "biomePct": [
+        13,
+        25.73,
+        60.74,
+        0.53
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.5942,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.041729618639174,
+        "saddle": 11.554756727893581,
+        "beach": 1.5941639646626458,
+        "biomes": 4.115809201289008,
+        "silhouette": 10.186018827217696,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 231,
+      "score": 66.48,
+      "peak": 2.85,
+      "secondary": 2.359,
+      "saddle": 1.787,
+      "beachPct": 0,
+      "biomePct": [
+        14.43,
+        26.2,
+        58.83,
+        0.53
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6672,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.456526917644805,
+        "saddle": 6.871394508203415,
+        "beach": 1.5941639646626458,
+        "biomes": 4.11982348107584,
+        "silhouette": 11.438094528913894,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 148,
+      "score": 66.415,
+      "peak": 2.85,
+      "secondary": 2.519,
+      "saddle": 1.792,
+      "beachPct": 5.23,
+      "biomePct": [
+        18.41,
+        15.94,
+        64.88,
+        0.76
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.6269,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.965610217633586,
+        "saddle": 1.8511469626909591,
+        "beach": 9.912007501481925,
+        "biomes": 5.939463249966264,
+        "silhouette": 10.746982312382992,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 89,
+      "score": 66.398,
+      "peak": 2.85,
+      "secondary": 2.393,
+      "saddle": 1.633,
+      "beachPct": 3.41,
+      "biomePct": [
+        17.77,
+        18.89,
+        62.67,
+        0.67
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7012,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.82938087253764,
+        "saddle": 1.2824798094115633,
+        "beach": 6.090678337103945,
+        "biomes": 5.194994197944843,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 220,
+      "score": 66.302,
+      "peak": 2.85,
+      "secondary": 2.361,
+      "saddle": 1.55,
+      "beachPct": 4.86,
+      "biomePct": [
+        19.8,
+        15.68,
+        64.25,
+        0.27
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.7953,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.432805815026605,
+        "saddle": 0.6809439910707963,
+        "beach": 9.097399562361081,
+        "biomes": 2.0908981488197202,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 181,
+      "score": 66.298,
+      "peak": 2.85,
+      "secondary": 2.515,
+      "saddle": 2.011,
+      "beachPct": 1.76,
+      "biomePct": [
+        16.98,
+        17.14,
+        65.52,
+        0.37
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8415,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.100213431194602,
+        "saddle": 9.918481084613374,
+        "beach": 3.4100802136902764,
+        "biomes": 2.8693781926485453,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 133,
+      "score": 66.245,
+      "peak": 2.85,
+      "secondary": 2.056,
+      "saddle": 1.861,
+      "beachPct": 1.43,
+      "biomePct": [
+        17.52,
+        21,
+        60.79,
+        0.68
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.5856,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.802276625685401,
+        "saddle": 10.096366194734163,
+        "beach": 2.988936273928386,
+        "biomes": 5.3187911682560465,
+        "silhouette": 10.039111414358652,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 211,
+      "score": 65.673,
+      "peak": 2.85,
+      "secondary": 2.383,
+      "saddle": 1.787,
+      "beachPct": 0,
+      "biomePct": [
+        14.09,
+        20.06,
+        65.32,
+        0.53
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8373,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.049807410368878,
+        "saddle": 5.878266036073359,
+        "beach": 1.5941639646626458,
+        "biomes": 4.150802345776924,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 190,
+      "score": 65.272,
+      "peak": 2.85,
+      "secondary": 2.515,
+      "saddle": 1.962,
+      "beachPct": 0.39,
+      "biomePct": [
+        14.71,
+        18.56,
+        66.01,
+        0.71
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7911,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.100125511752788,
+        "saddle": 7.720516490126763,
+        "beach": 1.9131943090942491,
+        "biomes": 5.53840571839374,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 127,
+      "score": 65.247,
+      "peak": 2.85,
+      "secondary": 2.67,
+      "saddle": 1.929,
+      "beachPct": 4.42,
+      "biomePct": [
+        19.93,
+        15.76,
+        62.86,
+        1.45
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.79,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 7.280527553795377,
+        "saddle": 1.5862519087277183,
+        "beach": 8.139432408747533,
+        "biomes": 11.240514503758382,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 81,
+      "score": 65.146,
+      "peak": 2.85,
+      "secondary": 2.614,
+      "saddle": 1.815,
+      "beachPct": 5.8,
+      "biomePct": [
+        22.19,
+        14.93,
+        62,
+        0.87
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.841,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.34557708596924,
+        "saddle": 0.7984171240731729,
+        "beach": 11.200058624318125,
+        "biomes": 6.802236355227901,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 197,
+      "score": 64.884,
+      "peak": 2.85,
+      "secondary": 2.527,
+      "saddle": 1.963,
+      "beachPct": 1.76,
+      "biomePct": [
+        14.97,
+        20.27,
+        64.17,
+        0.59
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7905,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.661548128979613,
+        "saddle": 7.231416485913423,
+        "beach": 3.4050935704413132,
+        "biomes": 4.58554970630296,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 109,
+      "score": 64.755,
+      "peak": 2.85,
+      "secondary": 2.6,
+      "saddle": 2.138,
+      "beachPct": 3.99,
+      "biomePct": [
+        19.53,
+        16.97,
+        63.2,
+        0.31
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 2,
+      "silhouetteVariance": 0.8417,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.845809469436105,
+        "saddle": 11.623179382008088,
+        "beach": 7.237375574384423,
+        "biomes": 2.3823809361473733,
+        "silhouette": 12,
+        "gullies": 6.666666666666666,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 169,
+      "score": 64.744,
+      "peak": 2.85,
+      "secondary": 2.117,
+      "saddle": 1.96,
+      "beachPct": 0,
+      "biomePct": [
+        19.07,
+        23.77,
+        56.72,
+        0.44
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6622,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 14.953310815932063,
+        "saddle": 8.42705066438716,
+        "beach": 1.5941639646626458,
+        "biomes": 3.4175719047561257,
+        "silhouette": 11.352246754450896,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 170,
+      "score": 64.656,
+      "peak": 2.85,
+      "secondary": 2.732,
+      "saddle": 2.163,
+      "beachPct": 4.5,
+      "biomePct": [
+        17.82,
+        17.35,
+        63.5,
+        1.33
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 2,
+      "silhouetteVariance": 0.8922,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 5.315660946108686,
+        "saddle": 7.055374376168771,
+        "beach": 8.303538520740933,
+        "biomes": 10.314585676412905,
+        "silhouette": 12,
+        "gullies": 6.666666666666666,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 121,
+      "score": 64.465,
+      "peak": 2.85,
+      "secondary": 2.088,
+      "saddle": 1.874,
+      "beachPct": 0,
+      "biomePct": [
+        13.22,
+        23.55,
+        63,
+        0.22
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 10,
+      "silhouetteVariance": 0.6533,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.993378962910661,
+        "saddle": 10.932488012376732,
+        "beach": 1.5941639646626458,
+        "biomes": 1.7461732488859523,
+        "silhouette": 11.198910799152305,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 144,
+      "score": 64.448,
+      "peak": 2.85,
+      "secondary": 2.374,
+      "saddle": 1.756,
+      "beachPct": 0.35,
+      "biomePct": [
+        14.12,
+        22.95,
+        62.5,
+        0.43
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7789,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.211770893242722,
+        "saddle": 4.982476102213562,
+        "beach": 1.8736402131730607,
+        "biomes": 3.37982393152477,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 102,
+      "score": 64.032,
+      "peak": 2.85,
+      "secondary": 2.016,
+      "saddle": 1.777,
+      "beachPct": 0,
+      "biomePct": [
+        14.18,
+        27.28,
+        58.05,
+        0.48
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6155,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.284597056296262,
+        "saddle": 11.85960512328806,
+        "beach": 1.5941639646626458,
+        "biomes": 3.742182988143514,
+        "silhouette": 10.551261856046635,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 174,
+      "score": 63.775,
+      "peak": 2.85,
+      "secondary": 2.578,
+      "saddle": 2.05,
+      "beachPct": 1.86,
+      "biomePct": [
+        16.52,
+        19.49,
+        63.52,
+        0.47
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7642,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.708722386047299,
+        "saddle": 8.85421455853784,
+        "beach": 3.543545829736827,
+        "biomes": 3.6686131652884235,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 91,
+      "score": 63.762,
+      "peak": 2.85,
+      "secondary": 2.199,
+      "saddle": 1.496,
+      "beachPct": 0,
+      "biomePct": [
+        14.46,
+        20.42,
+        64.12,
+        1
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.5771,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 17.10852578690478,
+        "saddle": 2.376783256234898,
+        "beach": 1.5941639646626458,
+        "biomes": 7.790133729385144,
+        "silhouette": 9.892758533176684,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 198,
+      "score": 63.56,
+      "peak": 2.85,
+      "secondary": 2.611,
+      "saddle": 1.803,
+      "beachPct": 4.91,
+      "biomePct": [
+        18.6,
+        15.19,
+        65.28,
+        0.93
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8324,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.431817402284697,
+        "saddle": 0.7055182246985459,
+        "beach": 9.201470580046651,
+        "biomes": 7.221509489087719,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 177,
+      "score": 63.549,
+      "peak": 2.85,
+      "secondary": 1.961,
+      "saddle": 1.616,
+      "beachPct": 0,
+      "biomePct": [
+        14.02,
+        26.08,
+        59.42,
+        0.48
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.583,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.200771974710253,
+        "saddle": 13.999164200499756,
+        "beach": 1.5941639646626458,
+        "biomes": 3.7605222125041866,
+        "silhouette": 9.994433449420649,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 125,
+      "score": 63.532,
+      "peak": 2.85,
+      "secondary": 2.029,
+      "saddle": 1.895,
+      "beachPct": 2.38,
+      "biomePct": [
+        16.82,
+        23.71,
+        59.05,
+        0.42
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.6895,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.783525388701577,
+        "saddle": 7.372601933268463,
+        "beach": 4.30110741453112,
+        "biomes": 3.254534834464165,
+        "silhouette": 11.820697013698544,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 54,
+      "score": 63.481,
+      "peak": 2.85,
+      "secondary": 2.074,
+      "saddle": 1.944,
+      "beachPct": 1.09,
+      "biomePct": [
+        17.13,
+        24.76,
+        57.66,
+        0.45
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.6854,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 13.46585907656502,
+        "saddle": 7.2052969781979925,
+        "beach": 2.5926864398047487,
+        "biomes": 3.466554495867478,
+        "silhouette": 11.75026396321267,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 79,
+      "score": 63.451,
+      "peak": 2.85,
+      "secondary": 2.413,
+      "saddle": 1.596,
+      "beachPct": 1.12,
+      "biomePct": [
+        15.62,
+        16.94,
+        66.56,
+        0.88
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7279,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 16.374766546982336,
+        "saddle": 0.638695952556248,
+        "beach": 2.6310759603288103,
+        "biomes": 6.806104355298343,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 39,
+      "score": 63.316,
+      "peak": 2.85,
+      "secondary": 2.752,
+      "saddle": 2.09,
+      "beachPct": 2.43,
+      "biomePct": [
+        19.64,
+        18.95,
+        59.65,
+        1.77
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.8282,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 4.731898245909985,
+        "saddle": 3.4674864122555116,
+        "beach": 4.383658741681974,
+        "biomes": 13.733049576158024,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 228,
+      "score": 63.258,
+      "peak": 2.85,
+      "secondary": 2.058,
+      "saddle": 1.902,
+      "beachPct": 0,
+      "biomePct": [
+        16.23,
+        27.58,
+        55.58,
+        0.6
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.623,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.891695195275744,
+        "saddle": 8.395698826055561,
+        "beach": 1.5941639646626458,
+        "biomes": 4.696026334852258,
+        "silhouette": 10.680036725645689,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 110,
+      "score": 62.737,
+      "peak": 2.85,
+      "secondary": 2.053,
+      "saddle": 1.955,
+      "beachPct": 0.33,
+      "biomePct": [
+        14.03,
+        23.67,
+        61.35,
+        0.95
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.5789,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.694551559907746,
+        "saddle": 5.841861796059664,
+        "beach": 1.8576682347632063,
+        "biomes": 7.420151714110496,
+        "silhouette": 9.92317058727725,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 131,
+      "score": 62.213,
+      "peak": 2.85,
+      "secondary": 2.698,
+      "saddle": 2.076,
+      "beachPct": 2.89,
+      "biomePct": [
+        17.21,
+        22.35,
+        59.3,
+        1.14
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8154,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 6.351153887292387,
+        "saddle": 4.855374021508412,
+        "beach": 5.134767310936,
+        "biomes": 8.871467200788434,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 234,
+      "score": 61.782,
+      "peak": 2.85,
+      "secondary": 2.589,
+      "saddle": 1.868,
+      "beachPct": 4.62,
+      "biomePct": [
+        19.88,
+        15.2,
+        64.41,
+        0.51
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7786,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.27648639829581,
+        "saddle": 1.9659520619412412,
+        "beach": 8.558373033216895,
+        "biomes": 3.981616608429272,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 223,
+      "score": 61.545,
+      "peak": 2.85,
+      "secondary": 2.581,
+      "saddle": 1.904,
+      "beachPct": 2.56,
+      "biomePct": [
+        19.35,
+        15.78,
+        64.06,
+        0.81
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8089,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.60227509926278,
+        "saddle": 3.0470492852140296,
+        "beach": 4.593416697551065,
+        "biomes": 6.302660875847631,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 154,
+      "score": 61.238,
+      "peak": 2.85,
+      "secondary": 2.591,
+      "saddle": 1.998,
+      "beachPct": 1.04,
+      "biomePct": [
+        14.21,
+        18.04,
+        67.05,
+        0.71
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 10,
+      "silhouetteVariance": 0.7918,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.219271139209159,
+        "saddle": 5.990353233839661,
+        "beach": 2.5421400350742296,
+        "biomes": 5.486341490572478,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 44,
+      "score": 60.823,
+      "peak": 2.85,
+      "secondary": 2.522,
+      "saddle": 1.767,
+      "beachPct": 3.54,
+      "biomePct": [
+        16.32,
+        17.28,
+        65.97,
+        0.43
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7373,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 12.844052949848221,
+        "saddle": 1.3507462450393863,
+        "beach": 6.321791290108921,
+        "biomes": 3.305960512336414,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 163,
+      "score": 60.423,
+      "peak": 2.85,
+      "secondary": 2.555,
+      "saddle": 1.915,
+      "beachPct": 2.07,
+      "biomePct": [
+        18.97,
+        18.4,
+        62.14,
+        0.49
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 6,
+      "silhouetteVariance": 0.7822,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.58933590856439,
+        "saddle": 4.206996621698818,
+        "beach": 3.8405127121919387,
+        "biomes": 3.7861134895806057,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 96,
+      "score": 59.813,
+      "peak": 2.85,
+      "secondary": 2.7,
+      "saddle": 2.114,
+      "beachPct": 2.35,
+      "biomePct": [
+        15.79,
+        18.86,
+        64.58,
+        0.77
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.8527,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 6.3017441642466645,
+        "saddle": 6.301721351473129,
+        "beach": 4.249457081618436,
+        "biomes": 5.960553919157975,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 167,
+      "score": 59.697,
+      "peak": 2.85,
+      "secondary": 2.579,
+      "saddle": 1.928,
+      "beachPct": 0.71,
+      "biomePct": [
+        15.95,
+        19.36,
+        63.92,
+        0.77
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7784,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 10.66557910005826,
+        "saddle": 3.83834964900558,
+        "beach": 2.2048514739323375,
+        "biomes": 5.987776045662658,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 160,
+      "score": 59.385,
+      "peak": 2.85,
+      "secondary": 2.674,
+      "saddle": 1.849,
+      "beachPct": 2.31,
+      "biomePct": [
+        16.53,
+        18.6,
+        63.52,
+        1.35
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8728,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 7.14407818531783,
+        "saddle": 0.5683435767766059,
+        "beach": 4.1908058059473134,
+        "biomes": 10.481775304571615,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 172,
+      "score": 59.222,
+      "peak": 2.85,
+      "secondary": 2.706,
+      "saddle": 1.873,
+      "beachPct": 3.81,
+      "biomePct": [
+        19.91,
+        15.91,
+        63.06,
+        1.13
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.8017,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 6.094427763833108,
+        "saddle": 0.5070395514805928,
+        "beach": 6.865229274161192,
+        "biomes": 8.75539396198268,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 12,
+      "score": 58.825,
+      "peak": 2.85,
+      "secondary": 2.671,
+      "saddle": 1.871,
+      "beachPct": 2.06,
+      "biomePct": [
+        17.56,
+        17.03,
+        64.13,
+        1.28
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 5,
+      "silhouetteVariance": 0.7377,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 7.247054652909634,
+        "saddle": 0.7857877984478189,
+        "beach": 3.823289125340517,
+        "biomes": 9.969353095387872,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 139,
+      "score": 58.759,
+      "peak": 2.85,
+      "secondary": 2.649,
+      "saddle": 2.1,
+      "beachPct": 0.35,
+      "biomePct": [
+        15.7,
+        17.9,
+        65.9,
+        0.5
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.8042,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 8.04211772612452,
+        "saddle": 7.920571752546568,
+        "beach": 1.8746655290509708,
+        "biomes": 3.921356229010679,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 166,
+      "score": 58.495,
+      "peak": 2.85,
+      "secondary": 2.713,
+      "saddle": 1.954,
+      "beachPct": 1.05,
+      "biomePct": [
+        17.32,
+        16.85,
+        64.32,
+        1.51
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.8518,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 5.866857494315584,
+        "saddle": 1.2979745437889538,
+        "beach": 2.550813212473977,
+        "biomes": 11.779817258557083,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 161,
+      "score": 57.871,
+      "peak": 2.85,
+      "secondary": 1.97,
+      "saddle": 1.847,
+      "beachPct": 0,
+      "biomePct": [
+        15.97,
+        29.09,
+        54.4,
+        0.54
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 9,
+      "silhouetteVariance": 0.6188,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.544080267265775,
+        "saddle": 6.932648918004569,
+        "beach": 1.5941639646626458,
+        "biomes": 4.191472554177718,
+        "silhouette": 10.608722906885822,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 86,
+      "score": 57.848,
+      "peak": 2.85,
+      "secondary": 2.027,
+      "saddle": 2.011,
+      "beachPct": 0,
+      "biomePct": [
+        16.64,
+        27.03,
+        55.58,
+        0.75
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.6242,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 11.725262016034675,
+        "saddle": 3.0024735379056584,
+        "beach": 1.5941639646626458,
+        "biomes": 5.8250272824571825,
+        "silhouette": 10.700934223880221,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 67,
+      "score": 57.507,
+      "peak": 2.85,
+      "secondary": 2.617,
+      "saddle": 1.882,
+      "beachPct": 1.78,
+      "biomePct": [
+        14.15,
+        17.52,
+        67.53,
+        0.79
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 8,
+      "silhouetteVariance": 0.7843,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 9.212510461329625,
+        "saddle": 1.6903786195377564,
+        "beach": 3.4323200513640857,
+        "biomes": 6.1717423924904615,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 37,
+      "score": 57.365,
+      "peak": 2.85,
+      "secondary": 2.668,
+      "saddle": 1.996,
+      "beachPct": 0,
+      "biomePct": [
+        13.03,
+        16.21,
+        69.71,
+        1.06
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 4,
+      "silhouetteVariance": 0.8422,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 7.3477213743563246,
+        "saddle": 3.166481575817853,
+        "beach": 1.5941639646626458,
+        "biomes": 8.256138613771945,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 35,
+      "score": 57.087,
+      "peak": 2.85,
+      "secondary": 2.832,
+      "saddle": 2.022,
+      "beachPct": 3.76,
+      "biomePct": [
+        15.5,
+        16.83,
+        66.42,
+        1.26
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 7,
+      "silhouetteVariance": 0.7805,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 2.865431234509588,
+        "saddle": 0.6868116425729727,
+        "beach": 6.758640384809253,
+        "biomes": 9.77653774373968,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    },
+    {
+      "seed": 43,
+      "score": 56.344,
+      "peak": 2.85,
+      "secondary": 2.659,
+      "saddle": 1.96,
+      "beachPct": 0.83,
+      "biomePct": [
+        16.58,
+        20.14,
+        62.4,
+        0.88
+      ],
+      "speckle": 0,
+      "clipping": 0,
+      "gullies": 10,
+      "silhouetteVariance": 0.8547,
+      "terms": {
+        "dominant": 14.999999999997305,
+        "ridge": 7.685532935973768,
+        "saddle": 2.479915987779922,
+        "beach": 2.326078602222204,
+        "biomes": 6.852013296420015,
+        "silhouette": 12,
+        "gullies": 10,
+        "speckle": 0,
+        "clipping": 0
+      }
+    }
+  ]
+}

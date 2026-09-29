@@ -1,0 +1,543 @@
+--- verify/run-l/before/src/state.ts
++++ src/state.ts
+@@ -19,3 +19,7 @@
+ 
+ // Shared wet footprints: centre x/z and elliptical radii; zero radius means dry.
+ export const wetFootprints = Array.from({length:4},()=>uniform(new Vector4()));
++
++// Shared by displacement and its refracted caustics; included in water rewind snapshots.
++export const waterAgitation = uniform(0);
++export const waterChoppiness = uniform(.85);
+--- verify/run-l/before/src/water-profile.ts
++++ src/water-profile.ts
+@@ -0,0 +1,68 @@
++import type { WebGPURenderer } from 'three/webgpu';
++/** Opt-in WebGPU timestamp queries. Split only the water draws into timed render
++ * passes, preserving attachments with loadOp=load. This includes tile load/store
++ * overhead and is a conservative water cost; normal playback never splits passes.
++ * Three's aggregate timers reuse queries across framebuffer-copy pass splits and
++ * cannot isolate the water. This adapter is deliberately pinned to Three 0.186. */
++export function createWaterProfile(renderer: WebGPURenderer, enabled: boolean) {
++  const samples: { water: number; reflection: number }[] = [];
++  // Backend render-pass state is not exposed by the public Three types.
++  const backend = renderer.backend as any;
++  let pending = false, cursor = 0, queries: any, resolve: any, result: any;
++  const reflectionStack: boolean[] = [], kinds: boolean[] = [];
++  if (enabled) {
++    renderer.inspector.beginRender = (_uid, scene) => { reflectionStack.push(scene.name.includes('[ Reflector ]')); };
++    renderer.inspector.finishRender = () => { reflectionStack.pop(); };
++    const draw = backend.draw.bind(backend);
++    backend.draw = (object: any, info: any) => {
++      if (!queries || pending || object.object.name !== 'Gerstner water surface' || cursor >= 252) return draw(object, info);
++      const context = object.context, data = backend.get(context);
++      const descriptor = { ...data.descriptor, colorAttachments: data.descriptor.colorAttachments.map((a: any) => ({ ...a, loadOp: 'load' })),
++        depthStencilAttachment: data.descriptor.depthStencilAttachment ? { ...data.descriptor.depthStencilAttachment, depthLoadOp: 'load' } : undefined, timestampWrites: undefined };
++      const begin = (timed: boolean) => {
++        data.currentPass = data.encoder.beginRenderPass({ ...descriptor, timestampWrites: timed ? { querySet: queries, beginningOfPassWriteIndex: cursor, endOfPassWriteIndex: cursor+1 } : undefined });
++        backend._resetRenderContextData(data);
++        if(context.viewport) backend.updateViewport(context);
++        if(context.scissor) backend.updateScissor(context);
++      };
++      data.currentPass.end(); kinds[cursor/2] = false; begin(true); draw(object, info); data.currentPass.end(); cursor += 2; begin(false);
++    };
++  }
++  return {
++    get diagnostics() { return { supported: Boolean(backend.hasTimestamp), samples: samples.slice(-180) }; },
++    update() {
++      if (!enabled || pending || !backend.hasTimestamp) return;
++      const device = backend.device;
++      if (!queries) {
++        queries = device.createQuerySet({type:'timestamp',count:256});
++        resolve = device.createBuffer({size:2048,usage:512|4}); // QUERY_RESOLVE | COPY_SRC
++        result = device.createBuffer({size:2048,usage:8|1}); // COPY_DST | MAP_READ
++        // Timestamp every actual reflection render pass (including copy-induced
++        // splits/mipmap passes), rather than Three's overwritten aggregate pair.
++        const createEncoder = device.createCommandEncoder.bind(device);
++        device.createCommandEncoder = (...args: any[]) => {
++          const encoder = createEncoder(...args), beginPass = encoder.beginRenderPass.bind(encoder);
++          encoder.beginRenderPass = (descriptor: any) => {
++            if (!pending && reflectionStack.at(-1) && cursor < 252) {
++              kinds[cursor/2] = true;
++              descriptor = {...descriptor,timestampWrites:{querySet:queries,beginningOfPassWriteIndex:cursor,endOfPassWriteIndex:cursor+1}};
++              cursor += 2;
++            }
++            return beginPass(descriptor);
++          };
++          return encoder;
++        };
++        return;
++      }
++      if (!cursor) { samples.push({water:0,reflection:0}); if(samples.length>180)samples.shift(); return; }
++      pending = true;
++      const count = cursor;
++      const encoder = device.createCommandEncoder(); encoder.resolveQuerySet(queries,0,count,resolve,0); encoder.copyBufferToBuffer(resolve,0,result,0,count*8); device.queue.submit([encoder.finish()]);
++      void result.mapAsync(1,0,count*8).then(() => {
++        const t = new BigUint64Array(result.getMappedRange(0,count*8)); let water = 0, reflection = 0;
++        for(let i=0;i<count;i+=2) { const ms = Number(t[i+1]-t[i])/1e6; if(kinds[i/2]) reflection += ms; else water += ms; }
++        result.unmap(); samples.push({water,reflection}); if(samples.length>180)samples.shift();
++      }).finally(() => {cursor=0;pending=false;});
++    },
++  };
++}
+--- verify/run-l/before/src/aquarium.ts
++++ src/aquarium.ts
+@@ -14,6 +14,7 @@
+ import { createSpill } from './scene/spill';
+ import { createAudio } from './audio';
+ import { createUI } from './ui';
++import { createWaterProfile } from './water-profile';
+ import { createRewind } from './rewind';
+ 
+ const loading = document.querySelector<HTMLElement>('#loading')!;
+@@ -28,7 +29,9 @@
+   const audio = createAudio(() => frame);
+   addEventListener('pointerdown', () => { void audio.gesture(); }, { capture: true });
+   addEventListener('keydown', () => { void audio.gesture(); }, { capture: true });
++  const profiling = new URLSearchParams(location.search).has('waterProfile');
+   const renderer = new WebGPURenderer({ antialias: true });
++  const waterProfile = createWaterProfile(renderer, profiling);
+   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.setSize(innerWidth, innerHeight);
+   renderer.toneMapping = AgXToneMapping; renderer.toneMappingExposure = 1.05;
+   renderer.shadowMap.enabled = true;
+@@ -41,8 +44,8 @@
+   // Match the fully fogged floor exactly; the HDRI remains scene.environment.
+   scene.backgroundNode = atmosphere; scene.backgroundIntensity = 1;
+   const stage = createStage(scene, lighting.sun);
+-  const tank = await createTank(scene, rig.camera), water = createWater(scene);
+-  const island = createIsland(scene);
++  const tank = await createTank(scene, rig.camera);
++  const island = createIsland(scene), water = createWater(scene, island.heightTexture);
+   const spill = createSpill(scene, water.ripple);
+   await audio.loading;
+   state.muted = audio.muted;
+@@ -118,7 +121,7 @@
+     fps: state.fps, pixelRatio: renderer.getPixelRatio(), mode: state.mode,
+     timeScale: state.timeScale, elapsed: state.elapsed, brokenCount: state.brokenCount,
+     hasImpact: state.hasImpact, impact: state.impact.toArray(), wall: state.wall,
+-    height: waterHeight.value, normal: waterNormal.value.toArray(), renderer: 'WebGPU',
++    gpu: waterProfile.diagnostics, water: water.diagnostics, height: waterHeight.value, normal: waterNormal.value.toArray(), renderer: 'WebGPU',
+     motes: dust.count, motesAboveSurface: dust.aboveSurface, bubbles: bubbles.count, bubblePops: bubbles.pops, floorCausticIntensity: stage.intensity,
+     sunAzimuth: Math.atan2(lighting.sun.position.z-lighting.sun.target.position.z,lighting.sun.position.x-lighting.sun.target.position.x)*180/Math.PI,
+     causticAzimuth: Math.atan2(-(lighting.sun.position.z-lighting.sun.target.position.z),-(lighting.sun.position.x-lighting.sun.target.position.x))*180/Math.PI,
+@@ -137,7 +140,7 @@
+     }
+     state.spilling = spill.active; lighting.update(simTime.value); stage.update(); dust.update(); bubbles.update(); shafts.update(); ui.update(realDt);
+     try {
+-      renderer.info.reset(); post.render();
++      renderer.info.reset(); post.render(); waterProfile.update();
+       if (!rendered) { rendered = true; loading.hidden = true; document.documentElement.dataset.status = 'ready'; }
+     } catch (error) { renderer.setAnimationLoop(null); fail('The WebGPU scene could not render. See the browser console for details.', error); }
+   });
+--- verify/run-l/before/src/camera.ts
++++ src/camera.ts
+@@ -10,8 +10,9 @@
+   controls.minDistance = 3; controls.maxDistance = 24; controls.maxPolarAngle = Math.PI / 2 - 0.025;
+   controls.autoRotateSpeed = 0.24; controls.enablePan = false;
+   const preset = new URLSearchParams(location.search).get('camera');
+-  const presets: Record<string, [number, number, number]> = { '34': [-7, 4.5, 8], front: [0, 2.2, 9.5], low: [-7, 1.25, 8], plaque: [0, 0.25, 4.5], floor: [7, 4.6, 8.5], surface: [5.2, 6.2, 7.2] };
++  const presets: Record<string, [number, number, number]> = { '34': [-7, 4.5, 8], front: [0, 2.2, 9.5], low: [-7, 1.25, 8], plaque: [0, 0.25, 4.5], floor: [7, 4.6, 8.5], surface: [4.4, 3.45, 5.2], shore: [2.4, 3.65, 3.8] };
+   if (preset && presets[preset]) { camera.position.set(...presets[preset]); controls.maxPolarAngle = Math.PI * 0.58; }
++  if (preset === 'shore') controls.target.set(.4,2.45,.35);
+   if (preset === 'surface') controls.target.set(0,2.45,0);
+   if (preset === 'plaque') controls.target.set(0, -0.20, 1.95);
+   if (preset === 'floor') controls.target.set(2.7, -0.1, 1.5);
+--- verify/run-l/before/src/lib/waves.ts
++++ src/lib/waves.ts
+@@ -1,15 +1,28 @@
+ import type { Node } from 'three/webgpu';
+-import { Fn, float, vec2, vec3 } from 'three/tsl';
+-/** Directional sine superposition returning (height, dh/dx, dh/dz).
+- * The exact same field drives displacement and its analytic normal. */
+-export const waveField = Fn(([xz, clock, amplitude]: [Node<'vec2'>, Node<'float'>, Node<'float'>]) => {
+-  const h=float(0).toVar(), dx=float(0).toVar(), dz=float(0).toVar();
+-  for(const [x,z,k,a,s] of [[1,.35,5,.016,1.5],[-.45,1,7.5,.010,2],[.7,-.7,12,.005,2.9],[-.9,-.35,18,.003,3.8],[.15,1,3.1,.008,1.1]]) {
+-    const d=vec2(x/Math.hypot(x,z),z/Math.hypot(x,z));
+-    const phase=xz.dot(d).mul(k).sub(clock.mul(s)), strength=amplitude.mul(a);
+-    h.addAssign(phase.sin().mul(strength));
+-    const derivative=phase.cos().mul(strength).mul(k);
+-    dx.addAssign(derivative.mul(d.x));dz.addAssign(derivative.mul(d.y));
++import { vec2, vec3 } from 'three/tsl';
++
++/** Finite deep-water spectrum: longer waves carry the energy; shorter waves are steeper.
++ * Q*A*k stays below one even at maximum agitation (no overturned triangles). */
++export const WATER_SPECTRUM = [
++  [.22, 2.6, .035, .65], [.72, 1.65, .025, .74], [-.25, 1.05, .018, .80],
++  [.98, .66, .011, .84], [-.58, .42, .0065, .88], [.40, .27, .0034, .90],
++] as const;
++
++/** Gerstner trochoids. Tangents are the exact derivatives of the same displaced
++ * position, including horizontal compression; curvature drives refracted-ray focusing. */
++export function gerstnerField(xz: Node<'vec2'>, clock: Node<'float'>, amplitude: Node<'float'>, choppiness: Node<'float'>) {
++  let offset: Node<'vec3'> = vec3(0), tangent: Node<'vec3'> = vec3(1,0,0), binormal: Node<'vec3'> = vec3(0,0,1), curvature: Node<'vec3'> = vec3(0);
++  for (const [angle, wavelength, a, q] of WATER_SPECTRUM) {
++    const d = vec2(Math.cos(angle), Math.sin(angle)), k = 2 * Math.PI / wavelength;
++    const phase = xz.dot(d).mul(k).sub(clock.mul(Math.sqrt(9.81 * k)));
++    const h = phase.sin().mul(amplitude).mul(a), slope = phase.cos().mul(amplitude).mul(a * k);
++    const qa = choppiness.mul(q), horizontal = phase.cos().mul(amplitude).mul(a).mul(qa);
++    offset = offset.add(vec3(d.x.mul(horizontal), h, d.y.mul(horizontal)));
++    const compression = h.mul(k).mul(qa);
++    tangent = tangent.add(vec3(d.x.mul(d.x).mul(compression).negate(), d.x.mul(slope), d.x.mul(d.y).mul(compression).negate()));
++    binormal = binormal.add(vec3(d.x.mul(d.y).mul(compression).negate(), d.y.mul(slope), d.y.mul(d.y).mul(compression).negate()));
++    curvature = curvature.sub(vec3(d.x.mul(d.x), d.x.mul(d.y), d.y.mul(d.y)).mul(h).mul(k * k));
+   }
+-  return vec3(h,dx,dz);
+-});
++  return { offset, tangent, binormal, normal: binormal.cross(tangent).normalize(),
++    jacobian: tangent.x.mul(binormal.z).sub(tangent.z.mul(binormal.x)), curvature };
++}
+--- verify/run-l/before/src/scene/stage.ts
++++ src/scene/stage.ts
+@@ -25,7 +25,7 @@
+   const shadowed = mix(base, color('#08171d'), smoothstep(0.85, 0, distance).mul(0.55));
+   material.colorNode = Fn(() => {
+     const light = vec3(0).toVar();
+-    // Skip the Worley evaluations outside the finite pool; no screen derivatives here.
++    // Skip wave focusing evaluations outside the finite pool; no screen derivatives here.
+     If(pool.mul(amount).greaterThan(0.001), () => { light.assign(causticLight.mul(vec3(0.55, 0.88, 1)).mul(pool).mul(amount).mul(0.30).min(0.42)); });
+     const rippleShade = rippleNormal.dot(sunDirection).sub(sunDirection.y).mul(.9).add(mx_noise_float(positionWorld.mul(45)).mul(.025)).mul(positionWorld.xz.length().mul(-.08).exp()).add(1);
+     return shadowed.mul(float(1).sub(wet.mul(.26))).mul(rippleShade).mul(visibility).add(light.mul(visibility));
+--- verify/run-l/before/src/scene/water-optics.ts
++++ src/scene/water-optics.ts
+@@ -0,0 +1,37 @@
++import type { Node } from 'three/webgpu';
++import { cameraProjectionMatrixInverse, cameraPosition, cameraViewMatrix, float, min, max, getViewPosition, mix, normalWorld, positionWorld, screenUV, vec2, vec3, vec4, viewportDepthTexture, viewportOpaqueMipTexture } from 'three/tsl';
++
++import { TANK, waterHeight, waterNormal } from '../state';
++
++/** Beer–Lambert extinction in linear light (metres), shared by surface, pour and puddle. */
++export const absorbWater = (radiance: Node<'vec3'>, distance: Node<'float'>) => radiance.mul(vec3(.32, .075, .038).mul(distance.max(0)).negate().exp());
++export function waterOptics(thickness?: Node<'float'>) {
++  const view = cameraPosition.sub(positionWorld).normalize();
++  const facing = normalWorld.dot(view).abs().clamp();
++  const fresnel = float(.0204).add(float(1).sub(facing).pow(5).mul(.9796));
++  const normalView = cameraViewMatrix.mul(vec4(normalWorld,0)).xyz;
++  const behind = getViewPosition(screenUV, viewportDepthTexture().r, cameraProjectionMatrixInverse);
++  const surfaceView = cameraViewMatrix.mul(vec4(positionWorld,1)).xyz;
++  // Limit scene-depth path length to the tank, including a camera looking upward
++  // through a side pane: air beyond the surface must never count as water.
++  const ray = positionWorld.sub(cameraPosition).normalize();
++  const safe = (v: Node<'float'>) => v.abs().lessThan(.00001).select(v.lessThan(0).select(-.00001,.00001),v);
++  const direction = vec3(safe(ray.x),safe(ray.y),safe(ray.z));
++  const t0 = vec3(-TANK.width/2,TANK.floor,-TANK.depth/2).sub(cameraPosition).div(direction);
++  const t1 = vec3(TANK.width/2,TANK.top,TANK.depth/2).sub(cameraPosition).div(direction);
++  const near = min(t0,t1), far = max(t0,t1);
++  const entry = max(max(near.x,near.y),near.z).max(0), exit = min(min(far.x,far.y),far.z);
++  const toSurface = positionWorld.sub(cameraPosition).length();
++  const below = cameraPosition.sub(vec3(0,waterHeight,0)).dot(waterNormal).lessThan(0);
++  const tankPath = below.select(toSurface.sub(entry).max(0), behind.sub(surfaceView).length().min(exit.sub(toSurface).max(0)));
++  const path = thickness ? thickness.div(facing.max(.16)) : tankPath.min(6);
++  const offset = normalView.xy.mul(vec2(1, -1)).mul(path.min(2)).mul(.018);
++  const displacedUV = screenUV.add(offset).clamp(.002, .998);
++  // Reject refraction offsets onto opaque foreground silhouettes.
++  const shiftedDepth = getViewPosition(displacedUV, viewportDepthTexture(displacedUV).r, cameraProjectionMatrixInverse);
++  const validUV = mix(screenUV, displacedUV, shiftedDepth.z.lessThan(surfaceView.z.sub(.015)).select(1, 0));
++  const dispersion = offset.mul(float(1).sub(facing).pow(3)).mul(.045);
++  const refracted = vec3(vec4(viewportOpaqueMipTexture(validUV.add(dispersion), float(0)) as Node<'vec4'>).r,
++    vec4(viewportOpaqueMipTexture(validUV, float(0)) as Node<'vec4'>).g, vec4(viewportOpaqueMipTexture(validUV.sub(dispersion), float(0)) as Node<'vec4'>).b);
++  return { fresnel, path, refracted: absorbWater(refracted, path) };
++}
+--- verify/run-l/before/src/scene/lighting.ts
++++ src/scene/lighting.ts
+@@ -1,26 +1,36 @@
+ import { type Node, Color, DirectionalLight, EquirectangularReflectionMapping, HemisphereLight, PMREMGenerator, Scene, Vector3, WebGPURenderer } from 'three/webgpu';
+ import { Fn, float, texture, color, mix, normalWorldGeometry, positionWorld, smoothstep, vec2, vec3 } from 'three/tsl';
+-import { causticsField, createCausticsUniforms } from '../lib/worley';
++import { gerstnerField } from '../lib/waves';
+ import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+-import { simTime, sunDirection, sunElevation, waterHeight, waterNormal } from '../state';
++import { simTime, sunDirection, sunElevation, waterHeight, waterNormal, waterAgitation, waterChoppiness, TANK } from '../state';
+ 
+ export const signedWaterDistance = positionWorld.sub(vec3(0, waterHeight, 0)).dot(waterNormal);
+ export const waterDepth = signedWaterDistance.negate().max(0);
+ export const submerged = smoothstep(0, 0.09, waterDepth);
+ // Project a world-space point back along the sun ray onto a horizontal reference plane.
+ export const sunProjection = positionWorld.xz.sub(sunDirection.xz.mul(positionWorld.y.div(sunDirection.y.max(0.2))));
+-const caustics = createCausticsUniforms();
+-caustics.scaleA.value = 2.3; caustics.scaleB.value = 2.65;
+-caustics.sharpness.value = 36; caustics.intensity.value = 2.4;
+-caustics.rgbOffset.value = 0.006;
+-// One light-space basis for refraction: long axis points away from the sun.
++// Inverse projected ray footprint: Snell's small-slope approximation maps a surface
++// Hessian into convergence of the refracted sun rays. Same spectrum/time as the mesh,
++// bounded focusing rather than a singular caustic (no Worley on the main page).
+ export const causticDirection = sunDirection.xz.negate().div(sunDirection.xz.length().max(.001));
+-const lightPoint = sunProjection.add(waterNormal.xz);
+-export const causticCoordinates = vec2(lightPoint.dot(causticDirection).mul(.43).sub(simTime.mul(.16)), lightPoint.dot(vec2(causticDirection.y.negate(),causticDirection.x)).mul(1.25));
+-export const causticLight = causticsField(causticCoordinates, simTime.mul(.18), { ...caustics, level: 3, depth: waterDepth })
+-  .mul(sunElevation.mul(0.6).add(0.4)).mul(waterDepth.mul(-0.16).exp());
+-// Flat terrain normals keep projected sunlight off steep, back-facing rock.
++// Linearize Snell's law about the mean plane, including oblique incidence.
++// Its horizontal derivative has a sun-aligned anisotropic term, shared by the floor.
++const eta = .7502, sy = sunDirection.y.max(.2);
++const transmittedY = float(1).sub(float(1).sub(sy.mul(sy)).mul(eta*eta)).sqrt();
++const entryPoint = positionWorld.xz.add(sunDirection.xz.mul(waterDepth.mul(eta).div(transmittedY)));
++const field = gerstnerField(entryPoint, simTime, waterAgitation.mul(.75).add(1).mul(waterHeight.sub(TANK.floor).div(.18).clamp()), waterChoppiness);
++const isotropic = transmittedY.sub(sy.mul(eta)).div(transmittedY);
++const oblique = sy.mul(eta*eta).div(transmittedY).add(eta).mul(eta).div(transmittedY.pow(2));
++const a = isotropic.add(sunDirection.x.pow(2).mul(oblique)), b = sunDirection.x.mul(sunDirection.z).mul(oblique), d = isotropic.add(sunDirection.z.pow(2).mul(oblique));
++const h = field.curvature, travel = waterDepth.min(2.5);
++const j00 = float(1).add(a.mul(h.x).add(b.mul(h.y)).mul(travel));
++const j01 = a.mul(h.y).add(b.mul(h.z)).mul(travel);
++const j10 = b.mul(h.x).add(d.mul(h.y)).mul(travel);
++const j11 = float(1).add(b.mul(h.y).add(d.mul(h.z)).mul(travel));
++const determinant = j00.mul(j11).sub(j01.mul(j10));
++const focus = float(1).div(determinant.abs().max(.23)).sub(1).max(0).min(2.8);
++export const causticLight = vec3(.40,.80,.92).mul(focus).mul(.30).mul(waterDepth.mul(-.30).exp()).mul(smoothstep(TANK.floor,TANK.floor+.2,waterHeight)).mul(submerged);
+ export const rockCaustics = causticLight.mul(normalWorldGeometry.dot(sunDirection).max(0))
+   .mul(smoothstep(0.15, 0.8, normalWorldGeometry.y)).mul(0.24);
+ export function underwaterColor(base: Node<'vec3'>) {
+--- verify/run-l/before/src/scene/water.ts
++++ src/scene/water.ts
+@@ -1,61 +1,97 @@
+-import { BoxGeometry, Color, DoubleSide, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Scene, Sphere, Vector3, Vector4 } from 'three/webgpu';
+-import { Fn, Discard, float, uniform, min, smoothstep, transformNormalToView, output, vec4, color, positionLocal, positionWorld, cameraPosition, normalWorld, vec3 } from 'three/tsl';
+-import { waveField } from '../lib/waves';
+-import { signedWaterDistance, waterDepth } from './lighting';
+-import { simTime, state, TANK, waterHeight, waterNormal } from '../state';
++import { BoxGeometry, DataTexture, DoubleSide, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Scene, Sphere, Vector3, Vector4 } from 'three/webgpu';
++import { Fn, Discard, float, uniform, min, smoothstep, transformNormalToView, output, vec4, color, positionGeometry, positionWorld, cameraPosition, normalWorld, vec3, vec2, mix, mx_noise_float, mx_noise_vec3, reflector, screenUV, texture } from 'three/tsl';
++import { gerstnerField } from '../lib/waves';
++import { waterOptics } from './water-optics';
++import { signedWaterDistance } from './lighting';
++import { simTime, state, TANK, waterHeight, waterNormal, waterAgitation, waterChoppiness, sunDirection } from '../state';
+ 
+-export function createWater(scene: Scene) {
+-  const surfaceMaterial = new MeshPhysicalNodeMaterial({ color: '#010709', transmission: 1, roughness: 0.035, metalness: 0, ior: 1.333, thickness: 0.10, attenuationColor: new Color('#2d9da9'), attenuationDistance: 5, side: DoubleSide, transparent: true, depthWrite: false });
++export function createWater(scene: Scene, terrain: DataTexture) {
++  const surfaceMaterial = new MeshPhysicalNodeMaterial({ color: '#000000', roughness: .065, metalness: 0, ior: 1.333, side: DoubleSide, transparent: true, depthWrite: false, envMapIntensity: .65 });
+   surfaceMaterial.fog = false;
+-  const agitation = uniform(0);
++  const agitation = waterAgitation;
+   const ripples = Array.from({ length: 4 }, () => uniform(new Vector4(0, 0, -100, 0)));
+   let rippleIndex = 0;
+-  const field = Fn(() => {
+-    const xz=positionLocal.xz;
+-    const wave=waveField(xz,simTime,agitation.mul(2).add(1)).toVar();
+-    const direction=waterNormal.xz.div(waterNormal.xz.length().max(0.0001));
+-    const phase=xz.dot(direction).mul(4).sub(simTime.mul(7)), strength=agitation.mul(.035);
+-    wave.x.addAssign(phase.sin().mul(strength));
+-    wave.yz.addAssign(direction.mul(phase.cos().mul(strength).mul(4)));
+-    for(const ripple of ripples) {
+-      const age=simTime.sub(ripple.z).max(0), delta=xz.sub(ripple.xy), radius=delta.length().max(.0001);
+-      const ring=radius.sub(age.mul(1.35)), envelope=ring.mul(ring).mul(-7).exp().mul(age.mul(-1.3).exp()).mul(ripple.w).mul(simTime.greaterThanEqual(ripple.z).select(1,0)).mul(.012);
+-      wave.x.addAssign(ring.mul(22).sin().mul(envelope));
+-      const derivative=ring.mul(22).cos().mul(22).sub(ring.mul(22).sin().mul(ring).mul(14)).mul(envelope);
+-      wave.yz.addAssign(delta.div(radius).mul(derivative));
++  const relief = waterHeight.sub(TANK.floor).div(.18).clamp();
++  const xz = positionGeometry.xz;
++  const g = gerstnerField(xz, simTime, agitation.mul(.75).add(1).mul(relief), waterChoppiness.mul(agitation.mul(.4).add(1)));
++  const rings = Fn(() => {
++    const result = vec3(0).toVar();
++    for (const ripple of ripples) {
++      const age = simTime.sub(ripple.z).max(0), delta = xz.sub(ripple.xy), radius = delta.length().max(.0001);
++      const ring = radius.sub(age.mul(1.35));
++      const envelope = ring.mul(ring).mul(-7).exp().mul(age.mul(-1.3).exp()).mul(ripple.w).mul(simTime.greaterThanEqual(ripple.z).select(1,0)).mul(.012).mul(relief);
++      result.x.addAssign(ring.mul(22).sin().mul(envelope));
++      const derivative = ring.mul(22).cos().mul(22).sub(ring.mul(22).sin().mul(ring).mul(14)).mul(envelope);
++      result.yz.addAssign(delta.div(radius).mul(derivative));
+     }
+-    // Fade relief as the tank empties; conserve the hydraulic mean plane.
+-    return wave.mul(waterHeight.sub(TANK.floor).div(.15).clamp());
++    // A travelling slosh along the spring's tilt direction.
++    const direction = waterNormal.xz.div(waterNormal.xz.length().max(.0001));
++    const phase = xz.dot(direction).mul(4).sub(simTime.mul(7));
++    result.x.addAssign(phase.sin().mul(agitation).mul(.025));
++    result.yz.addAssign(direction.mul(phase.cos()).mul(agitation).mul(.1));
++    return result;
+   })();
+-  const slope=waterNormal.xz.div(waterNormal.y.max(.2));
+-  surfaceMaterial.positionNode=vec3(positionLocal.x,waterHeight.sub(positionLocal.xz.dot(slope)).add(field.x),positionLocal.z);
+-  surfaceMaterial.normalNode=transformNormalToView(vec3(slope.x.sub(field.y),1,slope.y.sub(field.z)).normalize());
+-  const fresnel=float(1).sub(normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).abs()).clamp().pow(5);
+-  surfaceMaterial.opacityNode=fresnel.mul(.52).add(cameraPosition.y.lessThan(waterHeight).select(.10,.23)).min(.85);
+-  surfaceMaterial.envMapIntensity=1.65;
+-  const wallDistance=min(float(TANK.width/2-.026).sub(positionWorld.x.abs()),float(TANK.depth/2-.026).sub(positionWorld.z.abs()));
+-  const meniscus=color('#b7e9ef').mul(float(1).sub(smoothstep(.002,.018,wallDistance))).mul(.20);
+-  surfaceMaterial.emissiveNode=meniscus.add(color('#075462').mul(.14));
+-  surfaceMaterial.outputNode=vec4(output.rgb.div(output.rgb.div(1.1).add(1)),output.a);
+-  const geometry = new PlaneGeometry(TANK.width - 0.052, TANK.depth - 0.052, 128, 80);
+-  geometry.rotateX(-Math.PI / 2);
+-  // One conservative bound covers every spring-constrained position of the GPU plane.
+-  geometry.boundingSphere = new Sphere(new Vector3(0, (TANK.floor + TANK.top) / 2, 0), Math.hypot(TANK.width / 2, TANK.depth / 2, (TANK.top - TANK.floor) / 2));
+-  const surface = new Mesh(geometry, surfaceMaterial);
+-  surface.renderOrder = 3; scene.add(surface);
+-
+-  const volumeMaterial = new MeshPhysicalNodeMaterial({ color: '#bbdfd8', transmission: 1, roughness: 0.04, ior: 1.333, thickness: 0.22, attenuationColor: new Color('#429b91'), attenuationDistance: 1, side: DoubleSide, transparent: true, opacity: 0.10, depthWrite: false });
+-  volumeMaterial.fog = false;
+-  volumeMaterial.emissiveNode = color('#b4e4de').mul(signedWaterDistance.add(0.004).div(0.006).abs().pow(2).negate().exp()).mul(0.5);
+-  volumeMaterial.colorNode = Fn(() => {
+-    Discard(signedWaterDistance.greaterThan(0));
+-    return color('#89c6bc').rgb.mul(vec3(0.16, 0.025, 0.018).mul(waterDepth).negate().exp());
++  const slope = waterNormal.xz.div(waterNormal.y.max(.2));
++  // Pin horizontal displacement to zero at the glass, using the derivative of the
++  // pinning function in both tangents. The boundary stays watertight as crests travel.
++  const ax = float(TANK.width/2-.026).sub(xz.x.abs()).div(.18).clamp();
++  const az = float(TANK.depth/2-.026).sub(xz.y.abs()).div(.18).clamp();
++  const wx = ax.mul(ax).mul(float(3).sub(ax.mul(2))), wz = az.mul(az).mul(float(3).sub(az.mul(2)));
++  const edge = wx.mul(wz);
++  const ex = ax.mul(float(1).sub(ax)).mul(-6/.18).mul(xz.x.sign()).mul(wz);
++  const ez = az.mul(float(1).sub(az)).mul(-6/.18).mul(xz.y.sign()).mul(wx);
++  const displaced = xz.add(g.offset.xz.mul(edge));
++  surfaceMaterial.positionNode = vec3(displaced.x, waterHeight.sub(displaced.dot(slope)).add(g.offset.y).add(rings.x), displaced.y);
++  const tx = g.tangent.xz.sub(vec2(1,0)).mul(edge).add(vec2(1,0)).add(g.offset.xz.mul(ex));
++  const tz = g.binormal.xz.sub(vec2(0,1)).mul(edge).add(vec2(0,1)).add(g.offset.xz.mul(ez));
++  const tangent = vec3(tx.x, g.tangent.y.add(rings.y).sub(tx.dot(slope)), tx.y);
++  const binormal = vec3(tz.x, g.binormal.y.add(rings.z).sub(tz.dot(slope)), tz.y);
++  const baseNormal = binormal.cross(tangent).normalize().toVarying();
++  // Two decorrelated gradient-noise octaves supply capillary sparkle, not the base normal.
++  const fineA = mx_noise_vec3(vec3(positionWorld.xz.mul(24).add(simTime.mul(.22)), simTime.mul(.13)));
++  const fineB = mx_noise_vec3(vec3(positionWorld.xz.mul(53).sub(simTime.mul(.34)), 7.1));
++  surfaceMaterial.normalNode = transformNormalToView(baseNormal.add(vec3(fineA.x,0,fineA.y).mul(.028)).add(vec3(fineB.x,0,fineB.y).mul(.012)).normalize());
++  const optics = waterOptics();
++  const reflection = reflector({ resolutionScale: .25, bounces: false, samples: 0 });
++  reflection.target.rotation.x = -Math.PI/2; reflection.target.position.y = TANK.base; scene.add(reflection.target);
++  const reflectedUV = screenUV.flipX().add(baseNormal.xz.mul(vec2(-.028,.028))).clamp(.002,.998);
++  const shoreDepth = positionWorld.y.sub(texture(terrain, positionWorld.xz.div(vec2(6,3.5)).add(.5)).r);
++  const wallDistance = min(float(TANK.width/2-.026).sub(positionWorld.x.abs()), float(TANK.depth/2-.026).sub(positionWorld.z.abs()));
++  const foamNoise = mx_noise_float(vec3(positionWorld.xz.mul(17).add(simTime.mul(.15)),simTime.mul(.25))).mul(.5).add(.5);
++  const shoreline = smoothstep(.16,.02,shoreDepth).mul(smoothstep(-.025,.02,shoreDepth));
++  const wallFoam = smoothstep(.055,.004,wallDistance).mul(.24);
++  const crest = smoothstep(.68,.40,g.jacobian.toVarying()).mul(agitation.mul(.65).add(.18));
++  const foam = shoreline.add(wallFoam).add(crest).mul(smoothstep(.30,.66,foamNoise)).mul(relief).min(.7);
++  const meniscus = color('#b7e9ef').mul(float(1).sub(smoothstep(.002,.018,wallDistance))).mul(.14);
++  const backlit = baseNormal.dot(sunDirection).negate().max(0).mul(g.offset.y.toVarying().add(.015).max(0)).mul(3);
++  const halfLight = sunDirection.add(cameraPosition.sub(positionWorld).normalize()).normalize();
++  const sunGlow = normalWorld.dot(halfLight).max(0).pow(70).mul(.028);
++  const transport = optics.refracted.mul(float(1).sub(optics.fresnel));
++  const reflected = reflection.sample(reflectedUV).rgb.mul(optics.fresnel).mul(.85);
++  const profile = new URLSearchParams(location.search).get('waterProfile');
++  surfaceMaterial.emissiveNode = Fn(() => {
++    Discard(shoreDepth.lessThan(-.035));
++    return mix(transport.add(profile === 'no-reflection' ? vec3(0) : reflected).add(color('#087b78').mul(backlit)), color('#d5eee8'), foam).add(meniscus).add(color('#ffe5b8').mul(sunGlow));
+   })();
+-  // Beer–Lambert transmittance: clear just below the plane, denser teal at depth.
+-  volumeMaterial.attenuationColorNode = vec3(0.34, 0.10, 0.085).mul(waterDepth).negate().exp();
+-  const volume = new Mesh(new BoxGeometry(TANK.width - 0.10, TANK.top - TANK.floor - 0.02, TANK.depth - 0.10), volumeMaterial);
+-  volume.position.y = (TANK.top + TANK.floor) / 2; volume.renderOrder = 2; scene.add(volume);
+-
++  surfaceMaterial.opacityNode = float(1);
++  surfaceMaterial.outputNode = vec4(output.rgb.div(output.rgb.div(1.5).add(1)), output.a);
++  const geometry = new PlaneGeometry(TANK.width-.052, TANK.depth-.052, 128, 80); geometry.rotateX(-Math.PI/2);
++  geometry.boundingSphere = new Sphere(new Vector3(0,(TANK.floor+TANK.top)/2,0),Math.hypot(TANK.width/2,TANK.depth/2,(TANK.top-TANK.floor)/2));
++  const surface = new Mesh(geometry,surfaceMaterial); surface.name = 'Gerstner water surface'; surface.renderOrder = 3; scene.add(surface);
++  // The water side is optically clear: path extinction belongs to the ray through
++  // the surface, not an additional milky tint stacked over the island.
++  const volumeMaterial = new MeshPhysicalNodeMaterial({ color:'#010709', transmission:1, roughness:.025, ior:1.333, thickness:.035, side:DoubleSide, transparent:true, opacity:.035, depthWrite:false });
++  volumeMaterial.colorNode = Fn(() => { Discard(signedWaterDistance.greaterThan(0)); return color('#010709'); })();
++  volumeMaterial.emissiveNode = color('#b4e4de').mul(signedWaterDistance.div(.006).abs().pow(2).negate().exp()).mul(.22);
++  const volume = new Mesh(new BoxGeometry(TANK.width-.10,TANK.top-TANK.floor-.02,TANK.depth-.10),volumeMaterial);
++  volume.position.y=(TANK.top+TANK.floor)/2; volume.renderOrder=2; scene.add(volume);
++  const reflectionNormal = new Vector3(0,0,1);
++  const syncOptics = () => {
++    reflection.target.position.y = waterHeight.value;
++    reflection.target.quaternion.setFromUnitVectors(reflectionNormal,waterNormal.value);
++    reflection.target.updateMatrixWorld();
++    if (profile === 'off') surface.visible = volume.visible = false;
++  };
+   let height = TANK.base, drainHeight = TANK.base, draining = false, fast = false;
+   const tilt = new Vector3(), tiltVelocity = new Vector3(), targetTilt = new Vector3(), tiltDelta = new Vector3();
+   function ripple(point: Vector3, strength = 1) {
+@@ -81,16 +117,16 @@
+     const extent = Math.abs(tilt.x) * TANK.width / 2 + Math.abs(tilt.z) * TANK.depth / 2;
+     if (extent > Math.min(height - TANK.floor, TANK.top - height) - 0.01) tilt.multiplyScalar(0.8);
+     waterHeight.value = height; waterNormal.value.set(tilt.x, 1, tilt.z).normalize();
+-    surface.visible = volume.visible = height > TANK.floor + 0.015;
++    surface.visible = volume.visible = height > TANK.floor + 0.015; syncOptics();
+   }
+-  return { surface, slosh, ripple, update,
++  return { surface, get diagnostics() { return { waves: 6, resolution: [128,80], agitation: agitation.value, choppiness: waterChoppiness.value, reflection: 'planar-quarter', reflectionScale: .25 }; }, slosh, ripple, update,
+     capture() { return { height, normal: waterNormal.value.toArray(), agitation: agitation.value, ripples: ripples.map(r=>r.value.toArray()) }; },
+     restore(a: { height: number; normal: number[]; agitation: number; ripples: number[][] }, b: { height: number; normal: number[]; agitation: number; ripples: number[][] }, t: number) {
+       ripples.forEach((r,i)=>r.value.fromArray((t<.5?a:b).ripples[i]));
+       agitation.value = a.agitation * (1-t) + b.agitation * t;
+       height = a.height * (1 - t) + b.height * t; waterHeight.value = height;
+       waterNormal.value.fromArray(a.normal).lerp(new Vector3().fromArray(b.normal), t).normalize();
+-      surface.visible = volume.visible = height > TANK.floor + 0.015;
++      surface.visible = volume.visible = height > TANK.floor + 0.015; syncOptics();
+     },
+     drain(bottom: number, full = false) {
+     drainHeight = Math.max(TANK.floor, Math.min(drainHeight, bottom)); draining = true; fast = full; agitation.value = full ? 1 : .7;
+--- verify/run-l/before/src/scene/spill.ts
++++ src/scene/spill.ts
+@@ -1,7 +1,8 @@
+-import { type Node, AdditiveBlending, BoxGeometry, CircleGeometry, DoubleSide, DynamicDrawUsage, InstancedBufferAttribute, Mesh, MeshPhysicalNodeMaterial, PointsNodeMaterial, Scene, Sprite, Vector3 } from 'three/webgpu';
+-import { atan, bumpMap, mx_noise_float, normalWorld, cameraPosition, positionLocal, transformNormalToView, cameraViewMatrix, color, float, instancedBufferAttribute, mix, output, positionWorld, smoothstep, uniform, uv, vec2, vec3, vec4 } from 'three/tsl';
++import { type Node, AdditiveBlending, BoxGeometry, PlaneGeometry, DoubleSide, DynamicDrawUsage, InstancedBufferAttribute, Mesh, MeshPhysicalNodeMaterial, PointsNodeMaterial, Scene, Sprite, Vector3 } from 'three/webgpu';
++import { atan, bumpMap, mx_noise_float, normalWorld, cameraPosition, positionGeometry, transformNormalToView, cameraViewMatrix, color, float, instancedBufferAttribute, mix, output, positionWorld, smoothstep, uniform, uv, vec2, vec3, vec4 } from 'three/tsl';
+ import { random, STAGE_Y, simTime, TANK, waterHeight, wetFootprints } from '../state';
+-import { waveField } from '../lib/waves';
++import { gerstnerField } from '../lib/waves';
++import { waterOptics } from './water-optics';
+ import type { Opening } from './tank';
+ 
+ /** Split drained tank volume by width × sqrt(head), excluding dry sills in each height interval. */
+@@ -34,22 +35,23 @@
+   const sprites = new Sprite(material); sprites.count = count; sprites.frustumCulled = false; scene.add(sprites);
+   type Drop = { p: Vector3; v: Vector3; born: number; life: number; size: number; splash: boolean };
+   const drops: (Drop | undefined)[] = Array(count); let cursor = 0;
+-  const sheetMaterial = new MeshPhysicalNodeMaterial({ color: '#02141b', transmission: .65, ior: 1.33, roughness: .14, thickness: .04, side: DoubleSide, transparent: true, depthWrite: false, envMapIntensity:.55 });
++  const sheetMaterial = new MeshPhysicalNodeMaterial({ color: '#000000', transmission: 0, ior: 1.33, roughness: .14, thickness: .04, side: DoubleSide, transparent: true, depthWrite: false, envMapIntensity:.55 });
+   const crossWarp=mx_noise_float(vec3(uv().mul(3),simTime.mul(.3))).mul(2.5);
+   const streak=mx_noise_float(vec3(uv().x.mul(9).add(crossWarp),uv().y.mul(7).sub(simTime.mul(2.6)),simTime.mul(.35))).mul(.5).add(.5);
+   const fine=mx_noise_float(vec3(uv().x.mul(31).add(4),uv().y.mul(9).sub(simTime.mul(4)),2.7)).mul(.5).add(.5);
+   const fresnel=float(1).sub(normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).abs()).clamp().pow(5).mul(.96).add(.04);
+   sheetMaterial.normalNode=bumpMap(streak.add(fine.mul(.25)),float(.035));
+   sheetMaterial.outputNode=vec4(output.rgb.div(output.rgb.div(.9).add(1)),output.a);
+-  const puddleMaterial = new MeshPhysicalNodeMaterial({ color: '#254d65', transmission: 0.18, thickness: 0.025, ior: 1.33, metalness: 0, roughness: 0.17, specularIntensity: 0.25, clearcoat: 0.12, clearcoatRoughness: 0.25, transparent: true, opacity: 0.52, depthWrite: false });
++  const puddleMaterial = new MeshPhysicalNodeMaterial({ color: '#000000', transmission: 0, thickness: 0.025, ior: 1.33, metalness: 0, roughness: 0.17, specularIntensity: 0.25, clearcoat: 0.12, clearcoatRoughness: 0.25, transparent: true, opacity: 0.52, depthWrite: false });
+   // Keep both water and clearcoat sun reflections below the 1.3 bloom threshold.
+   // Rewind restores transforms only; this bounded material serves both directions.
+   puddleMaterial.fog = false;
+   puddleMaterial.outputNode = vec4(output.rgb.div(output.rgb.div(vec3(0.10, 0.18, 0.25)).add(1)), output.a);
+   puddleMaterial.envMapIntensity = 0.85;
++  const puddleOptics = waterOptics(float(.032));
+   const radiusUV = uv().sub(0.5).length();
+   const rim = radiusUV.sub(0.46).div(0.008).abs().pow(2).negate().exp();
+-  const puddleEmission = color('#8eb4c7').mul(rim.mul(0.12)); puddleMaterial.emissiveNode = puddleEmission;
++  const puddleEmission = puddleOptics.refracted.mul(float(1).sub(puddleOptics.fresnel)).mul(.46).add(color('#8eb4c7').mul(rim.mul(0.12))); puddleMaterial.emissiveNode = puddleEmission;
+   puddleMaterial.opacityNode = smoothstep(0.5, 0.43, radiusUV).mul(0.64);
+   type Emitter = { opening: Opening; sheet: Mesh<BoxGeometry, MeshPhysicalNodeMaterial>; puddle: Mesh; volume: number; carry: number; stopped: number; strength: number; wet: boolean; rippleAt: number; started: number; front: { value: number }; flow: { value: number }; impact: { value: Vector3 } };
+   const emitters = new Map<number, Emitter>();
+@@ -65,15 +67,21 @@
+     const uvs=geometry.getAttribute('uv');
+     for(let i=0;i<uvs.count;i++)uvs.setXY(i,base[i*3]+.5,base[i*3+2]+.5);
+     const sheet=new Mesh(geometry,sheetMaterial.clone());
+-    const edge=smoothstep(0,.07,uv().x).mul(smoothstep(1,.93,uv().x));
++    const fray = streak.sub(.5).mul(.035).mul(uv().y);
++    const edge=smoothstep(fray,fray.add(.07),uv().x).mul(smoothstep(float(1).sub(fray),float(.93).sub(fray),uv().x));
+     const reach=smoothstep(front.add(.045),front.sub(.045),uv().y);
+     const tip=smoothstep(1,.86,uv().y);
+     const foam=smoothstep(.48,.75,streak.mul(.7).add(fine.mul(.3)).add(uv().y.mul(.26))).mul(flow.mul(.8).add(.2));
+-    const body=streak.mul(.17).add(.32).add(foam.mul(.20));
+-    sheet.material.opacityNode=fresnel.add(body).min(.9).mul(edge).mul(reach).mul(tip).mul(flow.min(1));
+-    sheet.material.emissiveNode=mix(color('#08758a'),color('#d9f3fa'),foam).mul(body).mul(1.15);
++    const thickness = flow.mul(.075).add(.006).mul(float(1).sub(uv().y.mul(.78)));
++    const optics = waterOptics(thickness);
++    const aerated = uv().y.sub(front).div(.065).pow(2).negate().exp().mul(flow).mul(.55);
++    const froth = foam.mul(.65).add(aerated).min(.85);
++    const body=streak.mul(.17).add(.32).add(froth.mul(.20));
++    sheet.material.opacityNode=fresnel.add(body).add(.28).min(.96).mul(edge).mul(reach).mul(tip).mul(flow.min(1));
++    sheet.material.emissiveNode=mix(optics.refracted.mul(float(1).sub(optics.fresnel)).add(color('#046579').mul(flow).mul(.20)),color('#d9f3fa'),froth);
++    sheet.material.thicknessNode=thickness;
+     sheet.frustumCulled=false;sheet.renderOrder=4;scene.add(sheet);
+-    const puddleGeometry=new CircleGeometry(1,96,0,Math.PI*2);puddleGeometry.rotateX(-Math.PI/2);
++    const puddleGeometry=new PlaneGeometry(2,2,48,48);puddleGeometry.rotateX(-Math.PI/2);
+     const puddle=new Mesh(puddleGeometry,puddleMaterial.clone());
+     puddle.position.y=STAGE_Y+.026+opening.wall*.008;puddle.scale.setScalar(.001);
+     puddle.renderOrder=10+opening.wall;
+@@ -85,10 +93,12 @@
+     const distance = positionWorld.xz.sub(impact.xz).length();
+     const age = simTime.mul(1.3).fract();
+     const rings = distance.sub(age.mul(0.85)).div(0.03).abs().pow(2).negate().exp().mul(float(1).sub(age)).mul(flow.min(1));
+-    const wave=waveField(positionWorld.xz.mul(1.7),simTime.mul(.6),float(.16));
++    
++    const puddleWave=gerstnerField(positionGeometry.xz.mul(2),simTime.mul(.6),float(.08),float(.5));
++    (puddle.material as MeshPhysicalNodeMaterial).positionNode=positionGeometry.add(puddleWave.offset.mul(smoothstep(.5,.40,radiusUV)));
+     const ringSlope=distance.sub(age.mul(.85)).div(.03).mul(-2/.03).mul(rings).mul(.003);
+     const radial=positionWorld.xz.sub(impact.xz).div(distance.max(.0001));
+-    (puddle.material as MeshPhysicalNodeMaterial).normalNode=transformNormalToView(vec3(wave.y.mul(-1.7).sub(radial.x.mul(ringSlope)),1,wave.z.mul(-1.7).sub(radial.y.mul(ringSlope))).normalize());
++    (puddle.material as MeshPhysicalNodeMaterial).normalNode=transformNormalToView(vec3(puddleWave.normal.x.div(puddleWave.normal.y.max(.1)).mul(2).sub(radial.x.mul(ringSlope)),1,puddleWave.normal.z.div(puddleWave.normal.y.max(.1)).mul(2).sub(radial.y.mul(ringSlope))).normalize());
+     (puddle.material as MeshPhysicalNodeMaterial).emissiveNode=puddleEmission.add(color('#86bed7').mul(rings).mul(.075));
+     scene.add(puddle);
+     emitters.set(opening.wall, { opening, sheet, puddle, volume: 0, carry: 0, stopped: -1, strength: 0, wet: waterHeight.value > opening.bottom, rippleAt: simTime.value, started: simTime.value, front, flow, impact });

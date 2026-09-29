@@ -1,0 +1,6 @@
+
+> tideline-glass-aquarium@1.0.0 preview
+> vite preview --host 0.0.0.0 --port 4173
+
+  ➜  Local:   http://localhost:4173/
+  ➜  Network: http://192.168.0.138:4173/  en0

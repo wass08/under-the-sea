@@ -1,0 +1,1 @@
+PASS exact terrain baselines (seeds 42, 166, 57): L3 Poisson, island shaping/erosion/carve/biomes/layout, old L1 → new L2, old L2 → L3 random; all geometry attributes, sampling topology, heights, faces and diagnostics identical.

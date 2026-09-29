@@ -1,0 +1,37 @@
+Aquarium-only adaptive budgets; Lab profile and src/lab/* unchanged.
+100/80/65/50 would total 649. The tuned target reserves capacity for protected core/ring/Lloyd seeds; the measured sequence totals 560.
+Space retains its existing behavior: one wall from pristine, or every cracked wall. Patterns are budgeted sequentially at fracture and reused by Space.
+Earlier bodies keep their handles, geometry and mass. Reduced patterns preserve every original 0.28-radius strike-core seed, ring anchors, and outer Lloyd relaxation.
+Requested fractions: 1, 126/220, .45, .4. Core/ring/Lloyd protection imposes minimum counts on walls 3 and 4.
+walls wall cells applied-fraction core-bodies live-after-crack total-after-Space
+1 0 220 1.0000 72 72 220
+2 2 126 0.5727 76 148 346
+3 1 101 0.4591 84 232 447
+4 3 113 0.5136 99 331 560
+before: 880 bodies; four-wall median FPS airborne 59.524, settled 59.88; mean physics 14.712 ms/frame; mean frame 23.741 ms.
+after: 560 bodies; four-wall median FPS airborne 59.524, settled 59.88; mean physics 6.357 ms/frame; mean frame 18.154 ms.
+Measurement: same build, 1920x1080 at DPR 1.5; airborne .1-2 s, settled 8-10 s. Baseline uses ?wallBudget=full.
+Low-energy multi-wall piles use stronger grounded quiet damping (32/120) after the existing support/quiet test. No manual sleep, pose freeze, or merging; single-wall and Lab defaults unchanged.
+Pond fix: old order 10+wall covered transparent, read-only-depth shards at order 5. Pond now -4+wall*.01, 0.002 scene units above floor with polygon offset; depthWrite=false/depthTest=true. Water 3, cracks/sheets 4, shards 5 remain ordered. Shard transmission samples the opaque scene; FrontSide shards composite in the transparent pass after the pond.
+PASS main-page single-wall trajectories: all 300 physics steps bit-identical with full and adaptive budgets.
+PASS four-wall budgets: 560 bodies after Space; existing flying fragments untouched; all four core bursts captured at 0.3 s.
+PASS above-water crack: no jet/drips, no drainage
+PASS one crack per wall
+PASS four cracks: water drained from 1.5500814354245807 to lowest sill 0.6514679817558638; spilling stopped
+PASS four-wall full break: 560 bodies, 49 draw calls, 60 FPS
+PASS adaptive launch budget: 560 single-cell bodies, zero awake by 5 s
+PASS reset mid-spill: reverse audio, water rises, frozen physics, 0.15× rewind, second Reset skips to pristine
+PASS pond under shards: pixel 1134,572 RGB 129,141,146; glass-last 129,141,146, pond-last 40,52,64; floor depth-testing retained
+PASS reset after four-wall break; zero console errors
+PASS aquarium profile: all 300 steps of positions, rotations and linear/angular velocities are bit-identical to pre-tuning sources.
+PASS aquarium wall budgets: 220/126/101/113 = 560 independent cells; protected strike seeds, ring anchors, full coverage and deterministic patterns.
+PASS aquarium first-wall pattern: all seeds, polygons and vertex order bit-identical at 100%.
+PASS library: deterministic grid/random/Poisson sampling, shared analytic heights, Lab erosion/carving off, grid circumcircles/neighbours/resolution, upward normals, mask, variable-radius spacing, circumcircle, masked Lloyd, fracture coverage/density/rings/centroids, Rapier freeze/slow-motion/settling.
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, pending audio cancellation.
+PASS Run K: shared release, 10× density invariance for linear/angular launch, bounded spin, rotated pane normals, level-dependent falloff, disposal.
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS: "eight camera presets, Run L Gerstner waves/planar reflection/shore foam and depth-aware pour, stable puddle frames, unified floor light, saturation gain, underwater contrast >=1.8, bubbles/pop/reset, submerged motes, draining floor caustics, logo breakpoints, accessible hover/focus/touch spoiler, trimmed same-frame audio, crack/spill/sill, physics cap, 3–4s/8–10s rest and native sleep by 5s, 0.15× clock, 3.2s rewind with three distinct stages and skip, drag, branding, responsive layout, WebGPU guard"
+four-wall-budget.png: four strikes staged through the normal crack path, followed by Space; captured at 0.3006 s. A local dense spray remains on wall four, with larger outer plates; white water jets also appear.
+pond-under-shards.png: single-wall Space at about 3 s, low landing view. Glass faces and chips draw above the pond; overlapping glass partly obscures its outline.
+TypeScript and dist-perf Vite build PASS.
+Cleanup: dist-perf removed; preview on port 4175 stopped.

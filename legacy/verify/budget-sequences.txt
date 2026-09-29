@@ -1,0 +1,7 @@
+PASS main-page single-wall trajectories: all 300 physics steps bit-identical with full and adaptive budgets.
+walls wall cells fraction core live-after-crack total-after-Space
+1 0 220 1.0000 72 72 220
+2 2 126 0.5727 76 148 346
+3 1 101 0.4591 84 232 447
+4 3 113 0.5136 99 331 560
+PASS four-wall budgets: 560 bodies after Space; existing flying fragments untouched; all four core bursts captured at 0.3 s.

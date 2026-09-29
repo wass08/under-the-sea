@@ -1,0 +1,11 @@
+Island diff: PASS generateIslandTerrain(166) positions / biome / biomeWeights JSON byte-identical, 0 differences
+Lab L3 diff: PASS positions / biome byte-identical, 0 differences (erosion and carving were already off)
+L1: 1521 sampled vertices, 2888 triangles, 8664 flat-shaded vertices
+L2: 1656 sampled vertices, 3154 triangles, 9462 flat-shaded vertices
+L3: 1777 sampled vertices, 3396 triangles, 10188 flat-shaded vertices
+Reveals: PASS wireframe / seeds / circumcircles / biome regions / sea level toggled off and on at L1, L2, L3; no browser errors
+lab-L1.png: diagonal hatching visible on the front mountain slopes; stepped ridge silhouette.
+lab-L2.png: irregular broad facets and thin slivers visible on the central mountains.
+lab-L3.png: cleaner, more evenly spaced ridge facets; terrain geometry unchanged from the saved before image. The background color differs from the older capture.
+lab-L1-wire.png: regular grid and consistent diagonal splits visible across mountains and plains.
+lab-L2-wire.png: clumps, large gaps, and narrow slivers clearly visible.

@@ -1,0 +1,35 @@
+Wall-time samples: speed in units/s, spin in rad/s; radial = mean absolute projection fraction.
+walls profile target actualWall physicsTime speed50/90 radial spin50/90 linked asleep/total
+1 legacy 0.3 0.297 0.317 2.27/3.64 0.287 2.18/6.12 0 0/78
+1 legacy 0.6 0.598 0.617 4.17/5.10 0.458 1.67/6.22 1 0/78
+4 legacy 0.3 0.339 0.100 1.82/2.42 0.428 2.07/3.84 52 0/285
+4 legacy 0.6 0.641 0.200 1.74/2.54 0.412 1.94/3.81 63 0/285
+1 economy 0.3 0.296 0.317 2.27/3.64 0.287 2.18/6.12 0 0/78
+1 economy 0.6 0.600 0.633 4.24/5.20 0.462 1.75/6.00 1 0/78
+4 economy 0.3 0.300 0.200 1.74/2.55 0.435 1.92/3.50 109 0/285
+4 economy 0.6 0.590 0.417 2.83/3.62 0.488 1.70/4.77 106 0/285
+1 new 0.3 0.298 0.317 4.29/8.19 0.617 4.25/6.07 0 0/132
+1 new 0.6 0.601 0.617 3.04/6.01 0.409 3.33/25.36 3 0/132
+4 new 0.3 0.306 0.333 2.63/4.58 0.532 2.12/7.22 44 0/285
+4 new 0.6 0.623 0.550 2.05/4.94 0.403 1.83/7.24 41 35/285
+walls profile impulseFrames stepsInFirst0.5sWall FPSmedianAir/Settled
+1 legacy 1 31 56.50/59.88
+4 legacy 1 9 7.34/59.88
+1 economy 1 31 59.88/59.52
+4 economy 1 21 49.26/59.88
+1 new 1 31 59.52/60.24
+4 new 1 27 59.88/59.88
+Four-wall CPU ms/frame: physics(Rapier) sync batch spill rewind render(shadow) GC; steps mean/max; draws(shadow).
+legacy four-wall-perf FPS median airborne/settled: 6.18/59.88
+legacy airborne: 146.62(142.22) 0.10 4.03 0.69 0.10 1.65(0.11) 0.22; 3.00/3; 49(10).
+legacy settled: 0.14(0.02) 0.09 0.01 0.02 0.03 0.63(0.07) 0.02; 1.00/1; 49(10).
+new four-wall-perf FPS median airborne/settled: 59.88/60.61
+new airborne: 12.86(12.42) 0.11 3.36 0.48 0.05 1.31(0.08) 0.12; 1.16/3; 49(10).
+new settled: 0.14(0.02) 0.00 0.01 0.02 0.02 0.60(0.08) 0.01; 1.00/1; 49(10).
+New four-wall launch frame time: p95 78.60 ms, max 89.00 ms.
+PASS four-wall full break: 285 bodies, 49 draw calls, 60 FPS
+PASS reset after four-wall break; zero console errors
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS launch phase: bit-identical crowded trajectories, 48-to-4 solver ramp, restored contacts, three-step cap and dropped backlog.
+PASS: "eight camera presets, Run L Gerstner waves/planar reflection/shore foam and depth-aware pour, stable puddle frames, unified floor light, saturation gain, underwater contrast >=1.8, bubbles/pop/reset, submerged motes, draining floor caustics, logo breakpoints, accessible hover/focus/touch spoiler, trimmed same-frame audio, crack/spill/sill, physics cap, 3–4s/8–10s rest and native sleep by 5s, 0.15× clock, 3.2s rewind with three distinct stages and skip, drag, branding, responsive layout, WebGPU guard"

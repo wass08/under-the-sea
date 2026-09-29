@@ -1,0 +1,285 @@
+{
+  "captures": [
+    {
+      "name": "idle-default",
+      "drawCalls": 116,
+      "medianFPS": 60,
+      "cone": 50,
+      "elevation": 35.13461090510108,
+      "head": [
+        -4.12,
+        4.65,
+        -2.92
+      ],
+      "lampIntensity": 145,
+      "lampOn": 1,
+      "target": [
+        0.2,
+        0.9,
+        0.2
+      ]
+    },
+    {
+      "name": "floor-wide",
+      "drawCalls": 116,
+      "medianFPS": 60,
+      "cone": 50,
+      "elevation": 35.13461090510108,
+      "head": [
+        -4.12,
+        4.65,
+        -2.92
+      ],
+      "lampIntensity": 145,
+      "lampOn": 1,
+      "target": [
+        0.2,
+        0.9,
+        0.2
+      ]
+    },
+    {
+      "name": "lamp-side-floor",
+      "drawCalls": 116,
+      "medianFPS": 60,
+      "cone": 50,
+      "elevation": 35.13461090510108,
+      "head": [
+        -4.12,
+        4.65,
+        -2.92
+      ],
+      "lampIntensity": 145,
+      "lampOn": 1,
+      "target": [
+        0.2,
+        0.9,
+        0.2
+      ]
+    },
+    {
+      "name": "lamp-base",
+      "drawCalls": 102,
+      "medianFPS": 60,
+      "cone": 50,
+      "elevation": 35.13461090510108,
+      "head": [
+        -4.12,
+        4.65,
+        -2.92
+      ],
+      "lampIntensity": 145,
+      "lampOn": 1,
+      "target": [
+        0.2,
+        0.9,
+        0.2
+      ]
+    },
+    {
+      "name": "shadows",
+      "drawCalls": 116,
+      "medianFPS": 60,
+      "cone": 50,
+      "elevation": 35.13461090510108,
+      "head": [
+        -4.12,
+        4.65,
+        -2.92
+      ],
+      "lampIntensity": 145,
+      "lampOn": 1,
+      "target": [
+        0.2,
+        0.9,
+        0.2
+      ]
+    },
+    {
+      "name": "shadows-closeup",
+      "drawCalls": 116,
+      "medianFPS": 60,
+      "cone": 50,
+      "elevation": 35.13461090510108,
+      "head": [
+        -4.12,
+        4.65,
+        -2.92
+      ],
+      "lampIntensity": 145,
+      "lampOn": 1,
+      "target": [
+        0.2,
+        0.9,
+        0.2
+      ]
+    },
+    {
+      "name": "shadow-debug",
+      "drawCalls": 55,
+      "medianFPS": 60,
+      "cone": 50,
+      "elevation": 35.13461090510108,
+      "head": [
+        -4.12,
+        4.65,
+        -2.92
+      ],
+      "lampIntensity": 145,
+      "lampOn": 1,
+      "target": [
+        0.2,
+        0.9,
+        0.2
+      ]
+    },
+    {
+      "name": "lamp-off",
+      "drawCalls": 116,
+      "medianFPS": 60,
+      "cone": 50,
+      "elevation": 35.13461090510108,
+      "head": [
+        -4.12,
+        4.65,
+        -2.92
+      ],
+      "lampIntensity": 0,
+      "lampOn": 0,
+      "target": [
+        0.2,
+        0.9,
+        0.2
+      ]
+    }
+  ],
+  "switch": {
+    "cracks": 0,
+    "floor": 0,
+    "hasImpact": false,
+    "intensity": 0,
+    "lampOn": 0
+  },
+  "ramp": [
+    {
+      "ms": 8.599999904632568,
+      "value": 0.006003758396270207
+    },
+    {
+      "ms": 26,
+      "value": 0.025729953352769685
+    },
+    {
+      "ms": 42.59999990463257,
+      "value": 0.05539358600583092
+    },
+    {
+      "ms": 58.29999995231629,
+      "value": 0.0930045047072133
+    },
+    {
+      "ms": 76.09999990463257,
+      "value": 0.14421509001596428
+    },
+    {
+      "ms": 92.39999997615814,
+      "value": 0.1979009795551223
+    },
+    {
+      "ms": 108.5,
+      "value": 0.25634344345466376
+    },
+    {
+      "ms": 126.09999990463255,
+      "value": 0.32507248018347795
+    },
+    {
+      "ms": 142.39999997615814,
+      "value": 0.39358600583090386
+    },
+    {
+      "ms": 158.19999992847443,
+      "value": 0.46060775200611864
+    },
+    {
+      "ms": 176.09999990463257,
+      "value": 0.5368274721986835
+    },
+    {
+      "ms": 192.59999990463257,
+      "value": 0.6059941340573236
+    },
+    {
+      "ms": 208.39999997615817,
+      "value": 0.6720942072969879
+    },
+    {
+      "ms": 226,
+      "value": 0.7409946726089084
+    },
+    {
+      "ms": 242.19999992847443,
+      "value": 0.8010491430632974
+    },
+    {
+      "ms": 258.1999999284744,
+      "value": 0.8542221194075086
+    },
+    {
+      "ms": 276.09999990463257,
+      "value": 0.90568167643673
+    },
+    {
+      "ms": 292.2999999523163,
+      "value": 0.9446064139941692
+    },
+    {
+      "ms": 308.2999999523163,
+      "value": 0.9733726679990444
+    },
+    {
+      "ms": 325.7999999523163,
+      "value": 0.9934649700573364
+    },
+    {
+      "ms": 342.5,
+      "value": 0.9999997551485712
+    },
+    {
+      "ms": 358.09999990463257,
+      "value": 1
+    }
+  ],
+  "errors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 5946150526266789000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "console": {
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 5946150526266789000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    },
+    "messages": []
+  }
+}

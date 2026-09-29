@@ -1,0 +1,5 @@
+PASS above-water crack: no jet/drips, no drainage
+PASS one crack per wall
+PASS four cracks: water drained from 1.8346762394202913 to lowest sill 1.1783441991652233; spilling stopped
+PASS four-wall full break: 397 bodies, 42 draw calls, 60 FPS
+PASS reset after four-wall break; zero console errors

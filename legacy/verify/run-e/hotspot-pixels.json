@@ -1,0 +1,30 @@
+{
+  "before": {
+    "imageSize": [
+      2880,
+      1620
+    ],
+    "region": [
+      1670,
+      1312,
+      2015,
+      1571
+    ],
+    "nearWhitePixels": 1582,
+    "maximumChannel": 255
+  },
+  "after": {
+    "imageSize": [
+      2880,
+      1620
+    ],
+    "region": [
+      1670,
+      1312,
+      2015,
+      1571
+    ],
+    "nearWhitePixels": 0,
+    "maximumChannel": 167
+  }
+}

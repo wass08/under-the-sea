@@ -1,0 +1,3 @@
+PASS library: deterministic seeds, shared L1/L2 topology, upward normals, mask, variable-radius spacing, circumcircle, masked Lloyd, fracture coverage/density/rings/centroids, Rapier freeze/slow-motion/settling.
+Terrain samples: 1656 / 1656 / 1865
+

@@ -1,0 +1,18 @@
+{
+  "original": {
+    "meanDifference": 0.0,
+    "maximum": 0
+  },
+  "no-contact": {
+    "meanDifference": 0.0,
+    "maximum": 0
+  },
+  "no-sun-shadow": {
+    "meanDifference": 0.0,
+    "maximum": 0
+  },
+  "raised-contact": {
+    "meanDifference": 0.0,
+    "maximum": 0
+  }
+}

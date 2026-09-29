@@ -1,0 +1,144 @@
+{
+  "label": "budget-retune",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1.5,
+  "airborne": {
+    "frames": 100,
+    "fpsMedian": 59.88,
+    "ms": {
+      "frame": 19.191,
+      "physics": 8.141,
+      "rapier": 7.738,
+      "collision": 1.777,
+      "solver": 4.205,
+      "ccd": 0,
+      "sync": 0.15,
+      "batch": 2.101,
+      "spill": 0.019,
+      "rewind": 0.046,
+      "render": 0.795,
+      "shadow": 0.052
+    },
+    "stepsMean": 1.14,
+    "stepsMax": 3,
+    "drawCalls": 48,
+    "shadowCalls": 10,
+    "gcMsPerFrame": 0.055,
+    "gcEvents": 18,
+    "heapGrowthKBPerFrame": 4445.059,
+    "uploadsKBPerFrame": 1026.703,
+    "awakeMedian": 400
+  },
+  "settled": {
+    "frames": 120,
+    "fpsMedian": 59.524,
+    "ms": {
+      "frame": 16.668,
+      "physics": 0.217,
+      "rapier": 0.026,
+      "collision": 0.006,
+      "solver": 0.001,
+      "ccd": 0,
+      "sync": 0.008,
+      "batch": 0.029,
+      "spill": 0.009,
+      "rewind": 0.044,
+      "render": 0.497,
+      "shadow": 0.05
+    },
+    "stepsMean": 1,
+    "stepsMax": 1,
+    "drawCalls": 48,
+    "shadowCalls": 10,
+    "gcMsPerFrame": 0.01,
+    "gcEvents": 3,
+    "heapGrowthKBPerFrame": 843.186,
+    "uploadsKBPerFrame": 0,
+    "awakeMedian": 0
+  },
+  "final": {
+    "bodies": 649,
+    "awake": 0,
+    "physics": {
+      "profile": "launch",
+      "shardBodyLimit": 880,
+      "targetBodyBudget": 649,
+      "wallBudgets": [
+        {
+          "wall": 0,
+          "ordinal": 1,
+          "cells": 220,
+          "fraction": 1,
+          "requestedFraction": 1,
+          "coreCells": 89,
+          "released": 220,
+          "awake": 0
+        },
+        {
+          "wall": 2,
+          "ordinal": 2,
+          "cells": 176,
+          "fraction": 0.8,
+          "requestedFraction": 0.8,
+          "coreCells": 76,
+          "released": 176,
+          "awake": 0
+        },
+        {
+          "wall": 1,
+          "ordinal": 3,
+          "cells": 143,
+          "fraction": 0.65,
+          "requestedFraction": 0.65,
+          "coreCells": 84,
+          "released": 143,
+          "awake": 0
+        },
+        {
+          "wall": 3,
+          "ordinal": 4,
+          "cells": 110,
+          "fraction": 0.5,
+          "requestedFraction": 0.5,
+          "coreCells": 99,
+          "released": 110,
+          "awake": 0
+        }
+      ],
+      "releasePhysicsAge": 10.2,
+      "lastReleaseTime": 18.20600000000004,
+      "maxCellsPerBody": 1,
+      "individualCells": true,
+      "launch": {
+        "radialFraction": 0.8384647550779879,
+        "count": 649,
+        "min": 1.0617112584667656,
+        "median": 3.127128629846344,
+        "max": 5.800667081321152,
+        "maxAngular": 7.389936348912945
+      },
+      "fixedHz": 60,
+      "solverIterations": 4,
+      "internalPgs": 1,
+      "lengthUnit": 6,
+      "quietDamping": [
+        32,
+        120
+      ],
+      "allowedError": 0.00029999999242136255,
+      "prediction": 0.006000000284984708,
+      "erp": 0,
+      "contactSkinMax": 0.003,
+      "inertiaRatioLimit": 4,
+      "massRange": [
+        5,
+        311.23541259765625
+      ],
+      "fixedFallbacks": 0
+    }
+  },
+  "errors": []
+}

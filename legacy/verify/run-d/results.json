@@ -1,0 +1,54 @@
+{
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "log": "tsc.txt"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "log": "build.txt"
+    },
+    {
+      "command": "node verify/runtime.mjs",
+      "exitCode": 0,
+      "log": "runtime.txt"
+    },
+    {
+      "command": "node verify/edges.mjs",
+      "exitCode": 0,
+      "log": "edges.txt"
+    },
+    {
+      "command": "node verify/lab.mjs",
+      "exitCode": 0,
+      "log": "lab.txt"
+    },
+    {
+      "command": "node verify/library.mjs",
+      "exitCode": 0,
+      "log": "library.txt"
+    }
+  ],
+  "changedFiles": [
+    "src/audio.ts",
+    "src/lab/index.ts",
+    "src/lab/shatter.ts",
+    "src/lib/physics.ts",
+    "src/lib/post.ts",
+    "src/lib/shatter.ts",
+    "src/lib/worley.ts",
+    "src/scene/spill.ts",
+    "src/scene/tank.ts",
+    "README.md",
+    "verify/edges.mjs",
+    "verify/lab.mjs",
+    "verify/library-entry.ts",
+    "verify/library.mjs"
+  ],
+  "reviewedImages": [
+    "verify/shatter-settled.png",
+    "verify/run-d/caustics-L2-raw.png"
+  ]
+}

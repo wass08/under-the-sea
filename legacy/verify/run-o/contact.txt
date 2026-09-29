@@ -1,0 +1,13 @@
+{
+  maxDisplacement: 0,
+  maxRotation: 5.960464477539063e-8,
+  awake5: 0,
+  launch: {
+    radialFraction: 0.8393372820586998,
+    count: 78,
+    min: 2.4300856159837476,
+    median: 2.675891503198873,
+    max: 5.081877843658341,
+    maxAngular: 6.107735934394757
+  }
+}

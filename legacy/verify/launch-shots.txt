@@ -1,0 +1,8 @@
+legacy launch-01.png requested 0.1s captured 0.1017s
+legacy launch-03.png requested 0.3s captured 0.3171s
+legacy launch-06.png requested 0.6s captured 0.6163s
+legacy launch-10.png requested 1s captured 1.0000s
+launch launch-01.png requested 0.1s captured 0.1005s
+launch launch-03.png requested 0.3s captured 0.3161s
+launch launch-06.png requested 0.6s captured 0.6168s
+launch launch-10.png requested 1s captured 1.0156s

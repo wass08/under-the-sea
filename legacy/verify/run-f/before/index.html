@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111e25" />
+    <meta name="description" content="A small world held in glass. An interactive WebGPU aquarium, with sloshing water and refractive glass fragments." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='12' width='48' height='40' rx='3' fill='%237bbdbb'/%3E%3Cpath d='M12 42L30 20L48 42Z' fill='%23273439'/%3E%3C/svg%3E" />
+    <title>Aquarium</title>
+    <script>document.documentElement.dataset.page = location.hash.startsWith("#/lab") ? "lab" : "aquarium";</script>
+  </head>
+  <body>
+    <main id="app" aria-label="Interactive glass aquarium"></main>
+    <header class="masthead"><a href="https://wawasensei.dev" target="_blank" rel="noopener noreferrer" aria-label="Wawa Sensei"><img src="/brand/wawasensei-white.png" width="160" alt="Wawa Sensei" /></a><h1>Aquarium</h1><p class="series">You can't prompt what you can't name · Voronoi &amp; Delaunay</p></header>
+    <div id="loading" role="status"><span class="loader"></span>Gathering light…</div>
+    <footer class="caption"><nav class="socials" aria-label="Wawa Sensei social links">
+<a href="https://x.com/wawasensei" target="_blank" rel="noopener noreferrer" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l8.2-9.4L.8 2h6.5l5.8 7.7L18.9 2ZM17.8 20h1.7L6.4 3.9H4.6L17.8 20Z"/></svg></a>
+<a href="https://www.instagram.com/wawa.sensei" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+<a href="https://www.youtube.com/@wawasensei" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M22.5 6.5c-.3-1.2-1-2-2.3-2.3C18.3 3.7 12 3.7 12 3.7s-6.3 0-8.2.5C2.5 4.5 1.8 5.3 1.5 6.5 1 8.4 1 12 1 12s0 3.6.5 5.5c.3 1.2 1 2 2.3 2.3 1.9.5 8.2.5 8.2.5s6.3 0 8.2-.5c1.3-.3 2-1.1 2.3-2.3.5-1.9.5-5.5.5-5.5s0-3.6-.5-5.5ZM9.8 15.6V8.4L16 12l-6.2 3.6Z"/></svg></a>
+<a href="https://www.tiktok.com/@wawasensei08" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M16.5 2c.4 2.4 1.8 4 4.5 4.3v3.4c-1.8 0-3.4-.6-4.8-1.5v7.4a6.3 6.3 0 1 1-5.4-6.2v3.5a2.9 2.9 0 1 0 2 2.7V2h3.7Z"/></svg></a>
+</nav><span>Drag to explore · Scroll to move closer</span></footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

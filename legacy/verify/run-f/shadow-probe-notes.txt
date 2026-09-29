@@ -1,0 +1,1 @@
+Depth precision probe: same 10 low-camera poses; integrated floor, synthetic second plane at .003, and at .04.

@@ -1,0 +1,3 @@
+{"port":4176,"medianFPS":52,"minFPS":49,"maxFPS":55}
+{"port":4176,"medianFPS":49,"minFPS":44,"maxFPS":52}
+{"port":4176,"medianFPS":33,"minFPS":30,"maxFPS":38}

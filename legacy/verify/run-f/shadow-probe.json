@@ -1,0 +1,14 @@
+{
+  "integrated": {
+    "meanDifference": 0.028757464581387504,
+    "maximum": 13
+  },
+  "coplanar": {
+    "meanDifference": 0.03716561528665365,
+    "maximum": 19
+  },
+  "raised": {
+    "meanDifference": 0.030480268656306726,
+    "maximum": 8
+  }
+}

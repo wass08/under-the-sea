@@ -1,0 +1,28 @@
+ROOT CAUSE: Compounds were not increased by the performance pass: four-wall grouping is identical. Run D area thresholds (0.01 core / 0.1 rest) welded cells before flight; the previous fix ungrouped only the pristine core.
+Released shard bodies; histogram bins count bodies. Areas are original cell area in scene units squared.
+stage case bodies cells 1 2 3-5 6+ singlesArea compoundArea
+pre-perf single 78 220 48 9 12 9 19.2337 2.3503
+pre-perf four 285 880 167 29 35 54 57.7504 10.4096
+previous single 132 220 118 5 3 6 19.4877 2.0963
+previous four 285 880 167 29 35 54 57.7504 10.4096
+fixed single 220 220 220 0 0 0 21.5840 0.0000
+fixed four 880 880 880 0 0 0 68.1600 0.0000
+stage case FPSmedianAirborne FPSmedianSettled
+pre-perf single 59.52 59.88
+pre-perf four 7.29 59.88
+previous single 61.35 59.88
+previous four 59.88 59.88
+fixed single 59.88 59.88
+fixed four 48.31 59.88
+PARAMETERS: minimum group area -> 0 everywhere; per-release budget -> cell count; total body ceiling 400 -> 880; native sleeping preserves separate identities.
+SETTLING: individual-cell supported linear/angular damping 3/1 -> 6/5; airborne 0.45/1.2, impulses, quiet 8/20 and solver schedule unchanged.
+PASS four-wall full break: 880 bodies, 49 draw calls, 60 FPS
+PASS expanded launch budget: 880 single-cell bodies, zero awake by 5 s
+PASS reset after four-wall break; zero console errors
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L3→L1→L2: camera, reveal toggles, count, freeze and slowMotion preserved; measured rate=0.14430975534175255
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, pending audio cancellation.
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS individual aquarium cells: 220 cells remain 220 independent bodies; connected-compound Run D behavior retained.
+PASS: "eight camera presets, Run L Gerstner waves/planar reflection/shore foam and depth-aware pour, stable puddle frames, unified floor light, saturation gain, underwater contrast >=1.8, bubbles/pop/reset, submerged motes, draining floor caustics, logo breakpoints, accessible hover/focus/touch spoiler, trimmed same-frame audio, crack/spill/sill, physics cap, 3–4s/8–10s rest and native sleep by 5s, 0.15× clock, 3.2s rewind with three distinct stages and skip, drag, branding, responsive layout, WebGPU guard"
+FLOOR: verify/perf-after/shards-floor.png at 2.0167 s; all 220 bodies contain one cell, no fused outlines.

@@ -1,0 +1,9 @@
+ README.md               | 10 +++----
+ src/lab/caustics.ts     | 20 +++++--------
+ src/lab/levels.ts       | 12 ++++----
+ src/lab/terrain.ts      | 58 +++++++++++++++++++++++++++++-------
+ src/lib/terrain.ts      | 34 ++++++++++++++++-----
+ src/lib/worley.ts       | 14 ++++-----
+ verify/lab.mjs          | 73 ++++++++++++++++++++++++++++++++++-----------
+ verify/library-entry.ts | 78 ++++++++++++++++++++++++++++++++++++-------------
+ 8 files changed, 213 insertions(+), 86 deletions(-)

@@ -1,0 +1,1 @@
+import{chromium}from'playwright';const b=await chromium.launch({headless:true,args:['--enable-unsafe-webgpu','--use-angle=metal','--ignore-gpu-blocklist']});const p=await b.newPage();await p.goto('http://localhost:4174');console.log(await p.evaluate(async()=>{const a=await navigator.gpu.requestAdapter();return [...a.features]}));await b.close();

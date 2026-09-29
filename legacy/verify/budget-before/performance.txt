@@ -1,0 +1,96 @@
+{
+  "label": "budget-before",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1.5,
+  "airborne": {
+    "frames": 86,
+    "fpsMedian": 57.803,
+    "ms": {
+      "frame": 26.469,
+      "physics": 18.003,
+      "rapier": 16.883,
+      "collision": 4.229,
+      "solver": 8.48,
+      "ccd": 0,
+      "sync": 0.281,
+      "batch": 3.356,
+      "spill": 0.427,
+      "rewind": 0.105,
+      "render": 1.376,
+      "shadow": 0.08
+    },
+    "stepsMean": 1.291,
+    "stepsMax": 3,
+    "drawCalls": 49,
+    "shadowCalls": 10,
+    "gcMsPerFrame": 0.13,
+    "gcEvents": 24,
+    "heapGrowthKBPerFrame": 6282.106,
+    "uploadsKBPerFrame": 1395.516,
+    "awakeMedian": 661
+  },
+  "settled": {
+    "frames": 120,
+    "fpsMedian": 59.88,
+    "ms": {
+      "frame": 16.661,
+      "physics": 0.41,
+      "rapier": 0.016,
+      "collision": 0.002,
+      "solver": 0,
+      "ccd": 0,
+      "sync": 0.014,
+      "batch": 0.06,
+      "spill": 0.009,
+      "rewind": 0.052,
+      "render": 0.68,
+      "shadow": 0.082
+    },
+    "stepsMean": 1,
+    "stepsMax": 1,
+    "drawCalls": 49,
+    "shadowCalls": 10,
+    "gcMsPerFrame": 0.035,
+    "gcEvents": 6,
+    "heapGrowthKBPerFrame": 1075.104,
+    "uploadsKBPerFrame": 0,
+    "awakeMedian": 0
+  },
+  "final": {
+    "bodies": 880,
+    "awake": 0,
+    "physics": {
+      "profile": "launch",
+      "shardBodyLimit": 880,
+      "lastReleaseTime": 14.231799999952338,
+      "maxCellsPerBody": 1,
+      "individualCells": true,
+      "launch": {
+        "radialFraction": 0.8387398826773955,
+        "count": 880,
+        "min": 2.3561688976914983,
+        "median": 3.200264637187394,
+        "max": 5.800667081321152,
+        "maxAngular": 7.389936348912945
+      },
+      "fixedHz": 60,
+      "solverIterations": 4,
+      "internalPgs": 1,
+      "lengthUnit": 6,
+      "allowedError": 0.00029999999242136255,
+      "prediction": 0.006000000284984708,
+      "erp": 0,
+      "contactSkinMax": 0.003,
+      "inertiaRatioLimit": 4,
+      "massRange": [
+        5,
+        311.23541259765625
+      ],
+      "fixedFallbacks": 0
+    }
+  },
+  "errors": []
+}

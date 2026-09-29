@@ -1,0 +1,31 @@
+--- before/src/scene/spill.ts
++++ src/scene/spill.ts
+@@ -1,5 +1,5 @@
+ import { AdditiveBlending, CircleGeometry, DoubleSide, DynamicDrawUsage, InstancedBufferAttribute, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, PointsNodeMaterial, Scene, Sprite, Vector3 } from 'three/webgpu';
+-import { bumpMap, color, float, instancedBufferAttribute, positionWorld, smoothstep, uv } from 'three/tsl';
++import { bumpMap, color, float, instancedBufferAttribute, output, positionWorld, smoothstep, uv, vec4 } from 'three/tsl';
+ import { random, simTime, TANK, waterHeight } from '../state';
+ import type { Opening } from './tank';
+ 
+@@ -30,7 +30,9 @@
+   type Drop = { p: Vector3; v: Vector3; born: number; life: number; size: number; splash: boolean };
+   const drops: (Drop | undefined)[] = Array(count); let cursor = 0;
+   const sheetMaterial = new MeshPhysicalNodeMaterial({ color: '#bbebe2', transmission: 0.9, ior: 1.33, roughness: 0.04, thickness: 0.035, side: DoubleSide, transparent: true, opacity: 0.44, depthWrite: false });
+-  const puddleMaterial = new MeshPhysicalNodeMaterial({ color: '#35585d', transmission: 0.35, thickness: 0.025, ior: 1.33, metalness: 0, roughness: 0.035, clearcoat: 1, transparent: true, opacity: 0.52, depthWrite: false });
++  const puddleMaterial = new MeshPhysicalNodeMaterial({ color: '#35585d', transmission: 0.35, thickness: 0.025, ior: 1.33, metalness: 0, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.12, transparent: true, opacity: 0.52, depthWrite: false });
++  // Keep both water and clearcoat sun reflections below the 1.3 bloom threshold.
++  puddleMaterial.outputNode = vec4(output.rgb.min(1.1), output.a);
+   // A shallow traveling normal catches the sky without hiding the floor below.
+   puddleMaterial.normalNode = bumpMap(positionWorld.x.mul(9).add(positionWorld.z.mul(7)).sub(simTime.mul(1.8)).sin(), float(0.006));
+   puddleMaterial.envMapIntensity = 1.8;
+--- before/src/scene/tank.ts
++++ src/scene/tank.ts
+@@ -45,7 +45,7 @@
+   const cracks = new Map<number, Crack>();
+   const shards: { mesh: Mesh; body: ReturnType<typeof physics.addShard> }[] = [];
+   // Render all loose glass in one draw. Each cell keeps its own convex collider.
+-  const looseGlass = glass.clone(); looseGlass.opacity = 0.72; looseGlass.opacityNode = null; looseGlass.colorNode = null; looseGlass.depthWrite = true;
++  const looseGlass = glass.clone(); looseGlass.opacity = 0.42; looseGlass.opacityNode = null; looseGlass.colorNode = null; looseGlass.depthWrite = false;
+   // Broaden shard glints and bound their HDR output below the bloom threshold.
+   looseGlass.roughness = 0.12; looseGlass.outputNode = vec4(output.rgb.min(1.1), output.a);
+   const loose = new Mesh(new BufferGeometry(), looseGlass); loose.frustumCulled = false; loose.visible = false; scene.add(loose);

@@ -1,0 +1,76 @@
+--- verify/terrain/sampling-before/lab.mjs	2026-09-16 20:36:02
++++ verify/lab.mjs	2026-09-16 20:36:24
+@@ -42,7 +42,7 @@
+ };
+ let failed;
+ try {
+-  let first = true, randomSeeds;
++  let first = true, randomMinDistance;
+   for (const bench of ['terrain', 'caustics', 'shatter']) for (const level of [1, 2, 3]) {
+     const hash = `#/lab/${bench}?level=${level}`;
+     if (first) { await page.goto(base + hash); first = false; }
+@@ -51,8 +51,50 @@
+     assert.equal(await page.locator('.lab-card .level-number').textContent(), `Level ${level} of 3`);
+     await capture(`${bench}-L${level}`);
+     const benchState = await state();
+-    if (bench === 'terrain' && level === 1) randomSeeds = benchState.seedCoordinates;
+-    if (bench === 'terrain' && level === 2) assert.deepEqual(benchState.seedCoordinates, randomSeeds, 'L1/L2 point coordinates match exactly');
++    if (bench === 'terrain') {
++      const { seedCoordinates, seedCount, triangleCount, level: terrainLevel } = benchState, tolerance = 1e-6;
++      const points = Array.from({ length: seedCount }, (_, i) => seedCoordinates.slice(i * 2, i * 2 + 2));
++      const axes = [0, 1].map(axis => [...new Set(points.map(p => p[axis]))].sort((a, b) => a - b));
++      const [lo, hi] = [axes[0][0], axes[0].at(-1)], size = hi - lo;
++      const boundary = points.filter(p => p.some(v => Math.abs(v - lo) < tolerance || Math.abs(v - hi) < tolerance));
++      const interior = points.filter(p => p.every(v => v > lo + tolerance && v < hi - tolerance));
++      assert.equal(seedCoordinates.length, seedCount * 2); assert.equal(terrainLevel, level);
++      assert.equal(triangleCount, 2 * seedCount - boundary.length - 2, 'Diagnostics describe a triangulated square');
++      for (const axis of [0, 1]) for (const edge of [lo, hi]) {
++        const side = points.filter(p => Math.abs(p[axis] - edge) < tolerance).map(p => p[1 - axis]).sort((a, b) => a - b);
++        assert.ok(side.length > 2 && Math.abs(side[0] - lo) < tolerance && Math.abs(side.at(-1) - hi) < tolerance, 'Boundary ring includes all four sides and corners');
++        const step = size / (side.length - 1);
++        assert.ok(side.every((v, i) => Math.abs(v - lo - i * step) < tolerance), 'Boundary ring is evenly spaced');
++      }
++      if (level === 1) {
++        assert.equal(axes[0].length * axes[1].length, seedCount, 'L1 fills its lattice');
++        assert.equal(new Set(points.map(p => p.join(','))).size, seedCount, 'No duplicate lattice vertices');
++        for (const axis of axes) {
++          assert.ok(axis.length <= Math.sqrt(seedCount) + 1, 'L1 has a low-resolution regular lattice');
++          assert.ok(axis.every((v, i) => Math.abs(v - lo - i * size / (axis.length - 1)) < tolerance), 'L1 lattice is evenly spaced');
++        }
++        await page.evaluate(() => { window.terrainHeightAt = window.lab.state.heightAt; });
++      } else {
++        // The straight boundary ring is appended after sampling and is not Poisson-excluded.
++        let minDistance = Infinity;
++        for (let i = 0; i < interior.length; i++) for (let j = 0; j < i; j++) minDistance = Math.min(minDistance, Math.hypot(interior[i][0] - interior[j][0], interior[i][1] - interior[j][1]));
++        if (level === 2) { assert.ok(axes[0].length > seedCount * .9, 'L2 points are not on a lattice'); randomMinDistance = minDistance; }
++        else {
++          const minimumRadius = size / Math.sqrt(benchState.count) * 1.05 / Math.sqrt(4.25);
++          assert.ok(minDistance >= minimumRadius - tolerance, 'L3 respects the smallest slope-weighted Poisson radius');
++          assert.ok(randomMinDistance < .5 * minDistance, 'L2 clumps are closer than L3 samples');
++        }
++        const heightErrors = await page.evaluate(() => {
++          const { heightAt, meshPositions } = window.lab.state, errors = [];
++          for (let i = 0; i < 8; i++) {
++            const offset = Math.floor((meshPositions.length / 3 - 1) * i / 7) * 3, [x, y, z] = meshPositions.slice(offset, offset + 3);
++            errors.push(Math.abs(heightAt(x, z) - y), Math.abs(window.terrainHeightAt(x, z) - y));
++          }
++          return errors;
++        });
++        assert.ok(heightErrors.every(error => error < tolerance), 'L1 and current height fields match L2/L3 mesh vertices within 1e-6');
++      }
++    }
+     if (bench === 'terrain' && level === 3) {
+       await page.evaluate(() => window.lab.setReveal({ wireframe: true, seeds: true })); await page.waitForTimeout(350); await capture('terrain-L3-reveal');
+       await page.evaluate(() => window.lab.setReveal({ circumcircles: true })); await page.waitForTimeout(200);
+@@ -141,9 +183,9 @@
+   await page.locator('a[data-bench="terrain"]').click(); await ready('terrain', 3);
+   await page.keyboard.press('1'); await ready('terrain', 1);
+   await page.locator('button', { hasText: 'Regenerate seed' }).click();
+-  const regenerated = await page.evaluate(() => window.lab.state.seedCoordinates);
++  const regenerated = await page.evaluate(() => ({ seed: window.lab.state.seed, heights: [[0, 0], [1, -2], [-3, 4]].map(([x, z]) => window.lab.state.heightAt(x, z)) }));
+   await page.keyboard.press('ArrowRight'); await ready('terrain', 2);
+-  assert.deepEqual(await page.evaluate(() => window.lab.state.seedCoordinates), regenerated, 'Regenerated seed survives level changes');
++  assert.deepEqual(await page.evaluate(() => ({ seed: window.lab.state.seed, heights: [[0, 0], [1, -2], [-3, 4]].map(([x, z]) => window.lab.state.heightAt(x, z)) })), regenerated, 'Regenerated seed and height field survive level changes');
+   await page.locator('.lab-back').click();
+   await page.waitForFunction(() => document.documentElement.dataset.status === 'ready' && window.aquarium, null, { timeout: 90000 });
+   await page.waitForTimeout(1800); await capture('main');

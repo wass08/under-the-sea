@@ -1,0 +1,56 @@
+--- before/worley.ts
++++ src/lib/worley.ts
+@@ -30,7 +30,14 @@
+ export type CausticsParams = ReturnType<typeof createCausticsUniforms> & { level: 1 | 2 | 3; depth: Node<'float'> };
+ /** Three comparison levels; RGB light contribution is zero above water at level 3. layer: 0 both, 1 A, 2 B. */
+ export function causticsField(uv: Node<'vec2'>, time: Node<'float'>, p: CausticsParams) {
+-  if (p.level === 1) return vec3(0);
++  if (p.level === 1) {
++    const t = time.mul(p.speed);
++    // Fixed skewed axes only translate: tuning frequency/speed cannot break the plaid.
++    const a = sin(dot(uv, vec2(1, 0.28)).mul(p.scaleA).add(t));
++    const b = sin(dot(uv, vec2(-0.22, 1)).mul(p.scaleB).add(t));
++    const raw = a.add(b).mul(0.25).add(0.5);
++    return vec3(mix(raw.pow(3), raw, p.rawField));
++  }
+   const sample = (at: Node<'vec2'>) => {
+     const t = time.mul(p.speed);
+     const a = worley(at.mul(p.scaleA).add(vec2(t.mul(0.33), t.mul(0.12))), t);
+--- before/caustics.ts
++++ src/lab/caustics.ts
+@@ -30,10 +30,17 @@
+     waterLevel.value = params.waterLevel; water.position.y = params.waterLevel; water.visible = !params.rawField;
+   }
+   const reveal = pane.addFolder({ title: 'Reveal' });
+-  reveal.addBinding(params, 'rawField', { label: 'raw Worley field' }); reveal.addBinding(params, 'showSeeds', { label: 'cell seeds' });
+-  reveal.addBinding(params, 'layer', { options: { both: 0, A: 1, B: 2 } }); reveal.addBinding(params, 'freeze');
++  reveal.addBinding(params, 'rawField', { label: level === 1 ? 'raw sine field' : 'raw Worley field' });
++  if (level !== 1) {
++    reveal.addBinding(params, 'showSeeds', { label: 'cell seeds' });
++    reveal.addBinding(params, 'layer', { options: { both: 0, A: 1, B: 2 } });
++  }
++  reveal.addBinding(params, 'freeze');
+   const folder = pane.addFolder({ title: 'Parameters' });
+-  for (const [key, min, max, step] of [['scaleA', 0.5, 6, 0.1], ['scaleB', 0.5, 8, 0.1], ['speed', 0, 1, 0.01], ['sharpness', 2, 40, 1], ['intensity', 0, 4, 0.05], ['rgbOffset', 0, 0.05, 0.001], ['waterLevel', 0.2, 2, 0.01]] as const) folder.addBinding(params, key, { min, max, step, label: key === 'rgbOffset' ? 'rgb offset' : key === 'waterLevel' ? 'water level' : key });
++  for (const [key, min, max, step] of [['scaleA', 0.5, 6, 0.1], ['scaleB', 0.5, 8, 0.1], ['speed', 0, 1, 0.01], ['sharpness', 2, 40, 1], ['intensity', 0, 4, 0.05], ['rgbOffset', 0, 0.05, 0.001], ['waterLevel', 0.2, 2, 0.01]] as const) {
++    if (level === 1 && (key === 'sharpness' || key === 'intensity' || key === 'rgbOffset')) continue;
++    folder.addBinding(params, key, { min, max, step, label: level === 1 && key === 'scaleA' ? 'sine frequency A' : level === 1 && key === 'scaleB' ? 'sine frequency B' : key === 'rgbOffset' ? 'rgb offset' : key === 'waterLevel' ? 'water level' : key });
++  }
+   pane.on('change', sync); sync();
+   return { update(dt) { uniforms.advance(clock, dt); }, dispose() { Object.assign(settings, params); }, setReveal(values) { Object.assign(params, values); sync(); pane.refresh(); }, diagnostics: () => ({ elapsed: clock.value, ...params }) };
+ }
+--- before/levels.ts
++++ src/lab/levels.ts
+@@ -6,9 +6,9 @@
+     { title: 'Poisson-disk + ridged noise + Delaunay', technique: 'Poisson-disk sampling with density weighted by slope, ridged noise (1 − |n|) over fBm, a power curve to flatten valleys, Delaunay triangulation, flat shading', sees: 'Clean even facets, sharp ridges, detail where it matters, cheap flat plains.' },
+   ],
+   caustics: [
+-    { title: 'Flat colour', technique: 'Flat blue-green floor colour, no pattern', sees: 'Dead, plastic-looking sand.' },
+-    { title: 'One Worley layer', technique: 'Single-layer Worley noise, F1 distance, static', sees: 'Recognisable cells, but regular, thick and lifeless.' },
+-    { title: 'Two layers, F2 − F1, depth mask', technique: 'Two Worley layers at different scales counter-scrolling, F2 − F1 for edges, inverted and pow()-sharpened, slight per-channel RGB offset, brightness masked by water depth', sees: 'Thin irregular shimmering light lines that fade as the sand rises out of the water.' },
++    { title: 'Sine interference', technique: 'Two skewed sine waves, slowly scrolling, summed and sharpened', sees: 'Rigid plaid slides but never varies. No cell structure.' },
++    { title: 'One Worley layer', technique: 'Single Worley F1: no animation, no second layer, low contrast', sees: 'Right cell structure, wrong parameters: dim, thick and lifeless.' },
++    { title: 'Two layers, F2 − F1, depth falloff', technique: 'Two animated Worley layers at different scales counter-scrolling, F2 − F1 for edges, inverted and pow()-sharpened, slight per-channel RGB offsets, brightness fading with water depth', sees: 'Thin irregular shimmering light lines that fade as the sand rises out of the water.' },
+   ],
+   shatter: [
+     { title: 'Uniform grid', technique: 'Uniform grid of cells, every shard identical', sees: 'Glass falls apart like floor tiles. Obviously fake.' },

@@ -1,0 +1,7 @@
+PASS above-water crack: no jet/drips, no drainage
+PASS one crack per wall
+PASS four cracks: water drained from 1.5745391005087734 to lowest sill 1.0923448325114224; spilling stopped
+PASS four-wall full break: 880 bodies, 49 draw calls, 60 FPS
+PASS expanded launch budget: 880 single-cell bodies, zero awake by 5 s
+PASS reset mid-spill: reverse audio, water rises, frozen physics, 0.15× rewind, second Reset skips to pristine
+PASS reset after four-wall break; zero console errors

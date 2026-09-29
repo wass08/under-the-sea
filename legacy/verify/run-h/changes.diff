@@ -1,0 +1,482 @@
+--- verify/run-h/before/src/aquarium.ts
++++ src/aquarium.ts
+@@ -1,5 +1,5 @@
+ import { AgXToneMapping, FogExp2, Raycaster, Scene, Vector2, Vector3, WebGPURenderer } from 'three/webgpu';
+-import { createStage } from './scene/stage';
++import { atmosphere, createStage } from './scene/stage';
+ import { createCamera } from './camera';
+ import { createPost } from './post';
+ import { createTank } from './scene/tank';
+@@ -8,6 +8,8 @@
+ import { createLighting } from './scene/lighting';
+ import { createShafts } from './scene/shafts';
+ import { createDust } from './scene/dust';
++import { createReef } from './scene/reef';
++import { createBubbles } from './scene/bubbles';
+ import { simTime, state, TANK, waterHeight, waterNormal } from './state';
+ import { createSpill } from './scene/spill';
+ import { createAudio } from './audio';
+@@ -33,24 +35,25 @@
+   try { await renderer.init(); } catch (error) { fail('WebGPU could not start. Enable hardware acceleration and open in current Chrome or Edge.', error, 'unavailable'); return; }
+   if (!('isWebGPUBackend' in renderer.backend) || !renderer.backend.isWebGPUBackend) { renderer.dispose(); fail('No WebGPU adapter is available. Enable hardware acceleration and try Chrome or Edge.', undefined, 'unavailable'); return; }
+   document.querySelector('#app')!.appendChild(renderer.domElement);
+-  const scene = new Scene(); scene.fog = new FogExp2('#26333e', 0.025);
++  const scene = new Scene(); scene.fog = new FogExp2('#122c36', 0.018);
+   const rig = createCamera(renderer.domElement);
+   const lighting = await createLighting(scene, renderer);
+   // Match the fully fogged floor exactly; the HDRI remains scene.environment.
+-  scene.background = scene.fog.color;
+-  createStage(scene);
++  scene.backgroundNode = atmosphere; scene.backgroundIntensity = 1;
++  const stage = createStage(scene);
+   const tank = await createTank(scene), water = createWater(scene);
+   const island = createIsland(scene);
+   const spill = createSpill(scene, water.ripple);
+   await audio.loading;
+   state.muted = audio.muted;
+-  const shafts = createShafts(scene, island.heightTexture); createDust(scene);
++  const shafts = createShafts(scene, island.heightTexture), dust = createDust(scene);
++  const reef = createReef(scene, island.peak), bubbles = createBubbles(scene, reef.vents, water.ripple);
+   const post = createPost(renderer, scene, rig.camera);
+   let impactFrame = -1;
+   function resetPristine() {
+     state.mode = 'idle'; state.brokenCount = 0; state.cracks = 0; state.spilling = false; state.hasImpact = false;
+     state.wall = 0; state.impact.set(0.6, TANK.base - 0.44, TANK.depth / 2);
+-    tank.reset(); water.reset(); spill.reset(); audio.reset(); rig.reset(); rewind.clear();
++    tank.reset(); water.reset(); spill.reset(); bubbles.reset(); audio.reset(); rig.reset(); rewind.clear();
+   }
+   const rewind = createRewind(tank, water, spill, resetPristine);
+   const actions = {
+@@ -115,6 +118,7 @@
+     timeScale: state.timeScale, elapsed: state.elapsed, brokenCount: state.brokenCount,
+     hasImpact: state.hasImpact, impact: state.impact.toArray(), wall: state.wall,
+     height: waterHeight.value, normal: waterNormal.value.toArray(), renderer: 'WebGPU',
++    motes: dust.count, motesAboveSurface: dust.aboveSurface, bubbles: bubbles.count, bubblePops: bubbles.pops, floorCausticIntensity: stage.intensity,
+     environment: lighting.environment, drawCalls: renderer.info.render.drawCalls,
+   }) });
+   let previous = performance.now(), rendered = false;
+@@ -128,7 +132,7 @@
+       water.update(dt); tank.update(dt); spill.update(dt); rewind.record();
+       audio.update(spill.strength, state.timeScale); rig.update(dt);
+     }
+-    state.spilling = spill.active; lighting.update(simTime.value); shafts.update(); ui.update(realDt);
++    state.spilling = spill.active; lighting.update(simTime.value); stage.update(); dust.update(); bubbles.update(); shafts.update(); ui.update(realDt);
+     try {
+       renderer.info.reset(); post.render();
+       if (!rendered) { rendered = true; loading.hidden = true; document.documentElement.dataset.status = 'ready'; }
+--- verify/run-h/before/src/camera.ts
++++ src/camera.ts
+@@ -6,12 +6,14 @@
+   const camera = new PerspectiveCamera(39, innerWidth / innerHeight, 0.1, 2000);
+   camera.position.set(9.6, 7.1, 12.4);
+   const controls = new OrbitControls(camera, canvas);
+-  controls.target.set(0, 1.6, 0); controls.enableDamping = true; controls.dampingFactor = 0.07;
+-  controls.minDistance = 5; controls.maxDistance = 24; controls.maxPolarAngle = Math.PI / 2 - 0.025;
++  controls.target.set(0, 1.45, 0); controls.enableDamping = true; controls.dampingFactor = 0.07;
++  controls.minDistance = 3; controls.maxDistance = 24; controls.maxPolarAngle = Math.PI / 2 - 0.025;
+   controls.autoRotateSpeed = 0.24; controls.enablePan = false;
+   const preset = new URLSearchParams(location.search).get('camera');
+-  const presets: Record<string, [number, number, number]> = { '34': [-7, 4.5, 8], front: [0, 2.2, 9.5], low: [-7, 1.25, 8] };
++  const presets: Record<string, [number, number, number]> = { '34': [-7, 4.5, 8], front: [0, 2.2, 9.5], low: [-7, 1.25, 8], plaque: [0, 0.25, 4.5], floor: [7, 4.6, 8.5] };
+   if (preset && presets[preset]) { camera.position.set(...presets[preset]); controls.maxPolarAngle = Math.PI * 0.58; }
++  if (preset === 'plaque') controls.target.set(0, -0.20, 1.95);
++  if (preset === 'floor') controls.target.set(2.7, -0.1, 1.5);
+   controls.update();
+   let inputAt = -10000, dragging = false, transition: 'none' | 'push' | 'reset' = 'none', progress = 0;
+   const startPosition = new Vector3(), startTarget = new Vector3(), endPosition = new Vector3(), endTarget = new Vector3();
+--- verify/run-h/before/src/post.ts
++++ src/post.ts
+@@ -1,5 +1,5 @@
+ import { PerspectiveCamera, RenderPipeline, Scene, WebGPURenderer } from 'three/webgpu';
+-import { pass, screenUV, smoothstep } from 'three/tsl';
++import { pass, screenUV, smoothstep, vec3, vec4 } from 'three/tsl';
+ import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+ /** Bloom preserves crisp glass; a quiet vignette holds attention on the tank. */
+ export function createPost(renderer: WebGPURenderer, scene: Scene, camera: PerspectiveCamera) {
+@@ -7,6 +7,8 @@
+   const beauty = scenePass.getTextureNode();
+   const vignette = smoothstep(0.25, 0.76, screenUV.sub(0.5).length()).mul(-0.075).add(1);
+   // Bound the bloom source so a sun reflection on one shard stays a small glint.
+-  post.outputNode = beauty.add(bloom(beauty.min(3), 0.24, 0.4, 1.3)).mul(vignette);
++  const shadow = smoothstep(0.10, 0, beauty.rgb.max(0).dot(vec3(0.2126, 0.7152, 0.0722)));
++  const grade = beauty.rgb.add(vec3(0.0002, 0.0005, 0.0012).mul(shadow));
++  post.outputNode = vec4(grade.add(bloom(beauty.min(3), 0.24, 0.4, 1.3).rgb).mul(vignette).mul(vec3(vignette, 1, 1)), beauty.a);
+   return { render() { post.render(); } };
+ }
+--- verify/run-h/before/src/scene/bubbles.ts
++++ src/scene/bubbles.ts
+@@ -0,0 +1,39 @@
++import { InstancedMesh, MeshPhysicalNodeMaterial, Object3D, Scene, SphereGeometry, Vector3 } from 'three/webgpu';
++import { cameraPosition, color, float, normalWorld, output, positionWorld, vec4 } from 'three/tsl';
++import { random, simTime, state, TANK, waterHeight, waterNormal } from '../state';
++
++/** One batch of thin bubbles; analytic simulation-time trajectories also run backwards. */
++export function createBubbles(scene: Scene, vents: Vector3[], ripple: (p: Vector3, strength: number) => void) {
++  const count = 66, rng = random(219), transform = new Object3D();
++  const material = new MeshPhysicalNodeMaterial({ color: '#c5f8ec', roughness: 0.09, transmission: 1, ior: 1.04, thickness: 0.002, transparent: true, depthWrite: false });
++  material.fog = false; material.envMapIntensity = 0.3;
++  const rim = float(1).sub(normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).abs()).clamp().pow(3);
++  material.opacityNode = rim.mul(0.65).add(0.05); material.emissiveNode = color('#a7eee4').mul(rim).mul(0.36);
++  material.outputNode = vec4(output.rgb.min(0.8), output.a);
++  const mesh = new InstancedMesh(new SphereGeometry(1, 10, 7), material, count); mesh.name = 'Rising bubbles'; mesh.frustumCulled = false; mesh.renderOrder = 4; scene.add(mesh);
++  const bubbles = Array.from({ length: count }, (_, i) => {
++    const origin = vents[i % vents.length].clone(), radius = 0.010 + rng() * 0.020, speed = 0.23 + radius * 7;
++    const period = (TANK.base - origin.y) / speed + 0.25;
++    return { origin, radius, speed, period, phase: rng() * period, popped: false, previousAge: -1 };
++  });
++  let live = 0, pops = 0;
++  return { update() {
++    live = 0;
++    for (const b of bubbles) {
++      const age = ((simTime.value + b.phase) % b.period + b.period) % b.period;
++      if (age < b.previousAge) b.popped = false;
++      const p = b.origin.clone(); p.y += age * b.speed;
++      p.x += Math.sin(age * 1.9 + b.phase) * 0.045; p.z += Math.sin(age * 1.35 + b.phase) * 0.035;
++      const n = waterNormal.value, surface = waterHeight.value - (n.x * p.x + n.z * p.z) / n.y;
++      if (p.y + b.radius >= surface && !b.popped && b.previousAge >= 0) {
++        if (!state.rewinding && surface > b.origin.y + 0.10) { ripple(p.clone().setY(surface), 0.025 + b.radius * 0.3); pops++; }
++        b.popped = true;
++      }
++      if (p.y + b.radius < surface && b.origin.y + 0.08 < surface && waterHeight.value > TANK.floor + 0.15) {
++        transform.position.copy(p); transform.scale.setScalar(b.radius); transform.updateMatrix(); mesh.setMatrixAt(live++, transform.matrix);
++      }
++      b.previousAge = age;
++    }
++    mesh.count = live; mesh.visible = live > 0; mesh.instanceMatrix.needsUpdate = true;
++  }, get count() { return live; }, get pops() { return pops; }, reset() { for (const b of bubbles) { b.previousAge = -1; b.popped = false; } pops = 0; } };
++}
+--- verify/run-h/before/src/scene/dust.ts
++++ src/scene/dust.ts
+@@ -1,25 +1,30 @@
+-import { AdditiveBlending, InstancedBufferAttribute, PointsNodeMaterial, Scene, Sprite } from 'three/webgpu';
+-import { color, instancedBufferAttribute, mix, sin, smoothstep, uv, vec3 } from 'three/tsl';
++import { AdditiveBlending, DynamicDrawUsage, InstancedBufferAttribute, PointsNodeMaterial, Scene, Sprite } from 'three/webgpu';
++import { color, instancedBufferAttribute, mix, smoothstep, uv } from 'three/tsl';
+ import { shaftMask, submerged, waterDepth } from './lighting';
+-import { random, simTime, sunElevation, TANK } from '../state';
++import { random, simTime, sunElevation, TANK, waterHeight, waterNormal } from '../state';
+ 
+ export function createDust(scene: Scene) {
+   const count = 440, rng = random(171), data = new Float32Array(count * 3), sizes = new Float32Array(count);
+-  for (let i = 0; i < count; i++) {
+-    data[i * 3] = (rng() - 0.5) * 5.65;
+-    data[i * 3 + 1] = TANK.floor + 0.2 + Math.pow(rng(), 1.4) * 3.05;
+-    data[i * 3 + 2] = (rng() - 0.5) * 3.1;
+-    sizes[i] = 1.3 + rng() * 2.1;
+-  }
+-  const positions = instancedBufferAttribute<'vec3'>(new InstancedBufferAttribute(data, 3), 'vec3');
+-  const phase = positions.x.mul(12).add(positions.y.mul(8));
+-  const drift = vec3(sin(simTime.mul(0.13).add(phase)).mul(0.07), sin(simTime.mul(0.21).add(phase)).mul(0.08), sin(simTime.mul(0.17).add(phase)).mul(0.07));
++  const seeds = Array.from({ length: count }, () => ({ x: (rng() - 0.5) * 5.65, fraction: Math.pow(rng(), 1.4), z: (rng() - 0.5) * 3.1, size: 1.3 + rng() * 2.1 }));
++  const positions = new InstancedBufferAttribute(data, 3).setUsage(DynamicDrawUsage), size = new InstancedBufferAttribute(sizes, 1).setUsage(DynamicDrawUsage);
+   const material = new PointsNodeMaterial({ transparent: true, blending: AdditiveBlending, depthWrite: false, sizeAttenuation: false });
+-  material.positionNode = positions.add(drift);
+-  material.sizeNode = instancedBufferAttribute<'float'>(new InstancedBufferAttribute(sizes, 1), 'float');
++  material.positionNode = instancedBufferAttribute(positions, 'vec3'); material.sizeNode = instancedBufferAttribute(size, 'float');
+   material.colorNode = mix(color('#dae6c6'), color('#a9fff1'), submerged).mul(waterDepth.mul(-0.12).exp()).mul(shaftMask.mul(sunElevation).mul(1.5).add(0.7));
+-  const softCircle = smoothstep(0.5, 0.05, uv().sub(0.5).length());
+-  material.opacityNode = softCircle.mul(sin(simTime.mul(0.7).add(phase)).mul(0.15).add(0.34));
+-  const dust = new Sprite(material); dust.count = count; dust.frustumCulled = false; dust.renderOrder = 6; scene.add(dust);
+-  return dust;
++  // The fragment fade uses the same tilted water plane as every other water layer.
++  material.opacityNode = smoothstep(0.5, 0.05, uv().sub(0.5).length()).mul(smoothstep(0, 0.055, waterDepth)).mul(0.34);
++  const dust = new Sprite(material); dust.count = count; dust.frustumCulled = false; dust.renderOrder = 6; dust.name = 'Submerged motes'; scene.add(dust);
++  let live = 0, above = 0;
++  return { update() {
++    const time = simTime.value, n = waterNormal.value; live = above = 0;
++    seeds.forEach((s, i) => {
++      const phase = s.x * 12 + s.fraction * 8;
++      const x = s.x + Math.sin(time * 0.13 + phase) * 0.07, z = s.z + Math.sin(time * 0.17 + phase) * 0.07;
++      const surface = waterHeight.value - (n.x * x + n.z * z) / n.y;
++      const y = TANK.floor + 0.15 + s.fraction * Math.max(0, surface - TANK.floor - 0.23) + Math.sin(time * 0.21 + phase) * 0.045;
++      data.set([x, y, z], i * 3);
++      sizes[i] = surface > TANK.floor + 0.18 && y < surface - 0.015 ? s.size : 0;
++      if (sizes[i] > 0) { live++; if ((y - waterHeight.value) * n.y + x * n.x + z * n.z > 0) above++; }
++    });
++    dust.visible = live > 0; positions.needsUpdate = size.needsUpdate = true;
++  }, get count() { return live; }, get aboveSurface() { return above; } };
+ }
+--- verify/run-h/before/src/scene/island.ts
++++ src/scene/island.ts
+@@ -34,7 +34,7 @@
+   const wet = smoothstep(0, 0.035, signedWaterDistance).mul(float(1).sub(smoothstep(0.04, 0.16, signedWaterDistance)));
+   material.colorNode = underwaterColor(tint.mul(float(1).sub(wet.mul(0.42))));
+   // Water attenuates diffuse sky/environment fill; preserve direct sun contrast.
+-  material.aoNode = mix(float(1), float(0.045), submerged);
++  material.aoNode = mix(float(1), float(0.040), submerged);
+   material.emissiveNode = rockCaustics;
+   const peak = new Mesh(geometry, material);
+   peak.position.y = TANK.floor + 0.02; peak.castShadow = true; peak.receiveShadow = true; scene.add(peak);
+@@ -73,5 +73,5 @@
+   }
+   const heightTexture = new DataTexture(heights, resolution, resolution, RedFormat, FloatType);
+   heightTexture.minFilter = heightTexture.magFilter = LinearFilter; heightTexture.needsUpdate = true;
+-  return { focus: peak.position.clone().setY(1.95), heightTexture };
++  return { peak, focus: peak.position.clone().setY(1.95), heightTexture };
+ }
+--- verify/run-h/before/src/scene/lighting.ts
++++ src/scene/lighting.ts
+@@ -20,7 +20,7 @@
+ export const rockCaustics = causticLight.mul(normalWorldGeometry.dot(sunDirection).max(0))
+   .mul(smoothstep(0.15, 0.8, normalWorldGeometry.y)).mul(0.24);
+ export function underwaterColor(base: Node<'vec3'>) {
+-  return mix(base, base.mul(color('#529f98')).mul(waterDepth.mul(-0.14).exp()), submerged.mul(0.80));
++  return mix(base, base.mul(color('#439f98')).mul(waterDepth.mul(-0.14).exp()), submerged.mul(0.80));
+ }
+ // Light-space mask for drifting motes.
+ export function lightShaftMask(point: Node<'vec3'>) {
+@@ -51,7 +51,7 @@
+   sun.shadow.normalBias = 0.035; sun.shadow.bias = -0.0002;
+   sun.target.position.set(0, 0.7, 0);
+   scene.add(sun, sun.target, new HemisphereLight('#b8dce1', '#344753', 0.85));
+-  const cold = new Color('#eef5ff'), warm = new Color('#d5e6ee');
++  const cold = new Color('#fff3dc'), warm = new Color('#ffc78a');
+   const direction = new Vector3();
+   return { environment, update(time: number) {
+     const phase = time * Math.PI * 2 / 60;
+@@ -59,7 +59,7 @@
+     direction.set(Math.cos(phase + 2.3), elevation, Math.sin(phase + 2.3)).normalize();
+     sunDirection.value.copy(direction); sunElevation.value = direction.y;
+     sun.position.copy(direction).multiplyScalar(14).add(sun.target.position);
+-    sun.color.copy(warm).lerp(cold, (elevation - 0.28) / 0.6);
++    sun.color.copy(warm).lerp(cold, (elevation - 0.53) / 0.24);
+     sun.intensity = 1.6 + elevation * 0.7;
+   } };
+ }
+--- verify/run-h/before/src/scene/reef.ts
++++ src/scene/reef.ts
+@@ -0,0 +1,76 @@
++import { BufferGeometry, Color, CylinderGeometry, DodecahedronGeometry, Float32BufferAttribute, InstancedBufferAttribute, InstancedMesh, Mesh, MeshStandardNodeMaterial, Object3D, Raycaster, Scene, TorusGeometry, Vector3 } from 'three/webgpu';
++import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
++import { attribute, color, float, mix, positionLocal, sin, smoothstep, vec3 } from 'three/tsl';
++import { causticLight, submerged, underwaterColor } from './lighting';
++import { random, simTime, TANK, waterHeight, waterNormal } from '../state';
++
++/** Four instance batches: branching fans, hollow tubes, lobed brains, and seagrass. */
++export function createReef(scene: Scene, terrain: Mesh) {
++  const rng = random(614), up = new Vector3(0, 1, 0), ray = new Raycaster(); terrain.updateMatrixWorld(true);
++  function ground(x: number, z: number) {
++    ray.set(new Vector3(x, TANK.top + 1, z), new Vector3(0, -1, 0));
++    const hit = ray.intersectObject(terrain, false)[0];
++    return hit && hit.point.y > TANK.floor + 0.12 ? { point: hit.point, normal: hit.face!.normal.clone() } : { point: new Vector3(x, TANK.floor + 0.12, z), normal: up.clone() };
++  }
++  const centers = [[-2.25, 1.12], [-1.3, 1.45], [0.3, 1.42], [1.65, 1.35], [2.55, 0.65], [-2.6, -0.8], [1.9, -1.3], [-0.9, -1.35]];
++  function sites(count: number) {
++    const result = [];
++    for (let tries = 0; result.length < count && tries < count * 100; tries++) {
++      const c = centers[tries % centers.length], x = c[0] + (rng() - 0.5) * 0.7, z = c[1] + (rng() - 0.5) * 0.48;
++      if (Math.abs(x) > 2.79 || Math.abs(z) > 1.49) continue;
++      const g = ground(x, z);
++      if (g.point.y > 1.3 || g.normal.y < 0.70) continue;
++      result.push(g);
++    }
++    return result;
++  }
++  function combine(parts: BufferGeometry[]) { const flat = parts.map(p => p.index ? p.toNonIndexed() : p); const g = mergeGeometries(flat); new Set([...parts, ...flat]).forEach(p => p.dispose()); return g; }
++  const branches: BufferGeometry[] = [];
++  function branch(a: Vector3, b: Vector3, radius: number) {
++    const g = new CylinderGeometry(radius * 0.7, radius, a.distanceTo(b), 5, 1);
++    const transform = new Object3D(); transform.quaternion.setFromUnitVectors(up, b.clone().sub(a).normalize()); transform.position.copy(a).add(b).multiplyScalar(0.5); transform.updateMatrix(); g.applyMatrix4(transform.matrix); branches.push(g);
++  }
++  branch(new Vector3(), new Vector3(0, 1, 0), 0.065);
++  for (let i = 0; i < 7; i++) {
++    const side = i % 2 ? -1 : 1, y = 0.18 + i * 0.10, tip = new Vector3(side * (0.38 - i * 0.025), y + 0.24, 0.02 * i);
++    branch(new Vector3(0, y, 0), tip, 0.038); branch(tip, tip.clone().add(new Vector3(side * 0.07, 0.15, 0.02)), 0.025);
++  }
++  const tubes: BufferGeometry[] = [];
++  for (let i = 0; i < 5; i++) {
++    const x = Math.cos(i * 2.4) * 0.20, z = Math.sin(i * 2.4) * 0.20, h = 0.45 + i * 0.09;
++    tubes.push(new CylinderGeometry(0.105, 0.08, h, 8, 1, true).translate(x, h / 2, z));
++    const ring = new TorusGeometry(0.084, 0.025, 4, 8); ring.rotateX(Math.PI / 2); ring.translate(x, h, z); tubes.push(ring);
++    // Inner wall gives each tube a real dark hollow opening.
++    const inner = new CylinderGeometry(0.067, 0.055, h * 0.7, 8, 1, true); inner.scale(-1, 1, 1); inner.translate(x, h * 0.65, z); tubes.push(inner);
++  }
++  const brain = new DodecahedronGeometry(0.45, 1); const p = brain.getAttribute('position');
++  for (let i = 0; i < p.count; i++) { const v = new Vector3().fromBufferAttribute(p, i); v.multiplyScalar(1 + Math.sin(v.x * 32 + v.z * 15) * 0.10); p.setXYZ(i, v.x, (v.y + 0.45) * 0.65, v.z); } brain.computeVertexNormals();
++  const bladeParts: BufferGeometry[] = [];
++  for (let i = 0; i < 5; i++) {
++    const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute([-0.025,0,0, 0.025,0,0, -0.02,0.55,0.04, 0.025,0,0, 0.02,0.55,0.04, -0.02,0.55,0.04, -0.02,0.55,0.04, 0.02,0.55,0.04, 0.08,1,0.10],3));
++    g.rotateY(i * 2.4); g.computeVertexNormals(); bladeParts.push(g);
++  }
++  const coralMaterial = new MeshStandardNodeMaterial({ roughness: 0.8, flatShading: true });
++  coralMaterial.colorNode = underwaterColor(color('#ffffff').rgb); coralMaterial.aoNode = mix(float(1), float(0.46), submerged); coralMaterial.emissiveNode = causticLight.mul(0.12);
++  const grassMaterial = coralMaterial.clone(); grassMaterial.side = 2;
++  const anchor = attribute('reefAnchor', 'vec3');
++  const wet = smoothstep(0.02, 0.18, waterHeight.sub(anchor.y).sub(waterNormal.x.mul(anchor.x).add(waterNormal.z.mul(anchor.z))));
++  const top = positionLocal.y.max(0).pow(2);
++  const sway = sin(simTime.mul(1.15).add(anchor.x.mul(4)).add(anchor.z.mul(3))).mul(0.12).add(waterNormal.x.mul(5));
++  grassMaterial.positionNode = positionLocal.add(vec3(top.mul(sway.mul(wet).add(float(1).sub(wet).mul(0.55))), top.mul(float(1).sub(wet)).mul(-0.42), top.mul(waterNormal.z).mul(wet).mul(5)));
++  const geometries = [combine(branches), combine(tubes), brain, combine(bladeParts)];
++  const palettes = ['#e97e53', '#d96696', '#d89a82', '#359b76']; const counts = [25, 23, 20, 135]; const vents: Vector3[] = [];
++  geometries.forEach((geometry, kind) => {
++    const places = sites(counts[kind]), mesh = new InstancedMesh(geometry, kind === 3 ? grassMaterial : coralMaterial, places.length), anchors = new Float32Array(places.length * 3), transform = new Object3D();
++    places.forEach((g, i) => {
++      transform.position.copy(g.point); transform.quaternion.setFromUnitVectors(up, g.normal); transform.rotateY(rng() * Math.PI * 2);
++      const scale = kind === 3 ? 0.20 + rng() * 0.29 : 0.28 + rng() * 0.38; transform.scale.setScalar(scale); transform.updateMatrix(); mesh.setMatrixAt(i, transform.matrix);
++      mesh.setColorAt(i, new Color(kind === 2 && i % 4 === 0 ? '#8d9bd6' : palettes[kind]).offsetHSL((rng() - 0.5) * 0.05, (rng() - 0.5) * 0.12, (rng() - 0.5) * 0.08)); anchors.set(g.point.toArray(), i * 3);
++      if (kind === 1 && i % 4 === 0) vents.push(g.point.clone().add(new Vector3(0, scale * 0.8, 0)));
++    });
++    geometry.setAttribute('reefAnchor', new InstancedBufferAttribute(anchors, 3)); mesh.receiveShadow = true; mesh.name = ['Coral fans', 'Tube coral', 'Brain coral', 'Seagrass'][kind]; scene.add(mesh);
++  });
++  // Two extra vents originate on the lower terrain, along with the tube colonies.
++  for (const [x, z] of [[-2, 0.65], [2.2, 0.4]]) { const g = ground(x, z); if (g.point.y < 1.7) vents.push(g.point.add(new Vector3(0, 0.07, 0))); }
++  return { vents };
++}
+--- verify/run-h/before/src/scene/spill.ts
++++ src/scene/spill.ts
+@@ -1,6 +1,6 @@
+ import { AdditiveBlending, CircleGeometry, DoubleSide, DynamicDrawUsage, InstancedBufferAttribute, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, PointsNodeMaterial, Scene, Sprite, Vector3 } from 'three/webgpu';
+ import { bumpMap, color, float, instancedBufferAttribute, output, positionWorld, smoothstep, uv, vec4 } from 'three/tsl';
+-import { random, simTime, TANK, waterHeight } from '../state';
++import { random, STAGE_Y, simTime, TANK, waterHeight } from '../state';
+ import type { Opening } from './tank';
+ 
+ /** Split drained tank volume by width × sqrt(head), excluding dry sills in each height interval. */
+@@ -47,9 +47,9 @@
+     const old = emitters.get(opening.wall);
+     if (old) { old.opening = opening; old.stopped = -1; old.wet = waterHeight.value > opening.bottom; return; }
+     const sheet = new Mesh(new PlaneGeometry(1, 1, 1, 28), sheetMaterial.clone()); sheet.frustumCulled = false; scene.add(sheet);
+-    const puddle = new Mesh(new CircleGeometry(1, 64), puddleMaterial); puddle.rotation.x = -Math.PI / 2; puddle.position.y = 0.008 + opening.wall * 0.001; puddle.scale.setScalar(0.001);
++    const puddle = new Mesh(new CircleGeometry(1, 64), puddleMaterial); puddle.rotation.x = -Math.PI / 2; puddle.position.y = STAGE_Y + 0.008 + opening.wall * 0.001; puddle.scale.setScalar(0.001);
+     const head = Math.max(0, waterHeight.value - opening.bottom);
+-    const landingDistance = Math.sqrt(2 * 9.81 * head) * 0.55 * Math.sqrt(Math.max(0.01, Math.min(opening.point.y, waterHeight.value)) * 2 / 9.81) + 0.38;
++    const landingDistance = Math.sqrt(2 * 9.81 * head) * 0.55 * Math.sqrt(Math.max(0.01, Math.min(opening.point.y, waterHeight.value) - STAGE_Y) * 2 / 9.81) + 0.38;
+     puddle.position.x = opening.point.x + opening.normal.x * landingDistance;
+     puddle.position.z = opening.point.z + opening.normal.z * landingDistance;
+     scene.add(puddle);
+@@ -72,7 +72,7 @@
+       }
+       const speed = Math.sqrt(2 * 9.81 * head) * 0.55;
+       const sourceY = Math.min(o.point.y, Math.max(o.bottom + 0.015, waterHeight.value - 0.03));
+-      const flight = Math.sqrt(Math.max(0.01, sourceY) * 2 / 9.81);
++      const flight = Math.sqrt(Math.max(0.01, sourceY - STAGE_Y) * 2 / 9.81);
+       at.copy(o.point).setY(sourceY).addScaledVector(o.normal, 0.08);
+       tangent.set(o.normal.z, 0, -o.normal.x);
+       e.carry += dt * (head > 0.001 ? (o.full ? 1700 : 420) * e.strength : drips * 12);
+@@ -88,7 +88,7 @@
+         const row = Math.floor(i / 2) / 28, t = row * flight, side = i % 2 ? 1 : -1;
+         const point = at.clone().addScaledVector(o.normal, speed * t).addScaledVector(tangent, side * width * 0.5 * (1 - row * 0.35));
+         point.y = sourceY - 4.905 * t * t + Math.sin(row * 30 - simTime.value * 9) * 0.008 * row;
+-        p.setXYZ(i, point.x, Math.max(0.014, point.y), point.z);
++        p.setXYZ(i, point.x, Math.max(STAGE_Y + 0.014, point.y), point.z);
+       }
+       p.needsUpdate = true; e.sheet.geometry.computeVertexNormals(); e.sheet.visible = head > 0.003;
+       const landing = at.clone().addScaledVector(o.normal, speed * flight + 0.3);
+@@ -103,8 +103,8 @@
+       const age = simTime.value - d.born;
+       if (age > d.life) { drops[i] = undefined; continue; }
+       d.v.y -= 9.81 * dt; d.p.addScaledVector(d.v, dt);
+-      if (d.p.y < 0.018) {
+-        if (!d.splash) for (let n = 0; n < 2; n++) spawn(d.p.clone().setY(0.022), new Vector3((rng() - 0.5) * 0.8, rng() * 0.8 + 0.15, (rng() - 0.5) * 0.8), true);
++      if (d.p.y < STAGE_Y + 0.018) {
++        if (!d.splash) for (let n = 0; n < 2; n++) spawn(d.p.clone().setY(STAGE_Y + 0.022), new Vector3((rng() - 0.5) * 0.8, rng() * 0.8 + 0.15, (rng() - 0.5) * 0.8), true);
+         drops[i] = undefined; continue;
+       }
+       positions.set(d.p.toArray(), i * 3); sizes[i] = d.size * Math.min(1, (d.life - age) * 5);
+--- verify/run-h/before/src/scene/stage.ts
++++ src/scene/stage.ts
+@@ -1,14 +1,43 @@
+-import { Mesh, MeshBasicNodeMaterial, PlaneGeometry, Scene } from 'three/webgpu';
+-import { color, mix, positionWorld, smoothstep, vec2 } from 'three/tsl';
++import { BoxGeometry, CanvasTexture, Mesh, MeshBasicNodeMaterial, MeshStandardNodeMaterial, PlaneGeometry, Scene, SRGBColorSpace } from 'three/webgpu';
++import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
++import { Fn, If, color, float, mix, output, positionWorld, screenUV, smoothstep, uniform, vec2, vec3, vec4 } from 'three/tsl';
++import { causticLight } from './lighting';
++import { STAGE_Y, TANK, waterHeight } from '../state';
+ 
+-/** One unlit floor: evaluate its soft contact shadow in the same fragment.
+- * A second plane only 0.003 units above the 10,000-unit floor can compete
+- * for depth at shallow angles. No extra surface or directional shadow is needed. */
++export const atmosphere = mix(color('#0f2430'), color('#2c4757'), float(1).sub(screenUV.y));
++/** One floor fragment owns both the contact shadow and refracted light pool. */
+ export function createStage(scene: Scene) {
+-  const material = new MeshBasicNodeMaterial();
+-  const base = mix(color('#26333e'), color('#41515c'), positionWorld.xz.length().mul(-0.035).exp().mul(0.6));
+-  const distance = positionWorld.xz.abs().sub(vec2(2.9, 1.65)).max(0).length();
+-  material.colorNode = mix(base, color('#0d1c25'), smoothstep(1.1, 0, distance).mul(0.44));
++  const material = new MeshBasicNodeMaterial(); material.fog = false;
++  const amount = uniform(1);
++  const distance = positionWorld.xz.abs().sub(vec2(3.2, 1.95)).max(0).length();
++  const pool = smoothstep(3.8, 0, distance).mul(positionWorld.xz.length().mul(-0.055).exp());
++  const base = mix(atmosphere, color('#34464a'), positionWorld.xz.length().mul(-0.035).exp().mul(0.8))
++    .add(color('#6f8180').mul(positionWorld.xz.length().mul(-0.12).exp()).mul(0.035));
++  const shadowed = mix(base, color('#08171d'), smoothstep(0.85, 0, distance).mul(0.55));
++  material.colorNode = Fn(() => {
++    const light = vec3(0).toVar();
++    // Skip the Worley evaluations outside the finite pool; no screen derivatives here.
++    If(pool.mul(amount).greaterThan(0.001), () => { light.assign(causticLight.mul(vec3(0.55, 0.88, 1)).mul(pool).mul(amount).mul(0.30).min(0.42)); });
++    return shadowed.add(light);
++  })();
+   const floor = new Mesh(new PlaneGeometry(10000, 10000), material);
+-  floor.name = 'Floor with integrated contact shadow'; floor.rotation.x = -Math.PI / 2; scene.add(floor);
++  floor.name = 'Floor with integrated contact shadow and refracted caustics'; floor.rotation.x = -Math.PI / 2; floor.position.y = STAGE_Y; scene.add(floor);
++  const pedestal = new Mesh(new RoundedBoxGeometry(6.4, -STAGE_Y, 3.9, 2, 0.055), new MeshStandardNodeMaterial({ color: '#142326', roughness: 0.86, metalness: 0.12 }));
++  pedestal.position.y = STAGE_Y / 2; pedestal.receiveShadow = true; scene.add(pedestal);
++  const canvas = document.createElement('canvas'); canvas.width = 1536; canvas.height = 320;
++  const ctx = canvas.getContext('2d')!;
++  ctx.fillStyle = '#bd975b'; ctx.fillRect(0, 0, canvas.width, canvas.height);
++  // Fine brushed grain is deterministic; letters are engraved dark into the gold.
++  for (let y = 0; y < canvas.height; y++) { ctx.fillStyle = `rgba(45,30,12,${0.02 + (y * 17 % 13) / 200})`; ctx.fillRect(0, y, canvas.width, 1); }
++  function label(text: string, size: number, spacing: number, y: number) {
++    ctx.font = `500 ${size}px Georgia, serif`; ctx.textBaseline = 'middle';
++    const width = [...text].reduce((n, c) => n + ctx.measureText(c).width + spacing, -spacing); let x = (canvas.width - width) / 2;
++    for (const c of text) { ctx.fillStyle = '#e4c88e'; ctx.fillText(c, x, y + 2); ctx.fillStyle = '#30291d'; ctx.fillText(c, x, y); x += ctx.measureText(c).width + spacing; }
++  }
++  label('AQUARIUM', 95, 21, 112); label('WAWA SENSEI', 51, 16, 231);
++  const map = new CanvasTexture(canvas); map.colorSpace = SRGBColorSpace; map.anisotropy = 8;
++  const gold = new MeshStandardNodeMaterial({ map, metalness: 0.9, roughness: 0.3 });
++  gold.outputNode = vec4(output.rgb.div(output.rgb.div(0.8).add(1)), output.a);
++  const plaque = new Mesh(new BoxGeometry(1.52, 0.30, 0.018), gold); plaque.position.set(0, STAGE_Y / 2, 1.958); scene.add(plaque);
++  return { update() { amount.value = Math.max(0, Math.min(1, (waterHeight.value - TANK.floor) / (TANK.base - TANK.floor))); }, get intensity() { return amount.value; } };
+ }
+--- verify/run-h/before/src/scene/tank.ts
++++ src/scene/tank.ts
+@@ -5,7 +5,7 @@
+ import { buildShardGeometry, generateShatterPattern, groupAdjacentCells, insetCell, type ShatterCell } from '../lib/shatter';
+ import { polygonCentroid } from '../lib/triangulate';
+ import { createPhysicsWorld } from '../lib/physics';
+-import { random, TANK } from '../state';
++import { random, STAGE_Y, TANK } from '../state';
+ 
+ export type Opening = { wall: number; point: Vector3; normal: Vector3; bottom: number; width: number; full: boolean };
+ /** Physical glass, with the same material on intact faces and exposed shard edges. */
+@@ -26,7 +26,8 @@
+   });
+   const staticPane = (wall: number) => physics.addStaticBox(origins[wall], wall < 2 ? { x: widths[wall], y: height, z: 0.05 } : { x: 0.05, y: height, z: widths[wall] });
+   const colliders = widths.map((_, wall) => [staticPane(wall)]);
+-  physics.addStaticBox({ x: 0, y: -0.12, z: 0 }, { x: 40, y: 0.24, z: 40 });
++  physics.addStaticBox({ x: 0, y: STAGE_Y - 0.12, z: 0 }, { x: 40, y: 0.24, z: 40 });
++  physics.addStaticBox({ x: 0, y: STAGE_Y / 2, z: 0 }, { x: 6.4, y: -STAGE_Y, z: 3.9 });
+   physics.addStaticBox({ x: 0, y: 0.08, z: 0 }, { x: 6.18, y: 0.16, z: 3.68 });
+   const plinth = new Mesh(new BoxGeometry(6.18, 0.16, 3.68), new MeshStandardNodeMaterial({ color: '#273536', metalness: 0.12, roughness: 0.68 }));
+   plinth.position.y = 0.08; plinth.castShadow = true; plinth.receiveShadow = true; scene.add(plinth);
+--- verify/run-h/before/src/scene/water.ts
++++ src/scene/water.ts
+@@ -9,6 +9,8 @@
+   const ripples = Array.from({ length: 4 }, () => uniform(new Vector4(0, 0, -100, 0)));
+   let rippleIndex = 0;
+   let waves = mx_noise_float(positionWorld.mul(vec3(3.5, 0, 3.5)).add(vec3(simTime.mul(0.24), simTime.mul(0.17), 0)))
++    .add(mx_noise_float(positionWorld.mul(vec3(8.2, 0, 8.2)).add(vec3(simTime.mul(-0.31), 0, simTime.mul(0.22)))).mul(0.32))
++    .add(mx_noise_float(positionWorld.mul(vec3(15.3, 0, 15.3)).add(vec3(simTime.mul(0.16), 0, simTime.mul(-0.24)))).mul(0.12))
+     .add(positionWorld.x.mul(7).add(positionWorld.z.mul(4)).sub(simTime.mul(1.6)).sin().mul(0.25));
+   for (const ripple of ripples) {
+     const age = simTime.sub(ripple.z).max(0), radius = positionWorld.xz.sub(ripple.xy).length();
+@@ -21,7 +23,7 @@
+   // when the camera drops below it. Retain stronger sky reflection from above.
+   surfaceMaterial.opacityNode = cameraPosition.y.lessThan(waterHeight).select(fresnel.mul(0.10).add(0.08), fresnel.mul(0.20).add(0.35));
+   surfaceMaterial.envMapIntensity = 0.65;
+-  surfaceMaterial.normalNode = bumpMap(waves, float(0.035));
++  surfaceMaterial.normalNode = bumpMap(waves, float(0.048));
+   const wallDistance = min(float(TANK.width / 2 - 0.026).sub(positionWorld.x.abs()), float(TANK.depth / 2 - 0.026).sub(positionWorld.z.abs()));
+   const meniscus = color('#c9eee7').mul(float(1).sub(smoothstep(0.002, 0.014, wallDistance))).mul(0.06);
+   const halfVector = cameraPosition.sub(positionWorld).normalize().add(sunDirection).normalize();
+--- verify/run-h/before/src/state.ts
++++ src/state.ts
+@@ -1,6 +1,7 @@
+ import { Vector3 } from 'three/webgpu';
+ import { uniform } from 'three/tsl';
+ 
++export const STAGE_Y = -0.42;
+ export const TANK = { width: 6, depth: 3.5, floor: 0.16, top: 3.66, base: 2.59 };
+ export const state = {
+   timeScale: 1, elapsed: 0, rewinding: false, mode: 'idle' as 'idle' | 'cracked' | 'shattered',

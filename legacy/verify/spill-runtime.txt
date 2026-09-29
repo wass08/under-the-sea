@@ -1,0 +1,6 @@
+Pour performance: {"medianFPS":60,"pixelRatio":1.5}
+Pond at 3s: {"height":1.5615834421863057,"radii":[1.1911382493117488,1.0124675119149864],"flow":{"wall":0,"arcLength":1.9450066332986264,"sheetLandingSpeed":5.759667525927621,"uvScrollRateAtLanding":2.961258551678837,"measuredLandings":256,"meanDropletLandingSpeed":6.163979858429954,"meanStreakSpeedForThoseDrops":6.017390120956732,"meanRelativeError":0.024362493448508157}}
+Thin-sheet pond formula: {"at3s":{"sheetVolume":0.0824589295706186,"depth":0.025,"radius":1.1911382493117488,"expected":1.1911382493117488},"at10s":{"sheetVolume":0.1226581577675052,"depth":0.025,"radius":1.44897207757026,"expected":1.44897207757026}}
+Stopped pond: "PASS: position, radius and sheetVolume unchanged after flow stops"
+Pond frame stability: {"frames":10,"maxChannelDifference":1,"meanChannelDifference":0.008716724537037037}
+Focused spill checks: "PASS: crack, pour speed, bounded thin-sheet pond growth, stopped pond, distinct puddle depths, frame stability, rewind/reset, no shader or console errors"

@@ -1,0 +1,23 @@
+
+> tideline-glass-aquarium@1.0.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.0 building client environment for production...
+transforming...
+✓ 67 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                       3.00 kB │ gzip:     1.45 kB
+dist/assets/lab-BIvbH-iz.css          4.23 kB │ gzip:     1.53 kB
+dist/assets/index-BuIfv8ck.css        5.27 kB │ gzip:     1.91 kB
+dist/assets/index-DKIS2rrs.js         2.96 kB │ gzip:     1.52 kB
+dist/assets/aquarium-DwUZLDCM.js     54.11 kB │ gzip:    21.18 kB
+dist/assets/lab-i6D4rX3I.js         166.96 kB │ gzip:    38.40 kB
+dist/assets/terrain-Cg_Q9Fe8.js   3,863.00 kB │ gzip: 1,375.79 kB
+
+✓ built in 190ms
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 2000 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

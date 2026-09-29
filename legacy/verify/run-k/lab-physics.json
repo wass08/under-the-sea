@@ -1,0 +1,53 @@
+[
+  {
+    "level": 1,
+    "launch": {
+      "radialFraction": 0,
+      "count": 228,
+      "min": 2.200000047683716,
+      "median": 2.200000047683716,
+      "max": 2.200000047683716,
+      "maxAngular": 0
+    },
+    "rest": {
+      "samples": 61,
+      "maxDisplacement": 0.00005133348938320893,
+      "maxRotation": 0.0017765333845877055
+    },
+    "awake5": 0
+  },
+  {
+    "level": 2,
+    "launch": {
+      "radialFraction": 0.4358899015869562,
+      "count": 220,
+      "min": 2.9715469367234295,
+      "median": 3.0459168710130204,
+      "max": 11.41730630076573,
+      "maxAngular": 14.000018525872902
+    },
+    "rest": {
+      "samples": 61,
+      "maxDisplacement": 0,
+      "maxRotation": 5.960464477539063e-8
+    },
+    "awake5": 0
+  },
+  {
+    "level": 3,
+    "launch": {
+      "radialFraction": 0.43588989990235627,
+      "count": 220,
+      "min": 2.9740706755639676,
+      "median": 5.716495487238689,
+      "max": 11.8467903454286,
+      "maxAngular": 14.000002221464939
+    },
+    "rest": {
+      "samples": 61,
+      "maxDisplacement": 0,
+      "maxRotation": 5.960464477539063e-8
+    },
+    "awake5": 0
+  }
+]

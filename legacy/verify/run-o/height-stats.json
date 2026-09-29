@@ -1,0 +1,195 @@
+[
+  {
+    "options": {
+      "warp": 0,
+      "erosion": 0,
+      "carve": 0
+    },
+    "unwarped": {
+      "min": 0,
+      "max": 2.7674450874328613,
+      "mean": 0.8024096947897339,
+      "rms": 1.0975682229385235
+    },
+    "warped": {
+      "min": 0,
+      "max": 2.7674450874328613,
+      "mean": 0.8024096947897339,
+      "rms": 1.0975682229385235
+    },
+    "thermal": {
+      "min": 0,
+      "max": 2.7674450874328613,
+      "mean": 0.8024096947897339,
+      "rms": 1.0975682229385235
+    },
+    "carved": {
+      "min": 0,
+      "max": 2.7674450874328613,
+      "mean": 0.8024096947897339,
+      "rms": 1.0975682229385235
+    },
+    "warpChange": {
+      "meanAbsolute": 0,
+      "maxAbsolute": 0,
+      "changed": 0
+    },
+    "thermalChange": {
+      "meanAbsolute": 0,
+      "maxAbsolute": 0,
+      "changed": 0
+    },
+    "carveChange": {
+      "meanAbsolute": 0,
+      "maxAbsolute": 0,
+      "changed": 0
+    },
+    "dropletPaths": 0,
+    "gullyCount": 0,
+    "gullyVertices": 0,
+    "maximumIncision": 0
+  },
+  {
+    "options": {
+      "erosion": 0,
+      "carve": 0
+    },
+    "unwarped": {
+      "min": 0,
+      "max": 2.7888529300689697,
+      "mean": 0.7970308669987971,
+      "rms": 1.0878813310885076
+    },
+    "warped": {
+      "min": 0,
+      "max": 2.861950397491455,
+      "mean": 0.7908164488126808,
+      "rms": 1.0851975048473759
+    },
+    "thermal": {
+      "min": 0,
+      "max": 2.861950397491455,
+      "mean": 0.7908164488126808,
+      "rms": 1.0851975048473759
+    },
+    "carved": {
+      "min": 0,
+      "max": 2.861950397491455,
+      "mean": 0.7908164488126808,
+      "rms": 1.0851975048473759
+    },
+    "warpChange": {
+      "meanAbsolute": 0.04103389121414112,
+      "maxAbsolute": 0.2059648036956787,
+      "changed": 1470
+    },
+    "thermalChange": {
+      "meanAbsolute": 0,
+      "maxAbsolute": 0,
+      "changed": 0
+    },
+    "carveChange": {
+      "meanAbsolute": 0,
+      "maxAbsolute": 0,
+      "changed": 0
+    },
+    "dropletPaths": 0,
+    "gullyCount": 0,
+    "gullyVertices": 0,
+    "maximumIncision": 0
+  },
+  {
+    "options": {
+      "carve": 0
+    },
+    "unwarped": {
+      "min": 0,
+      "max": 2.7888529300689697,
+      "mean": 0.7970308669987971,
+      "rms": 1.0878813310885076
+    },
+    "warped": {
+      "min": 0,
+      "max": 2.861950397491455,
+      "mean": 0.7908164488126808,
+      "rms": 1.0851975048473759
+    },
+    "thermal": {
+      "min": 0,
+      "max": 2.7102749347686768,
+      "mean": 0.7908164491060639,
+      "rms": 1.0727364365428078
+    },
+    "carved": {
+      "min": 0,
+      "max": 2.7102749347686768,
+      "mean": 0.7908164491060639,
+      "rms": 1.0727364365428078
+    },
+    "warpChange": {
+      "meanAbsolute": 0.04103389121414112,
+      "maxAbsolute": 0.2059648036956787,
+      "changed": 1470
+    },
+    "thermalChange": {
+      "meanAbsolute": 0.0288407317431968,
+      "maxAbsolute": 0.1873592734336853,
+      "changed": 1182
+    },
+    "carveChange": {
+      "meanAbsolute": 0,
+      "maxAbsolute": 0,
+      "changed": 0
+    },
+    "dropletPaths": 0,
+    "gullyCount": 0,
+    "gullyVertices": 0,
+    "maximumIncision": 0
+  },
+  {
+    "options": {},
+    "unwarped": {
+      "min": 0,
+      "max": 2.7888529300689697,
+      "mean": 0.7970308669987971,
+      "rms": 1.0878813310885076
+    },
+    "warped": {
+      "min": 0,
+      "max": 2.861950397491455,
+      "mean": 0.7908164488126808,
+      "rms": 1.0851975048473759
+    },
+    "thermal": {
+      "min": 0,
+      "max": 2.7102749347686768,
+      "mean": 0.7908164491060639,
+      "rms": 1.0727364365428078
+    },
+    "carved": {
+      "min": 0,
+      "max": 2.677981376647949,
+      "mean": 0.7492576823869666,
+      "rms": 1.025888116995635
+    },
+    "warpChange": {
+      "meanAbsolute": 0.04103389121414112,
+      "maxAbsolute": 0.2059648036956787,
+      "changed": 1470
+    },
+    "thermalChange": {
+      "meanAbsolute": 0.0288407317431968,
+      "maxAbsolute": 0.1873592734336853,
+      "changed": 1182
+    },
+    "carveChange": {
+      "meanAbsolute": 0.0415587667190973,
+      "maxAbsolute": 0.22511547803878784,
+      "changed": 1245
+    },
+    "dropletPaths": 403,
+    "gullyCount": 8,
+    "gullyVertices": 465,
+    "maximumIncision": 0.23999999463558197
+  }
+]

@@ -1,0 +1,92 @@
+{
+  "label": "after",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1.5,
+  "airborne": {
+    "frames": 97,
+    "fpsMedian": 60.606,
+    "ms": {
+      "frame": 21.558,
+      "physics": 13.01,
+      "rapier": 12.592,
+      "collision": 3.676,
+      "solver": 5.643,
+      "ccd": 0,
+      "sync": 0.118,
+      "batch": 3.28,
+      "spill": 0.49,
+      "rewind": 0.052,
+      "render": 1.362,
+      "shadow": 0.087
+    },
+    "stepsMean": 1.155,
+    "stepsMax": 3,
+    "drawCalls": 49,
+    "shadowCalls": 10,
+    "gcMsPerFrame": 0.116,
+    "gcEvents": 27,
+    "heapGrowthKBPerFrame": 6078.317,
+    "uploadsKBPerFrame": 1395.516,
+    "awakeMedian": 262
+  },
+  "settled": {
+    "frames": 120,
+    "fpsMedian": 59.524,
+    "ms": {
+      "frame": 16.668,
+      "physics": 0.143,
+      "rapier": 0.023,
+      "collision": 0.004,
+      "solver": 0.002,
+      "ccd": 0,
+      "sync": 0.007,
+      "batch": 0.02,
+      "spill": 0.018,
+      "rewind": 0.026,
+      "render": 0.662,
+      "shadow": 0.069
+    },
+    "stepsMean": 1,
+    "stepsMax": 1,
+    "drawCalls": 49,
+    "shadowCalls": 10,
+    "gcMsPerFrame": 0.009,
+    "gcEvents": 2,
+    "heapGrowthKBPerFrame": 475.202,
+    "uploadsKBPerFrame": 0,
+    "awakeMedian": 0
+  },
+  "final": {
+    "bodies": 285,
+    "awake": 0,
+    "physics": {
+      "profile": "launch",
+      "launch": {
+        "radialFraction": 0.8390975008504283,
+        "count": 285,
+        "min": 2.4300524492244233,
+        "median": 2.600249482780381,
+        "max": 5.039444068693017,
+        "maxAngular": 7.365770572932899
+      },
+      "fixedHz": 60,
+      "solverIterations": 4,
+      "internalPgs": 1,
+      "lengthUnit": 6,
+      "allowedError": 0.00029999999242136255,
+      "prediction": 0.006000000284984708,
+      "erp": 0,
+      "contactSkinMax": 0.003,
+      "inertiaRatioLimit": 4,
+      "massRange": [
+        4.999999046325684,
+        311.23541259765625
+      ],
+      "fixedFallbacks": 0
+    }
+  },
+  "errors": []
+}

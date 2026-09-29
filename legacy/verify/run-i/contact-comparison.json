@@ -1,0 +1,638 @@
+{
+  "axial": {
+    "friction": 0.65,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 4.2146848510894035e-08
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.0018063765915274958,
+          "maxRotation": 0.011355428058402279
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.003299688524205645,
+          "maxRotation": 0.023342562575272063
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  "f09": {
+    "friction": 0.9,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.004166135291446243,
+          "maxRotation": 0.019285589060165236
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.006289513838991249,
+          "maxRotation": 0.0204749700040872
+        },
+        "awake5": 52
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  "f12": {
+    "friction": 1.2,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  "flat": {
+    "friction": 0.65,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.0068080304821511025,
+          "maxRotation": 0.01914400429413225
+        },
+        "awake5": 52
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.004055685597961845,
+          "maxRotation": 0.03211799386370723
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  "inertia4": {
+    "friction": 0.65,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.003589143125162377,
+          "maxRotation": 0.0773286828884141
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.004898405326632867,
+          "maxRotation": 0.031038120820186477
+        },
+        "awake5": 68
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.0033319378026270305,
+          "maxRotation": 0.012982626053238805
+        },
+        "awake5": 68
+      }
+    ]
+  },
+  "inertia8": {
+    "friction": 0.65,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.002906034028602377,
+          "maxRotation": 0.0220536121113639
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.0023284478215205356,
+          "maxRotation": 0.01588869786576744
+        },
+        "awake5": 68
+      }
+    ]
+  },
+  "round": {
+    "friction": 0.3,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.12124907537395889,
+          "maxRotation": 0.325010541990803
+        },
+        "awake5": 59
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.213000612204722,
+          "maxRotation": 0.2546872290686618
+        },
+        "awake5": 165
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.206629943637499,
+          "maxRotation": 1.1007927980186718
+        },
+        "awake5": 111
+      }
+    ]
+  },
+  "slip": {
+    "friction": 0.3,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.15503680579807028,
+          "maxRotation": 0.176861146276205
+        },
+        "awake5": 59
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.1666023057144922,
+          "maxRotation": 0.27859071369711635
+        },
+        "awake5": 120
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.24465277501884253,
+          "maxRotation": 0.24215088147210362
+        },
+        "awake5": 111
+      }
+    ]
+  },
+  "tip03": {
+    "friction": 0.65,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.018296203215309594,
+          "maxRotation": 0.1044831252237809
+        },
+        "awake5": 59
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.058912899477620156,
+          "maxRotation": 0.30898813528564273
+        },
+        "awake5": 52
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.16707532292284802,
+          "maxRotation": 0.6036513788417088
+        },
+        "awake5": 51
+      }
+    ]
+  },
+  "tip09": {
+    "friction": 0.9,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.018573177760964038,
+          "maxRotation": 0.34510121257616183
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.0018705370373289878,
+          "maxRotation": 0.014691953865542439
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.0009081172262154222,
+          "maxRotation": 0.006700270985274379
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  "tip1": {
+    "friction": 0.65,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 6.937960809215539e-05,
+          "maxRotation": 0.0012463725782092137
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.005593986023458196,
+          "maxRotation": 0.04516673343225702
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  "tip12": {
+    "friction": 1.2,
+    "cases": [
+      {
+        "scenario": "one",
+        "bodies": 61,
+        "spawn": {
+          "candidates": 251,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0,
+          "maxRotation": 5.16191365590357e-08
+        },
+        "awake5": 0
+      },
+      {
+        "scenario": "instant",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 1124,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.0017506224364744903,
+          "maxRotation": 0.010360354075443138
+        },
+        "awake5": 68
+      },
+      {
+        "scenario": "staggered",
+        "bodies": 233,
+        "spawn": {
+          "candidates": 944,
+          "overlaps": 0,
+          "marginOverlaps": 0,
+          "staticOverlaps": 0,
+          "maxPenetration": 0
+        },
+        "window3to4": {
+          "maxTravel": 0.010423407128179855,
+          "maxRotation": 0.07912232859101609
+        },
+        "awake5": 52
+      }
+    ]
+  }
+}

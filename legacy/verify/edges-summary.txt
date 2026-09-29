@@ -1,0 +1,8 @@
+PASS above-water crack: no jet/drips, no drainage
+PASS one crack per wall
+PASS four cracks: water drained from 1.5502276906240966 to lowest sill 0.16000000000000014; spilling stopped
+PASS four-wall full break: 649 bodies, 48 draw calls, 60 FPS
+PASS adaptive launch budget: 649 single-cell bodies, zero awake by 5 s
+PASS reset mid-spill: reverse audio, water rises, frozen physics, 0.15× rewind, second Reset skips to pristine
+PASS pond under shards: pixel 1134,572 RGB 129,141,146; glass-last 129,141,146, pond-last 40,52,64; floor depth-testing retained
+PASS reset after four-wall break; zero console errors

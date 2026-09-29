@@ -1,0 +1,110 @@
+[
+  {
+    "seed": 166,
+    "vertices": 1565,
+    "triangles": 2988,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 358,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.000023875758830012448
+  },
+  {
+    "seed": 155,
+    "vertices": 1620,
+    "triangles": 3098,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 356,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.000006949903237796207
+  },
+  {
+    "seed": 167,
+    "vertices": 1546,
+    "triangles": 2950,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 351,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.000028872496812937243
+  },
+  {
+    "seed": 71,
+    "vertices": 1534,
+    "triangles": 2926,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 337,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.000029873855083906165
+  },
+  {
+    "seed": 234,
+    "vertices": 1574,
+    "triangles": 3006,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 348,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.00010751488387938934
+  },
+  {
+    "seed": 32,
+    "vertices": 1566,
+    "triangles": 2990,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 351,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.00006752007720933761
+  },
+  {
+    "seed": 139,
+    "vertices": 1544,
+    "triangles": 2946,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 347,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.00013803489460428864
+  },
+  {
+    "seed": 13,
+    "vertices": 1608,
+    "triangles": 3074,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 357,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.00001692771558481354
+  },
+  {
+    "seed": 173,
+    "vertices": 1559,
+    "triangles": 2976,
+    "degenerate": 0,
+    "downward": 0,
+    "belowSand": 340,
+    "interiorBoundary": 0,
+    "nonmanifold": 0,
+    "edgeOrientation": 0,
+    "minArea": 0.000071487898300306
+  }
+]

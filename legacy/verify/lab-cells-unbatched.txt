@@ -1,0 +1,13 @@
+HIST L1 count=220 cells=228 bodies=228 histogram(1/2/3-5/6+)=228/0/0/0
+FPS L1 220: airborne=59.88 settled=59.88 awake=0
+HIST L1 count=600 cells=589 bodies=589 histogram(1/2/3-5/6+)=589/0/0/0
+FPS L1 600: airborne=36.36 settled=60.24 awake=349
+HIST L2 count=220 cells=220 bodies=220 histogram(1/2/3-5/6+)=220/0/0/0
+FPS L2 220: airborne=60.24 settled=60.24 awake=2
+HIST L2 count=600 cells=600 bodies=600 histogram(1/2/3-5/6+)=600/0/0/0
+FPS L2 600: airborne=44.84 settled=59.17 awake=0
+HIST L3 count=220 cells=220 bodies=220 histogram(1/2/3-5/6+)=220/0/0/0
+FPS L3 220: airborne=65.79 settled=59.17 awake=2
+HIST L3 count=600 cells=600 bodies=600 histogram(1/2/3-5/6+)=600/0/0/0
+FPS L3 600: airborne=59.17 settled=60.24 awake=0
+HIST L3 count=220 cells=220 bodies=220 histogram(1/2/3-5/6+)=220/0/0/0

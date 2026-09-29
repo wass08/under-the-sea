@@ -1,0 +1,348 @@
+--- verify/run-o/before/src/lib/physics.ts
++++ src/lib/physics.ts
+@@ -86,8 +86,11 @@
+         // Four fractured panes have > 800 convex hulls; give their coupled contact
+         // piles more iterations while keeping the small one-pane/Lab worlds light.
+         const crowded = world.colliders.len() > 512;
+-        world.numSolverIterations = crowded ? 24 : 12;
+-        world.numInternalPgsIterations = crowded ? 8 : 4;
++        world.numSolverIterations = crowded ? 48 : 12;
++        world.numInternalPgsIterations = crowded ? 12 : 4;
++        // Four panes span the whole stage: scale the native contact/sleep tolerance
++        // with that pile (0.3 mm allowed error, 6 mm prediction); no manual sleeping.
++        world.integrationParameters.lengthUnit = crowded ? 6 : 4;
+       }
+       accumulator += Math.min(Math.max(dt, 0), 0.1) * api.timeScale;
+       while (accumulator + 1e-10 >= fixedDt) {
+--- verify/run-o/before/src/lib/release.ts
++++ src/lib/release.ts
+@@ -12,7 +12,7 @@
+   origin: Vector3; rotation: Quaternion; impact: Vector3;
+   width: number; height: number; level: 1 | 2 | 3;
+   budget: number; minimumArea: number; floorY: number; random: () => number;
+-  strength?: number; density?: number; cornerClearance?: number;
++  strength?: number; maxSpeed?: number; spinStrength?: number; density?: number; cornerClearance?: number;
+ };
+ const areaOf = (cell: ShatterCell) => Math.abs(cell.polygon.reduce((a, p, i) => {
+   const q = cell.polygon[(i + 1) % cell.polygon.length]; return a + p[0] * q[1] - p[1] * q[0];
+@@ -60,7 +60,7 @@
+     const distance = radial.length();
+     const falloff = Math.exp(-distance * 3);
+     geometry.setAttribute('impactGlow', new Float32BufferAttribute(new Float32Array(geometry.getAttribute('position').count).fill(level === 3 ? falloff : 0), 1));
+-    const speed = (level === 3 ? 1.8 + 5.7 * falloff : 2.2) * strength;
++    const speed = Math.min(options.maxSpeed ?? Infinity, (level === 3 ? 1.8 + 5.7 * falloff : 2.2) * strength);
+     const radialDirection = radial.clone().normalize();
+     const velocity = radialDirection.clone().multiplyScalar(level === 3 ? 0.85 : level === 2 ? 0.18 : 0);
+     velocity.z = level === 3 ? 0.55 : 1;
+@@ -71,7 +71,7 @@
+     // Random-axis tumble biased outward to clear surviving pane edges.
+     // Convert the requested angular velocity through the real conditioned inertia.
+     const axis = new Vector3(1, (random() - .5) * 1.0, (random() - .5) * 1.0).normalize();
+-    const spin = level === 1 ? 0 : level === 2 ? 4 : Math.min(14, (4 + 10 * falloff * (.7 + .3 * random())) * strength);
++    const spin = level === 1 ? 0 : level === 2 ? 4 : Math.min(14, (4 + 10 * falloff * (.7 + .3 * random())) * (options.spinStrength ?? strength));
+     const omega = axis.multiplyScalar(spin).applyQuaternion(rotation);
+     if (level === 2) {
+       // Mild impact fan with a broad-face landing; L3 keeps the random tumble above.
+--- verify/run-o/before/src/lib/terrain.ts
++++ src/lib/terrain.ts
+@@ -3,14 +3,28 @@
+ import { createNoise2D, fbm, terrainHeight } from './noise';
+ import { poissonDisk } from './poisson';
+ import { delaunayFrom, type Point2 } from './triangulate';
+-export type TerrainOptions = { level: 1 | 2 | 3; size: number; count: number; seed: number; amplitude: number; mask?: (x: number, y: number) => number; warp?: number; erosion?: number; island?: boolean };
++export type TerrainOptions = { level: 1 | 2 | 3; size: number; count: number; seed: number; amplitude: number; mask?: (x: number, y: number) => number; warp?: number; erosion?: number; island?: boolean; carve?: number };
+ const smooth = (a: number, b: number, x: number) => { const t = Math.max(0, Math.min(1, (x-a)/(b-a))); return t*t*(3-2*t); };
+ /** Flat-shaded Delaunay terrain; biome weights use the face-neighbour graph, not isolated normals. */
+-export function generateTerrain({ level, size, count, seed, amplitude, mask, warp = 0, erosion = 0, island = false }: TerrainOptions) {
++export function generateTerrain({ level, size, count, seed, amplitude, mask, warp = 0, erosion = 0, island = false, carve = 0 }: TerrainOptions) {
+   const rng = random(seed), noise = createNoise2D(seed), half = size / 2;
+-  const field = (x: number, y: number) => {
+-    const wx = x + warp * size * noise(x/size*1.3+31,y/size*1.3-17), wy = y + warp * size * noise(x/size*1.3-12,y/size*1.3+9);
+-    return terrainHeight(wx, wy, { noise, amplitude, frequency: 1.5 / size });
++  // A composed prior remains a scalar height field: it changes neither the
++  // Poisson/Delaunay technique nor flat face normals. Seeds vary its proportions.
++  const design = random(seed + 8101);
++  const peakX = -1.05 + design()*.60, peakZ = -.70 + design()*.55;
++  const ridgeX = .55 + design()*.80, ridgeZ = -.75 + design()*.80;
++  const shelfWidth = 1.25 + design()*.55, ridgeHeight = 2.25 + design()*.36;
++  const peakWidth = 1.00+design()*.30, shelfX=.05+design()*.65, shelfZ=.75+design()*.40, ridgeLength=1.0+design()*.45;
++  const field = (x: number, y: number, domainWarp = warp) => {
++    const wx = x + domainWarp * size * noise(x/size*1.3+31,y/size*1.3-17), wy = y + domainWarp * size * noise(x/size*1.3-12,y/size*1.3+9);
++    const detail = terrainHeight(wx, wy, { noise, amplitude, frequency: 1.5 / size });
++    if (!island) return detail;
++    const peak = 2.98*Math.exp(-((Math.abs((x-peakX)/(x<peakX?peakWidth*.80:peakWidth)))**1.55 + Math.abs((y-peakZ)/1.35)**1.7));
++    const ridge = ridgeHeight*Math.exp(-(Math.abs((x-ridgeX)/ridgeLength)**2 + Math.abs((y-ridgeZ+(x-ridgeX)*.48)/.83)**2));
++    // Front/right terrace gives a broad beach, separated from the rear ridge by a saddle.
++    const shelf = 2.10*(1-smooth(.62,1.32,Math.hypot((x-shelfX)/shelfWidth,(y-shelfZ)/1.42)));
++    const prior = Math.max(peak,ridge,shelf);
++    return Math.max(0, prior + (detail/amplitude-.38)*.34 + noise(wx*1.45+4,wy*1.45-6)*.075);
+   };
+   const e = size / 350;
+   const slopeAt = (x: number, y: number) => Math.hypot(field(x + e, y) - field(x - e, y), field(x, y + e) - field(x, y - e)) / (2 * e);
+@@ -24,14 +38,11 @@
+   for (let i = 0; i < edges; i++) { const t = -half + size * i / edges; points.push([t, -half], [half, t], [-t, half], [-half, -t]); }
+   const heights = Float32Array.from(points, ([x, y]) => {
+     let h = level === 1 ? rng() * amplitude : level === 2 ? (fbm(x * 2 / size, y * 2 / size, { noise, octaves: 5 }) * 0.5 + 0.5) * amplitude : field(x, y);
+-    if (island) {
+-      const bend = noise(x*.43+6,y*.43-3)*.38;
+-      const ridge = Math.exp(-((x/2.05)**2 + ((y+x*.18+bend)/1.35)**2));
+-      h = h*.62 + ridge*1.65;
+-    }
+     return h * (mask?.(x, y) ?? 1);
+   });
+   const delaunay = delaunayFrom(points);
++  const beforeThermal = Float32Array.from(heights);
++  const unwarped = Float32Array.from(points, ([x,y]) => field(x,y,0)*(mask?.(x,y)??1));
+   // Thermal erosion: conservative transfers to each vertex's lowest Delaunay neighbour.
+   // Boundary samples stay pinned; a 0.8 talus slope keeps cliffs while accumulating fans.
+   const neighbours = points.map((_, i) => [...delaunay.neighbors(i)]);
+@@ -50,11 +61,56 @@
+     }
+     heights.forEach((_,i)=>heights[i]+=delta[i]);
+   }
++  const afterThermal = Float32Array.from(heights), carved = new Float32Array(heights.length);
++  const waterRng = random(seed + 42091), paths: number[][] = [];
++  // Hydraulic-style graph incision (not a fluid solver): seeded droplets follow
++  // steepest downhill edges. Repeated drainage paths deepen into connected gullies.
++  const sources = heights.map((h,i)=>h>amplitude*.42?i:-1).filter(i=>i>=0);
++  for(let drop=0;drop<carve && sources.length;drop++) {
++    let i=sources[Math.floor(waterRng()*sources.length)], sediment=0;
++    const path:number[]=[];
++    for(let step=0;step<55;step++) {
++      path.push(i); let next=-1, steepest=0;
++      for(const j of neighbours[i]) {
++        const distance=Math.hypot(points[i][0]-points[j][0],points[i][1]-points[j][1]);
++        const slope=(heights[i]-heights[j])/Math.max(.01,distance);
++        if(slope>steepest){steepest=slope;next=j;}
++      }
++      if(next<0 || heights[i]<.25) break;
++      const cut=Math.min(.018,steepest*.013,Math.max(0,.24-carved[i]));
++      heights[i]-=cut;carved[i]+=cut;sediment+=cut;
++      // A little bank widening prevents a single-vertex zigzag trench.
++      for(const j of neighbours[i]) if(heights[j]>heights[i] && carved[j]<.12) {
++        const bank=Math.min(cut*.16,.12-carved[j]);heights[j]-=bank;carved[j]+=bank;sediment+=bank;
++      }
++      i=next;
++    }
++    if(path.length>=4)paths.push(path);
++    if(Math.abs(points[i][0])<half-1e-6 && Math.abs(points[i][1])<half-1e-6)heights[i]+=sediment*.12;
++  }
++  if(carve>0) {
++    // Widen drainage channels over one ring; avoid needle pits and deposition spikes.
++    heights.forEach((_,i)=>{
++      const incision=carved[i]*.70+neighbours[i].reduce((sum,j)=>sum+carved[j],0)/Math.max(1,neighbours[i].length)*.30;
++      heights[i]=Math.max(0,afterThermal[i]-incision);
++    });
++  }
++  const visited=new Set<number>();let gullyCount=0;
++  for(let i=0;i<carved.length;i++)if(carved[i]>.055 && !visited.has(i)){
++    const component:number[]=[],pending=[i];visited.add(i);
++    while(pending.length){const j=pending.pop()!;component.push(j);for(const k of neighbours[j])if(carved[k]>.055&&!visited.has(k)){visited.add(k);pending.push(k);}}
++    const span=Math.max(...component.map(j=>afterThermal[j]))-Math.min(...component.map(j=>afterThermal[j]));
++    if(component.length>=8 && span>.25)gullyCount++;
++  }
++  const stats=(values:Float32Array)=>({min:Math.min(...values),max:Math.max(...values),mean:values.reduce((a,b)=>a+b,0)/values.length,rms:Math.sqrt(values.reduce((a,b)=>a+b*b,0)/values.length)});
++  const difference=(a:Float32Array,b:Float32Array)=>({meanAbsolute:a.reduce((sum,v,i)=>sum+Math.abs(v-b[i]),0)/a.length,maxAbsolute:Math.max(...a.map((v,i)=>Math.abs(v-b[i]))),changed:a.filter((v,i)=>Math.abs(v-b[i])>1e-6).length});
++  const diagnostics={unwarped:stats(unwarped),warped:stats(beforeThermal),thermal:stats(afterThermal),carved:stats(heights),warpChange:difference(beforeThermal,unwarped),thermalChange:difference(afterThermal,beforeThermal),carveChange:difference(heights,afterThermal),dropletPaths:paths.length,gullyCount,gullyVertices:carved.filter(v=>v>.055).length,maximumIncision:Math.max(...carved)};
+   if (island) {
+     const high=Math.max(...heights);
+-    heights.forEach((h,i)=>heights[i]=(h/high)**1.1*2.67);
++    heights.forEach((h,i)=>heights[i]=h/high*2.67);
+     points.forEach(p=>p[1]*=3.5/5.6);
+-    // Delaunay connectivity is retained under this affine compression.
++    // Keep the triangulation built in the square sampling domain when shaping
++    // its footprint; anisotropic compression does not retriangulate the graph.
+     points.forEach((p,i)=>{(delaunay.points as Float64Array)[i*2]=p[0];(delaunay.points as Float64Array)[i*2+1]=p[1];});
+   }
+   const faces: {ids:number[]; height:number; slope:number; x:number; z:number; adjacent:number[]; weights:number[]; biome:number}[]=[];
+@@ -66,28 +122,31 @@
+     if(c.y<0) ids.reverse();
+     faces.push({ids,height:ids.reduce((s,j)=>s+heights[j],0)/3,slope:1-Math.abs(c.y),x:ids.reduce((s,j)=>s+points[j][0],0)/3,z:ids.reduce((s,j)=>s+points[j][1],0)/3,adjacent:[0,1,2].map(j=>delaunay.halfedges[i+j]).filter(j=>j>=0).map(j=>Math.floor(j/3)),weights:[],biome:0});
+   }
+-  for (const f of faces) {
++  const cliffs=new Set<number>();
++  if(island)faces.forEach((f,i)=>{if(f.slope>.48){cliffs.add(i);const bank=[...f.adjacent].sort((a,b)=>faces[b].slope-faces[a].slope)[0];if(bank!==undefined)cliffs.add(bank);}});
++  for (const [faceIndex,f] of faces.entries()) {
+     const nearby=[f,...f.adjacent.map(i=>faces[i])];
+     const h=nearby.reduce((s,v)=>s+v.height,0)/nearby.length/(island?2.67:amplitude);
+     const slope=nearby.reduce((s,v)=>s+v.slope,0)/nearby.length;
+     const boundary=noise(f.x/size*2.1+13,f.z/size*2.1-8)*.025;
+-    const snow=smooth(island?.84:.75,island?.915:.84,h+boundary);
+-    const shore=island?Math.max(1-smooth(.10,.17,h),smooth(.68,.72,h)*(1-smooth(.75,.79,h))*(1-smooth(.10,.25,slope))):1-smooth(.14,.22,h+boundary);
+-    const rock=Math.max(smooth(.24,.42,slope+boundary),smooth(.66,.83,h));
++    const snow=smooth(island?.85:.75,island?.925:.84,h+boundary*(island?1.65:1));
++    const shore=island?Math.max(1-smooth(.12,.20,h),smooth(.67,.73,h)*(1-smooth(.80,.83,h))*(1-smooth(.08,.20,slope))):1-smooth(.14,.22,h+boundary);
++    const rock=island?smooth(.40,.57,slope+boundary):Math.max(smooth(.24,.42,slope+boundary),smooth(.66,.83,h));
+     f.weights=[shore*(1-snow),(1-shore)*(1-rock)*(1-snow),(1-shore)*rock*(1-snow),snow];
++    if(cliffs.has(faceIndex))f.weights=[0,0,1,0]; // >58.7° is exposed rock at every altitude.
+     f.biome=f.weights.indexOf(Math.max(...f.weights));
+   }
+   // Hysteresis: isolated holes inherit a unanimous surrounding region. Then blend
+   // weights across shared edges, retaining flat geometric normals and reveal labels.
+-  for(let pass=0;pass<2;pass++) {
++  for(let pass=0;pass<4;pass++) {
+     const labels=faces.map(f=>f.biome);
+-    faces.forEach(f=>{if(f.adjacent.length===3 && f.adjacent.every(j=>labels[j]!==f.biome)) {
++    faces.forEach((f,i)=>{if(!cliffs.has(i) && f.adjacent.length===3 && f.adjacent.every(j=>labels[j]!==f.biome)) {
+       f.biome=[0,1,2,3].sort((a,b)=>f.adjacent.filter(j=>labels[j]===b).length-f.adjacent.filter(j=>labels[j]===a).length)[0]; f.weights=f.weights.map((v,i)=>v*.15+(i===f.biome?.85:0));
+     }});
+   }
+   const positions:number[]=[], biomes:number[]=[], slopes:number[]=[], weights:number[]=[];
+-  for(const f of faces) {
+-    const blend=f.weights.map((w,k)=>w*.8+f.adjacent.reduce((s,j)=>s+faces[j].weights[k],0)/Math.max(1,f.adjacent.length)*.2);
++  for(const [faceIndex,f] of faces.entries()) {
++    const blend=cliffs.has(faceIndex)?[0,0,1,0]:f.weights.map((w,k)=>w*.8+f.adjacent.reduce((s,j)=>s+faces[j].weights[k],0)/Math.max(1,f.adjacent.length)*.2);
+     for(const id of f.ids) { positions.push(points[id][0],heights[id],points[id][1]);biomes.push(f.biome);slopes.push(f.slope);weights.push(...blend); }
+   }
+   const geometry=new BufferGeometry();
+@@ -95,10 +154,9 @@
+   const biome=new Float32Array(biomes);
+   geometry.setAttribute('biome',new Float32BufferAttribute(biome,1));geometry.setAttribute('biomeWeights',new Float32BufferAttribute(weights,4));geometry.setAttribute('slope',new Float32BufferAttribute(slopes,1));
+   geometry.computeVertexNormals();geometry.computeBoundingSphere();
+-  return {geometry,seeds:new Float32Array(points.flat()),heights,delaunay,biome,faces};
++  return {geometry,seeds:new Float32Array(points.flat()),heights,delaunay,biome,faces,diagnostics};
+ }
+-export const ISLAND_SEED = 42;
+-export function generateIslandTerrain(seed=ISLAND_SEED) {
++export function generateIslandTerrain(seed:number, options: {warp?:number;erosion?:number;carve?:number} = {}) {
+   const mask=(x:number,z:number)=>Math.max(0,1-(Math.abs(x/2.8)**4+Math.abs(z/2.8)**4))**.8;
+-  return generateTerrain({level:3,size:5.6,count:1200,seed,amplitude:3.1,mask,warp:.16,erosion:8,island:true});
++  return generateTerrain({level:3,size:5.6,count:1200,seed,amplitude:3.1,mask,warp:.16,erosion:8,carve:420,island:true,...options});
+ }
+--- verify/run-o/before/src/scene/island.ts
++++ src/scene/island.ts
+@@ -4,10 +4,11 @@
+ import { generateIslandTerrain } from '../lib/terrain';
+ import { random, TANK } from '../state';
+ 
++// Presenter choice: use any seed labelled on verify/island-sheet.png.
++export const ISLAND_SEED = 38;
++
+ /** Poisson/Delaunay landform: a connected ridge softened into a submerged shore. */
+-export function createIsland(scene: Scene) {
+-  const data = generateIslandTerrain();
+-  const geometry = data.geometry, positions = geometry.getAttribute('position');
++export function createIslandMaterial() {
+   const material = new MeshStandardNodeMaterial({ roughness: 0.93, flatShading: true });
+   const region = attribute('biome', 'float');
+   const weights = attribute('biomeWeights', 'vec4');
+@@ -18,9 +19,15 @@
+   const albedo = mix(tint.rgb, tint.rgb.mul(vec3(0.84, 1.04, 1.30)), submerged.mul(slate.select(1, 0)));
+   const dry = albedo.mul(float(1).sub(wet.mul(0.42)));
+   material.colorNode = mix(dry, dry.mul(color('#a8d9db')).mul(waterDepth.mul(-0.14).exp()), submerged.mul(0.80)).mul(mix(float(1), float(1.18), submerged));
+-  // Water attenuates diffuse sky/environment fill; preserve direct sun contrast.
+-  material.aoNode = mix(float(1), float(0.040), submerged);
+-  material.emissiveNode = rockCaustics;
++  // Soft cool environment fill plus weak sand bounce keeps submerged shadow facets readable.
++  material.aoNode = mix(float(1), float(0.20), submerged);
++  material.emissiveNode = rockCaustics.add(tint.rgb.mul(color('#b7d2e8')).mul(.025).mul(submerged));
++  return material;
++}
++export function createIsland(scene: Scene) {
++  const data = generateIslandTerrain(ISLAND_SEED);
++  const geometry=data.geometry, positions=geometry.getAttribute('position');
++  const material=createIslandMaterial();
+   const peak = new Mesh(geometry, material);
+   peak.position.y = TANK.floor + 0.02; peak.castShadow = true; peak.receiveShadow = true; scene.add(peak);
+ 
+--- verify/run-o/before/src/scene/lighting.ts
++++ src/scene/lighting.ts
+@@ -65,7 +65,7 @@
+     return result;
+   }); sun.shadow.normalBias = 0.025; sun.shadow.bias = -0.0002;
+   sun.target.position.set(0, 0.7, 0);
+-  scene.add(sun, sun.target, new HemisphereLight('#8aafff', '#102746', 0.45));
++  scene.add(sun, sun.target, new HemisphereLight('#a6c8ff', '#857352', 0.65));
+   const origin = new Vector3();
+   const updateShadow = sun.shadow.updateMatrices.bind(sun.shadow);
+   sun.shadow.updateMatrices = light => {
+--- verify/run-o/before/src/scene/spill.ts
++++ src/scene/spill.ts
+@@ -31,7 +31,7 @@
+   const viewVelocity = cameraViewMatrix.mul(vec4(vec3(instancedBufferAttribute(velocityAttribute, 'vec3') as Node<'vec3'>), 0)).xy;
+   material.scaleNode = vec2(1, viewVelocity.length().mul(0.18).add(1).min(2.8));
+   material.rotationNode = atan(viewVelocity.x.negate(), viewVelocity.y.add(0.00001));
+-  material.colorNode = color('#b9e4ff').mul(1.35); material.opacityNode = smoothstep(0.5, 0.12, uv().sub(0.5).length()).mul(0.65);
++  material.colorNode = color('#b9e4ff').mul(1.35); material.opacityNode = smoothstep(0.5, 0.12, uv().sub(0.5).length()).mul(0.48);
+   const sprites = new Sprite(material); sprites.count = count; sprites.frustumCulled = false; scene.add(sprites);
+   type Drop = { p: Vector3; v: Vector3; source: Vector3; initialVelocity: Vector3; born: number; life: number; size: number; splash: boolean; emitter?: Emitter; sheetSpeed?: number };
+   const drops: (Drop | undefined)[] = Array(count); let cursor = 0;
+@@ -74,13 +74,13 @@
+     const reach=smoothstep(front.add(.045),front.sub(.045),uv().y);
+     const tip=smoothstep(1,.86,uv().y);
+     const foam=smoothstep(.66,.88,streak.mul(.7).add(fine.mul(.3)).add(uv().y.mul(.12))).mul(flow.mul(.8).add(.2));
+-    const thickness = flow.mul(.018).add(.003).mul(float(1).sub(uv().y.mul(.78)));
++    const thickness = flow.mul(.050).add(.008).mul(float(1).sub(uv().y.mul(.78)));
+     const optics = waterOptics(thickness);
+     const aerated = uv().y.sub(front).div(.065).pow(2).negate().exp().mul(flow).mul(.30);
+-    const froth = foam.mul(.08).add(aerated).min(.85);
+-    const body=streak.mul(.035).add(.10).add(froth.mul(.15));
+-    sheet.material.opacityNode=fresnel.mul(.5).add(body).min(.65).mul(edge).mul(reach).mul(tip).mul(flow.min(1));
+-    sheet.material.emissiveNode=mix(optics.refracted.mul(float(1).sub(optics.fresnel)).add(color('#046579').mul(flow).mul(.035)),color('#d9f3fa'),froth);
++    const froth = foam.mul(.12).add(aerated).min(.85);
++    const body=streak.mul(.09).add(.44).add(froth.mul(.18));
++    sheet.material.opacityNode=fresnel.mul(.42).add(body).min(.78).mul(edge).mul(reach).mul(tip).mul(flow.min(1));
++    sheet.material.emissiveNode=mix(optics.refracted.mul(float(1).sub(optics.fresnel)).add(color('#8ed8ef').mul(flow).mul(.40)),color('#d9f3fa'),froth);
+     sheet.material.thicknessNode=thickness;
+     sheet.frustumCulled=false;sheet.renderOrder=4;scene.add(sheet);
+     const puddleGeometry=new PlaneGeometry(2,2,48,48);puddleGeometry.rotateX(-Math.PI/2);
+--- verify/run-o/before/src/scene/tank.ts
++++ src/scene/tank.ts
+@@ -9,6 +9,9 @@
+ 
+ export type Opening = { wall: number; point: Vector3; normal: Vector3; bottom: number; width: number; full: boolean };
+ /** Physical glass, with the same material on intact faces and exposed shard edges. */
++// The visible core reaches roughly 9 m/s; outer plates also gain travel and tumble.
++const SHATTER_STRENGTH = 1.35;
++const GLASS_SEED = 93;
+ export async function createTank(scene: Scene, camera?: Camera) {
+   const physics = await createShardWorld(), height = TANK.top - TANK.floor;
+   const glass = new MeshPhysicalNodeMaterial({ color: '#f6fffc', transmission: 1, thickness: 0.05, ior: 1.52, roughness: 0.04, attenuationColor: new Color('#cfe8e4'), attenuationDistance: 1.5, dispersion: 0.015, clearcoat: 0, side: DoubleSide, transparent: true, opacity: 0.28, depthWrite: false });
+@@ -54,7 +57,9 @@
+   // The same batch/material is used for physics and rewind playback.
+   looseGlass.emissiveNode = color('#cbefff').mul(attribute('shardEdge', 'float').mul(.35).add(grazing.max(0).sqrt().mul(.15)).add(attribute('impactGlow', 'float').mul(.65)));
+   looseGlass.outputNode = vec4(output.rgb.div(output.rgb.div(0.55).add(1)), output.a);
+-  const loose = new Mesh(new BufferGeometry(), looseGlass); loose.frustumCulled = false; loose.visible = false; scene.add(loose);
++  // Released glass is outside the pane; composite after the pouring slab (order 4).
++  // Its batch origin otherwise sorts behind the water and hides the dense burst.
++  const loose = new Mesh(new BufferGeometry(), looseGlass); loose.renderOrder = 5; loose.frustumCulled = false; loose.visible = false; scene.add(loose);
+   let offsets: number[] = [], triangleOrder: number[] = []; let depths = new Float32Array();
+   function rebuildBatch() {
+     offsets = []; let total = 0;
+@@ -77,9 +82,11 @@
+     loose.visible = total > 0;
+   }
+   function clearColliders(wall: number) { for (const body of colliders[wall]) physics.removeBody(body); colliders[wall] = []; }
+-  function release(cells: ShatterCell[], wall: number, impact: Vector3, budget: number, full = false, strength = full ? 1 : 0.55) {
++  function release(cells: ShatterCell[], wall: number, impact: Vector3, budget: number, full = false, strength = full ? SHATTER_STRENGTH : 0.55) {
+     const released = releaseShards({ cells, world: physics, material: glass, origin: origins[wall], rotation: rotations[wall], impact,
+-      width: widths[wall], height, level: 3, budget, minimumArea: full ? 0.1 : 0.01, floorY: STAGE_Y, random: random(912 + wall * 17 + (full ? 1 : 0)), strength });
++      // Translation carries the stronger burst. Bound spin independently so long plates
++      // topple onto their broad face instead of landing edge-on and rocking late.
++      width: widths[wall], height, level: 3, budget, minimumArea: full ? 0.1 : 0.01, floorY: STAGE_Y, random: random(912 + wall * 17 + (full ? 1 : 0)), strength, maxSpeed: 9, spinStrength: Math.min(strength, .75) });
+     for (const { mesh, body, launch } of released) shards.push({ mesh, body, launch, wall, full, homePosition: mesh.position.clone(), homeRotation: mesh.quaternion.clone() });
+   }
+ 
+@@ -89,7 +96,7 @@
+     // Subpixel click/orbit timing must not change the fracture topology between takes.
+     local.x = Math.round(local.x * 100) / 100; local.y = Math.round(local.y * 100) / 100;
+     impact = local.clone().applyQuaternion(rotations[wall]).add(origins[wall]);
+-    const { cells } = generateShatterPattern({ level: 3, width: widths[wall], height, impact: [Math.max(-widths[wall] / 2, Math.min(widths[wall] / 2, local.x)), Math.max(-height / 2, Math.min(height / 2, local.y))], count: 220, seed: 93 + wall });
++    const { cells } = generateShatterPattern({ level: 3, width: widths[wall], height, impact: [Math.max(-widths[wall] / 2, Math.min(widths[wall] / 2, local.x)), Math.max(-height / 2, Math.min(height / 2, local.y))], count: 220, seed: GLASS_SEED + wall });
+     const core = cells.filter(c => { const p = polygonCentroid(c.polygon); return Math.hypot(p[0] - local.x, p[1] - local.y) < 0.28; });
+     const remaining = cells.filter(c => !core.includes(c));
+     const bottom = Math.min(...core.flatMap(c => c.polygon.map(p => p[1] + origins[wall].y)));
+@@ -118,9 +125,12 @@
+     (lines.material as LineBasicNodeMaterial).opacityNode = smoothstep(radius.add(0.06), radius, attribute('crackDistance', 'float')).mul(0.72);
+     lines.position.copy(origins[wall]); lines.quaternion.copy(rotations[wall]); scene.add(lines);
+     cracks.set(wall, { cells: remaining, impact: impact.clone(), opening, lines });
+-    release(core, wall, impact, Math.max(1, Math.min(70, 400 - shards.length)), false, fullLaunch ? 1 : 0.55); rebuildBatch(); return opening;
++    release(core, wall, impact, Math.max(1, Math.min(70, 400 - shards.length)), false, fullLaunch ? SHATTER_STRENGTH : 0.55); rebuildBatch(); return opening;
+   }
+   function shatter(impact: Vector3, wall: number) {
++    // Removing the cracked pane changes supports: rebuild the native contact
++    // islands with its existing fragments awake before adding the outer plates.
++    for (const shard of shards) shard.body.wakeUp();
+     if (!cracks.size) crack(impact, wall, true);
+     const openings: Opening[] = [], budget = Math.floor((400 - shards.length) / cracks.size);
+     for (const [id, c] of cracks) {

@@ -1,0 +1,94 @@
+{
+  "floor": {
+    "rectangle": [
+      1250,
+      1400,
+      2350,
+      1530
+    ],
+    "meanRGB": [
+      3.4134755244755244,
+      83.52727272727273,
+      122.80941258741258
+    ],
+    "meanHex": "#03547b"
+  },
+  "background": {
+    "rectangle": [
+      1800,
+      220,
+      2450,
+      460
+    ],
+    "meanRGB": [
+      0.0,
+      40.48053846153846,
+      72.43653205128206
+    ],
+    "meanHex": "#002848"
+  },
+  "Idle performance": {
+    "medianFPS": 60,
+    "drawCalls": 128,
+    "pixelRatio": 1.5
+  },
+  "Underwater contrast and saturation": {
+    "lit": 0.08172004793202957,
+    "dark": 0.04238078474893921,
+    "ratio": 1.9282334769432279,
+    "pair": {
+      "lit": 1011,
+      "dark": 947,
+      "score": 23.718964259680703,
+      "litPixel": [
+        1160,
+        909
+      ],
+      "darkPixel": [
+        1159,
+        925
+      ]
+    },
+    "beforeSaturation": 0.269543653369573,
+    "afterSaturation": 0.6427319024067124
+  },
+  "Run O pristine launch": {
+    "radialFraction": 0.839341304511141,
+    "count": 78,
+    "min": 2.4300993257813857,
+    "median": 2.7649028043501214,
+    "max": 8.96576194406876,
+    "maxAngular": 8.980639063867102
+  },
+  "Spill": [
+    {
+      "wall": 0,
+      "arcLength": 2.1480619434092763,
+      "sheetLandingSpeed": 6.1562410329091986,
+      "uvScrollRateAtLanding": 2.865951352938351,
+      "measuredLandings": 256,
+      "meanDropletLandingSpeed": 6.365047306399415,
+      "meanStreakSpeedForThoseDrops": 6.176271825993864,
+      "meanRelativeError": 0.03061901193369301
+    }
+  ],
+  "Settling 3\u20134 seconds (all rendered poses)": {
+    "samples": 61,
+    "maxDisplacement": 0,
+    "maxRotation": 5.960464477539063e-08
+  },
+  "Native sleep at five seconds": {
+    "awake": 0,
+    "fixedFallbacks": 0
+  },
+  "Settling 8\u201310 seconds": {
+    "maxDisplacement": 0,
+    "maxRotation": 5.960464477539063e-08,
+    "shards": 78
+  },
+  "Shattered performance": {
+    "medianFPS": 60,
+    "drawCalls": 65,
+    "pixelRatio": 1.5
+  }
+}

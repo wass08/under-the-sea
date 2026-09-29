@@ -1,0 +1,1 @@
+{"darkerPercent":46.50081057313481,"frames":30,"lit":0.24831398226873275,"litSamples":23,"patchPixels":9,"ratio":0.5349918942686519,"shadow":0.13284596774734178,"shadowSamples":61}

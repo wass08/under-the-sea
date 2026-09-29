@@ -1,0 +1,8 @@
+PASS contrast body: 14.98:1
+PASS contrast muted sidebar: 8.16:1
+PASS contrast card secondary: 8.14:1
+PASS contrast active navigation: 6.62:1
+PASS contrast navigation number on hover: 5.26:1
+PASS contrast Tweakpane label: 9.72:1
+PASS contrast Tweakpane focused input: 6.62:1
+PASS contrast caption over white (worst case at .92 background alpha): 7.85:1

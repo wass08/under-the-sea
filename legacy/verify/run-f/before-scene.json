@@ -1,0 +1,457 @@
+[
+  {
+    "i": 0,
+    "type": "DirectionalLight",
+    "receiveShadow": false,
+    "castShadow": true,
+    "y": 8.53409737724841
+  },
+  {
+    "i": 1,
+    "type": "Object3D",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 0.7
+  },
+  {
+    "i": 2,
+    "type": "HemisphereLight",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1
+  },
+  {
+    "i": 3,
+    "type": "Mesh",
+    "geometry": "PlaneGeometry",
+    "parameters": {
+      "width": 10000,
+      "height": 10000,
+      "widthSegments": 1,
+      "heightSegments": 1
+    },
+    "material": "MeshBasicNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 0
+  },
+  {
+    "i": 4,
+    "type": "Mesh",
+    "geometry": "PlaneGeometry",
+    "parameters": {
+      "width": 9,
+      "height": 6.5,
+      "widthSegments": 1,
+      "heightSegments": 1
+    },
+    "material": "MeshBasicNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 0.003
+  },
+  {
+    "i": 5,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 6,
+      "height": 3.5,
+      "depth": 0.05,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 6,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 6,
+      "height": 3.5,
+      "depth": 0.05,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 7,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 3.5,
+      "height": 3.5,
+      "depth": 0.05,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 8,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 3.5,
+      "height": 3.5,
+      "depth": 0.05,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 9,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 6.18,
+      "height": 0.16,
+      "depth": 3.68,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshStandardNodeMaterial",
+    "receiveShadow": true,
+    "castShadow": true,
+    "y": 0.08
+  },
+  {
+    "i": 10,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 6,
+      "height": 0.012,
+      "depth": 0.028,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 3.66
+  },
+  {
+    "i": 11,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 0.01,
+      "height": 3.5,
+      "depth": 0.025,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 12,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 0.01,
+      "height": 3.5,
+      "depth": 0.025,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 13,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 6,
+      "height": 0.012,
+      "depth": 0.028,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 3.66
+  },
+  {
+    "i": 14,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 0.01,
+      "height": 3.5,
+      "depth": 0.025,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 15,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 0.01,
+      "height": 3.5,
+      "depth": 0.025,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 16,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 3.5,
+      "height": 0.012,
+      "depth": 0.028,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 3.66
+  },
+  {
+    "i": 17,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 0.01,
+      "height": 3.5,
+      "depth": 0.025,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 18,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 0.01,
+      "height": 3.5,
+      "depth": 0.025,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 19,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 3.5,
+      "height": 0.012,
+      "depth": 0.028,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 3.66
+  },
+  {
+    "i": 20,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 0.01,
+      "height": 3.5,
+      "depth": 0.025,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 21,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 0.01,
+      "height": 3.5,
+      "depth": 0.025,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.91
+  },
+  {
+    "i": 22,
+    "type": "Mesh",
+    "geometry": "BufferGeometry",
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 0
+  },
+  {
+    "i": 23,
+    "type": "Mesh",
+    "geometry": "PlaneGeometry",
+    "parameters": {
+      "width": 5.91,
+      "height": 3.41,
+      "widthSegments": 32,
+      "heightSegments": 20
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 0
+  },
+  {
+    "i": 24,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 5.9,
+      "height": 3.48,
+      "depth": 3.4,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshPhysicalNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.9100000000000001
+  },
+  {
+    "i": 25,
+    "type": "Mesh",
+    "geometry": "BufferGeometry",
+    "material": "MeshStandardNodeMaterial",
+    "receiveShadow": true,
+    "castShadow": true,
+    "y": 0.18
+  },
+  {
+    "i": 26,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 5.87,
+      "height": 0.12,
+      "depth": 3.37,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshStandardNodeMaterial",
+    "receiveShadow": true,
+    "castShadow": false,
+    "y": 0.22
+  },
+  {
+    "i": 27,
+    "type": "Mesh",
+    "geometry": "DodecahedronGeometry",
+    "parameters": {
+      "radius": 1,
+      "detail": 0
+    },
+    "material": "MeshStandardNodeMaterial",
+    "receiveShadow": true,
+    "castShadow": true,
+    "y": 0
+  },
+  {
+    "i": 28,
+    "type": "Sprite",
+    "geometry": "BufferGeometry",
+    "material": "PointsNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 0
+  },
+  {
+    "i": 29,
+    "type": "Mesh",
+    "geometry": "BoxGeometry",
+    "parameters": {
+      "width": 5.88,
+      "height": 3.38,
+      "depth": 3.38,
+      "widthSegments": 1,
+      "heightSegments": 1,
+      "depthSegments": 1
+    },
+    "material": "MeshBasicNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 1.9700000000000002
+  },
+  {
+    "i": 30,
+    "type": "Sprite",
+    "geometry": "BufferGeometry",
+    "material": "PointsNodeMaterial",
+    "receiveShadow": false,
+    "castShadow": false,
+    "y": 0
+  }
+]

@@ -1,0 +1,3002 @@
+[
+  {
+    "seed": 42,
+    "score": 77.533,
+    "peak": 3.28,
+    "secondary": 2.501,
+    "shorePct": 3.56,
+    "biomePct": [
+      45.2,
+      10.2,
+      42.8,
+      1.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 177,
+    "score": 76.919,
+    "peak": 3.28,
+    "secondary": 2.345,
+    "shorePct": 3.31,
+    "biomePct": [
+      46.6,
+      8.3,
+      43.2,
+      2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 169,
+    "score": 73.134,
+    "peak": 3.28,
+    "secondary": 2.265,
+    "shorePct": 3.31,
+    "biomePct": [
+      39,
+      9.8,
+      49.3,
+      1.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 159,
+    "score": 71.991,
+    "peak": 3.28,
+    "secondary": 2.323,
+    "shorePct": 2.06,
+    "biomePct": [
+      49.7,
+      17.2,
+      31.3,
+      1.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 12,
+    "score": 71.299,
+    "peak": 3.28,
+    "secondary": 2.177,
+    "shorePct": 2.57,
+    "biomePct": [
+      46.5,
+      10.7,
+      40.4,
+      2.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 85,
+    "score": 70.151,
+    "peak": 3.28,
+    "secondary": 2.124,
+    "shorePct": 3.14,
+    "biomePct": [
+      40.1,
+      14.5,
+      42.5,
+      2.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 181,
+    "score": 70.096,
+    "peak": 3.28,
+    "secondary": 2.753,
+    "shorePct": 2.48,
+    "biomePct": [
+      42.7,
+      15.7,
+      38.8,
+      2.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 168,
+    "score": 69.928,
+    "peak": 3.28,
+    "secondary": 2.43,
+    "shorePct": 5.4,
+    "biomePct": [
+      39.9,
+      8.5,
+      50,
+      1.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 131,
+    "score": 69.754,
+    "peak": 3.28,
+    "secondary": 2.53,
+    "shorePct": 1.92,
+    "biomePct": [
+      40.7,
+      12.9,
+      45.1,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 4,
+    "score": 68.684,
+    "peak": 3.28,
+    "secondary": 2.211,
+    "shorePct": 2.55,
+    "biomePct": [
+      41.1,
+      6,
+      51.1,
+      1.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 33,
+    "score": 68.632,
+    "peak": 3.28,
+    "secondary": 2.342,
+    "shorePct": 6.67,
+    "biomePct": [
+      46.1,
+      1.5,
+      51.3,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 107,
+    "score": 68.55,
+    "peak": 3.28,
+    "secondary": 2.282,
+    "shorePct": 4.6,
+    "biomePct": [
+      41.2,
+      3.3,
+      53,
+      2.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 186,
+    "score": 68.227,
+    "peak": 3.28,
+    "secondary": 2.225,
+    "shorePct": 2.7,
+    "biomePct": [
+      41.4,
+      7,
+      49.9,
+      1.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 140,
+    "score": 68.108,
+    "peak": 3.28,
+    "secondary": 2.661,
+    "shorePct": 3.31,
+    "biomePct": [
+      51.3,
+      5.3,
+      42,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 200,
+    "score": 67.965,
+    "peak": 3.28,
+    "secondary": 2.542,
+    "shorePct": 4,
+    "biomePct": [
+      41.2,
+      5.8,
+      52.3,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 199,
+    "score": 67.912,
+    "peak": 3.28,
+    "secondary": 2.646,
+    "shorePct": 4.19,
+    "biomePct": [
+      45.3,
+      8.2,
+      45.5,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 111,
+    "score": 66.767,
+    "peak": 3.28,
+    "secondary": 2.485,
+    "shorePct": 3.69,
+    "biomePct": [
+      40.4,
+      12.1,
+      47,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 38,
+    "score": 66.459,
+    "peak": 3.28,
+    "secondary": 2.431,
+    "shorePct": 3.26,
+    "biomePct": [
+      41.7,
+      4.7,
+      53.2,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 57,
+    "score": 65.943,
+    "peak": 3.28,
+    "secondary": 2.7,
+    "shorePct": 3.85,
+    "biomePct": [
+      42.8,
+      6.4,
+      48,
+      2.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 79,
+    "score": 65.463,
+    "peak": 3.28,
+    "secondary": 2.338,
+    "shorePct": 2.04,
+    "biomePct": [
+      51.1,
+      3.8,
+      44.3,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 48,
+    "score": 65.223,
+    "peak": 3.28,
+    "secondary": 2.295,
+    "shorePct": 1.82,
+    "biomePct": [
+      51.4,
+      9.2,
+      38.3,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 95,
+    "score": 64.984,
+    "peak": 3.28,
+    "secondary": 2.612,
+    "shorePct": 8.1,
+    "biomePct": [
+      37.8,
+      5.6,
+      56.1,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 195,
+    "score": 64.691,
+    "peak": 3.28,
+    "secondary": 2.631,
+    "shorePct": 2.58,
+    "biomePct": [
+      47,
+      12.7,
+      39.2,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 106,
+    "score": 64.102,
+    "peak": 3.28,
+    "secondary": 2.834,
+    "shorePct": 3.69,
+    "biomePct": [
+      44.7,
+      12.7,
+      40.5,
+      2.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 70,
+    "score": 64.048,
+    "peak": 3.28,
+    "secondary": 2.268,
+    "shorePct": 1.79,
+    "biomePct": [
+      46.4,
+      20.6,
+      32,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 2,
+    "score": 63.723,
+    "peak": 3.28,
+    "secondary": 2.669,
+    "shorePct": 3.8,
+    "biomePct": [
+      47.5,
+      9.1,
+      42.6,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 149,
+    "score": 63.577,
+    "peak": 3.28,
+    "secondary": 2.527,
+    "shorePct": 4.64,
+    "biomePct": [
+      36.7,
+      8.8,
+      53.4,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 192,
+    "score": 63.442,
+    "peak": 3.28,
+    "secondary": 2.604,
+    "shorePct": 3.58,
+    "biomePct": [
+      42,
+      10.7,
+      46.8,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 194,
+    "score": 62.696,
+    "peak": 3.28,
+    "secondary": 2.032,
+    "shorePct": 3.53,
+    "biomePct": [
+      44.3,
+      6.2,
+      47.4,
+      2.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 100,
+    "score": 62.505,
+    "peak": 3.28,
+    "secondary": 2.357,
+    "shorePct": 2.26,
+    "biomePct": [
+      41.2,
+      9.1,
+      49.3,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 184,
+    "score": 62.412,
+    "peak": 3.28,
+    "secondary": 2.317,
+    "shorePct": 1.82,
+    "biomePct": [
+      47.8,
+      11.3,
+      40.3,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 160,
+    "score": 62.283,
+    "peak": 3.28,
+    "secondary": 2.555,
+    "shorePct": 5.37,
+    "biomePct": [
+      47.5,
+      11,
+      40.8,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 133,
+    "score": 62.253,
+    "peak": 3.28,
+    "secondary": 2.242,
+    "shorePct": 2.54,
+    "biomePct": [
+      41.3,
+      11.1,
+      45.2,
+      2.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 84,
+    "score": 62.216,
+    "peak": 3.28,
+    "secondary": 2.551,
+    "shorePct": 2.62,
+    "biomePct": [
+      48.7,
+      7.4,
+      43.6,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 170,
+    "score": 61.877,
+    "peak": 3.28,
+    "secondary": 2.507,
+    "shorePct": 1.47,
+    "biomePct": [
+      44.3,
+      11.6,
+      43.7,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 28,
+    "score": 61.853,
+    "peak": 3.28,
+    "secondary": 2.626,
+    "shorePct": 2.43,
+    "biomePct": [
+      49.2,
+      7.9,
+      42.3,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 74,
+    "score": 61.774,
+    "peak": 3.28,
+    "secondary": 2.231,
+    "shorePct": 1.37,
+    "biomePct": [
+      51.1,
+      12,
+      35.8,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 47,
+    "score": 61.712,
+    "peak": 3.28,
+    "secondary": 2.512,
+    "shorePct": 4.12,
+    "biomePct": [
+      33.3,
+      9.9,
+      55.8,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 105,
+    "score": 61.651,
+    "peak": 3.28,
+    "secondary": 2.647,
+    "shorePct": 2.32,
+    "biomePct": [
+      38.6,
+      13.8,
+      46.8,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 125,
+    "score": 61.498,
+    "peak": 3.28,
+    "secondary": 2.7,
+    "shorePct": 2.47,
+    "biomePct": [
+      43.5,
+      17.6,
+      36.6,
+      2.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 21,
+    "score": 61.311,
+    "peak": 3.28,
+    "secondary": 2.384,
+    "shorePct": 4.3,
+    "biomePct": [
+      40.4,
+      6.8,
+      51.9,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 63,
+    "score": 61.276,
+    "peak": 3.28,
+    "secondary": 2.314,
+    "shorePct": 3.69,
+    "biomePct": [
+      40.9,
+      9.9,
+      47.9,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 154,
+    "score": 60.981,
+    "peak": 3.28,
+    "secondary": 2.184,
+    "shorePct": 3.48,
+    "biomePct": [
+      38.7,
+      4.3,
+      53.3,
+      3.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 44,
+    "score": 60.93,
+    "peak": 3.28,
+    "secondary": 2.721,
+    "shorePct": 2.79,
+    "biomePct": [
+      47.1,
+      10,
+      41.8,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 150,
+    "score": 60.912,
+    "peak": 3.28,
+    "secondary": 2.711,
+    "shorePct": 2.89,
+    "biomePct": [
+      41.6,
+      13.5,
+      44,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 35,
+    "score": 60.684,
+    "peak": 3.28,
+    "secondary": 2.166,
+    "shorePct": 2.35,
+    "biomePct": [
+      49.3,
+      14.5,
+      33.8,
+      2.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 40,
+    "score": 60.117,
+    "peak": 3.28,
+    "secondary": 2.533,
+    "shorePct": 5.13,
+    "biomePct": [
+      45.9,
+      7.5,
+      45.4,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 97,
+    "score": 60.021,
+    "peak": 3.28,
+    "secondary": 2.158,
+    "shorePct": 2.6,
+    "biomePct": [
+      46.4,
+      11.5,
+      40.9,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 26,
+    "score": 60.012,
+    "peak": 3.28,
+    "secondary": 2.241,
+    "shorePct": 2.5,
+    "biomePct": [
+      40.2,
+      10.8,
+      46.8,
+      2.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 165,
+    "score": 59.976,
+    "peak": 3.28,
+    "secondary": 2.453,
+    "shorePct": 2.41,
+    "biomePct": [
+      44,
+      11.3,
+      43.5,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 128,
+    "score": 59.962,
+    "peak": 3.28,
+    "secondary": 2.685,
+    "shorePct": 2.29,
+    "biomePct": [
+      41.3,
+      12.7,
+      45.2,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 41,
+    "score": 59.945,
+    "peak": 3.28,
+    "secondary": 2.316,
+    "shorePct": 1.61,
+    "biomePct": [
+      44.4,
+      12.9,
+      42.3,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 134,
+    "score": 59.773,
+    "peak": 3.28,
+    "secondary": 2.41,
+    "shorePct": 3.22,
+    "biomePct": [
+      44.7,
+      8.3,
+      46.1,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 93,
+    "score": 59.666,
+    "peak": 3.28,
+    "secondary": 2.697,
+    "shorePct": 3.84,
+    "biomePct": [
+      38.7,
+      12.3,
+      48.5,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 119,
+    "score": 59.563,
+    "peak": 3.28,
+    "secondary": 2.743,
+    "shorePct": 3.98,
+    "biomePct": [
+      44.3,
+      11.6,
+      43.4,
+      0.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 1,
+    "score": 59.102,
+    "peak": 3.28,
+    "secondary": 2.212,
+    "shorePct": 1.55,
+    "biomePct": [
+      41.9,
+      8.2,
+      49,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 114,
+    "score": 58.986,
+    "peak": 3.28,
+    "secondary": 2.214,
+    "shorePct": 1.59,
+    "biomePct": [
+      49.7,
+      12.5,
+      37.1,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 147,
+    "score": 58.582,
+    "peak": 3.28,
+    "secondary": 2.637,
+    "shorePct": 2.05,
+    "biomePct": [
+      43.5,
+      18.3,
+      37.8,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 135,
+    "score": 57.797,
+    "peak": 3.28,
+    "secondary": 2.79,
+    "shorePct": 5.04,
+    "biomePct": [
+      35.5,
+      6.6,
+      57.3,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 77,
+    "score": 57.702,
+    "peak": 3.28,
+    "secondary": 2.676,
+    "shorePct": 2.88,
+    "biomePct": [
+      44.6,
+      8.6,
+      46.5,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 152,
+    "score": 57.506,
+    "peak": 3.28,
+    "secondary": 2.721,
+    "shorePct": 3.07,
+    "biomePct": [
+      44.9,
+      15.7,
+      38.9,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 191,
+    "score": 57.453,
+    "peak": 3.28,
+    "secondary": 2.27,
+    "shorePct": 1.54,
+    "biomePct": [
+      51.9,
+      12.6,
+      35.3,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 171,
+    "score": 57.045,
+    "peak": 3.28,
+    "secondary": 2.883,
+    "shorePct": 3.42,
+    "biomePct": [
+      44.8,
+      6.9,
+      46.7,
+      1.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 157,
+    "score": 56.889,
+    "peak": 3.28,
+    "secondary": 2.58,
+    "shorePct": 3.48,
+    "biomePct": [
+      47.1,
+      8.9,
+      43.2,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 18,
+    "score": 56.869,
+    "peak": 3.28,
+    "secondary": 2.764,
+    "shorePct": 2.62,
+    "biomePct": [
+      48.2,
+      8.2,
+      42.7,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 142,
+    "score": 56.639,
+    "peak": 3.28,
+    "secondary": 2.794,
+    "shorePct": 2.94,
+    "biomePct": [
+      40.4,
+      5.4,
+      53.2,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 122,
+    "score": 56.444,
+    "peak": 3.28,
+    "secondary": 2.848,
+    "shorePct": 3.69,
+    "biomePct": [
+      43.7,
+      11.3,
+      43.8,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 29,
+    "score": 56.391,
+    "peak": 3.28,
+    "secondary": 2.911,
+    "shorePct": 6.2,
+    "biomePct": [
+      45.7,
+      2.4,
+      51.1,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 188,
+    "score": 56.007,
+    "peak": 3.28,
+    "secondary": 2.892,
+    "shorePct": 4.45,
+    "biomePct": [
+      37.8,
+      10.8,
+      48.6,
+      2.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 172,
+    "score": 55.796,
+    "peak": 3.28,
+    "secondary": 2.571,
+    "shorePct": 1.52,
+    "biomePct": [
+      54,
+      13.8,
+      31.2,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 163,
+    "score": 55.544,
+    "peak": 3.28,
+    "secondary": 2.211,
+    "shorePct": 2.4,
+    "biomePct": [
+      48.8,
+      4.8,
+      44.9,
+      1.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 58,
+    "score": 55.531,
+    "peak": 3.28,
+    "secondary": 2.66,
+    "shorePct": 3.22,
+    "biomePct": [
+      52.1,
+      7.6,
+      39.1,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 71,
+    "score": 54.942,
+    "peak": 3.28,
+    "secondary": 2.209,
+    "shorePct": 1.9,
+    "biomePct": [
+      40,
+      12.8,
+      46.9,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 132,
+    "score": 54.86,
+    "peak": 3.28,
+    "secondary": 2.718,
+    "shorePct": 2.16,
+    "biomePct": [
+      45.2,
+      15.2,
+      39.2,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 30,
+    "score": 54.792,
+    "peak": 3.28,
+    "secondary": 2.742,
+    "shorePct": 3.68,
+    "biomePct": [
+      37.4,
+      13.5,
+      47.6,
+      1.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 179,
+    "score": 54.581,
+    "peak": 3.28,
+    "secondary": 2.937,
+    "shorePct": 3.47,
+    "biomePct": [
+      46.7,
+      9.1,
+      42.6,
+      1.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 110,
+    "score": 54.377,
+    "peak": 3.28,
+    "secondary": 2.353,
+    "shorePct": 2.35,
+    "biomePct": [
+      48.3,
+      7.5,
+      43.6,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 45,
+    "score": 54.074,
+    "peak": 3.28,
+    "secondary": 2.983,
+    "shorePct": 7.46,
+    "biomePct": [
+      33.7,
+      3.3,
+      60.3,
+      2.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 15,
+    "score": 53.693,
+    "peak": 3.28,
+    "secondary": 2.324,
+    "shorePct": 3.15,
+    "biomePct": [
+      43.5,
+      3.2,
+      52.4,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 50,
+    "score": 53.62,
+    "peak": 3.28,
+    "secondary": 2.725,
+    "shorePct": 2.06,
+    "biomePct": [
+      43.5,
+      10.2,
+      46,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 92,
+    "score": 53.416,
+    "peak": 3.28,
+    "secondary": 2.655,
+    "shorePct": 5.04,
+    "biomePct": [
+      48.8,
+      4.5,
+      46.4,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 115,
+    "score": 53.148,
+    "peak": 3.28,
+    "secondary": 1.691,
+    "shorePct": 4.24,
+    "biomePct": [
+      46.5,
+      6.6,
+      44,
+      2.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 155,
+    "score": 52.892,
+    "peak": 3.28,
+    "secondary": 2.649,
+    "shorePct": 3.3,
+    "biomePct": [
+      37.3,
+      4.9,
+      57.1,
+      0.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 185,
+    "score": 52.51,
+    "peak": 3.28,
+    "secondary": 2.599,
+    "shorePct": 2.68,
+    "biomePct": [
+      44.2,
+      4,
+      51.2,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 162,
+    "score": 52.079,
+    "peak": 3.28,
+    "secondary": 2.61,
+    "shorePct": 3.04,
+    "biomePct": [
+      45.5,
+      4.9,
+      48.7,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 120,
+    "score": 52.003,
+    "peak": 3.28,
+    "secondary": 2.79,
+    "shorePct": 3.82,
+    "biomePct": [
+      39.5,
+      12,
+      47,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 173,
+    "score": 51.774,
+    "peak": 3.28,
+    "secondary": 2.889,
+    "shorePct": 2.76,
+    "biomePct": [
+      36,
+      10,
+      52.8,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 116,
+    "score": 51.6,
+    "peak": 3.28,
+    "secondary": 2.335,
+    "shorePct": 2.02,
+    "biomePct": [
+      40.2,
+      12.4,
+      46.6,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 153,
+    "score": 51.583,
+    "peak": 3.28,
+    "secondary": 2.777,
+    "shorePct": 3.36,
+    "biomePct": [
+      46.4,
+      10.8,
+      42.7,
+      0.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 7,
+    "score": 51.224,
+    "peak": 3.28,
+    "secondary": 1.657,
+    "shorePct": 3.69,
+    "biomePct": [
+      42.4,
+      5.2,
+      48.1,
+      4.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 53,
+    "score": 51.118,
+    "peak": 3.28,
+    "secondary": 2.274,
+    "shorePct": 2.07,
+    "biomePct": [
+      47,
+      7.1,
+      45.3,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 130,
+    "score": 50.933,
+    "peak": 3.28,
+    "secondary": 2.021,
+    "shorePct": 2.34,
+    "biomePct": [
+      58.9,
+      10.3,
+      29.7,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 139,
+    "score": 50.685,
+    "peak": 3.28,
+    "secondary": 2.969,
+    "shorePct": 3.92,
+    "biomePct": [
+      43.4,
+      9.2,
+      43.2,
+      4.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 144,
+    "score": 50.381,
+    "peak": 3.28,
+    "secondary": 2.033,
+    "shorePct": 2.48,
+    "biomePct": [
+      42.6,
+      9.6,
+      46.9,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 148,
+    "score": 50.118,
+    "peak": 3.28,
+    "secondary": 2.057,
+    "shorePct": 3,
+    "biomePct": [
+      41.9,
+      9.2,
+      48.3,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 98,
+    "score": 49.858,
+    "peak": 3.28,
+    "secondary": 2.009,
+    "shorePct": 2.55,
+    "biomePct": [
+      52.7,
+      10.6,
+      35.7,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 118,
+    "score": 49.151,
+    "peak": 3.28,
+    "secondary": 2.851,
+    "shorePct": 2.41,
+    "biomePct": [
+      43.7,
+      14,
+      41.7,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 112,
+    "score": 48.888,
+    "peak": 3.28,
+    "secondary": 2.767,
+    "shorePct": 5.47,
+    "biomePct": [
+      42.2,
+      6.7,
+      50.4,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 52,
+    "score": 48.841,
+    "peak": 3.28,
+    "secondary": 2.686,
+    "shorePct": 2.52,
+    "biomePct": [
+      39.7,
+      7.2,
+      52.6,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 24,
+    "score": 48.241,
+    "peak": 3.28,
+    "secondary": 2.068,
+    "shorePct": 1.94,
+    "biomePct": [
+      44.5,
+      6.1,
+      49,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 146,
+    "score": 48.183,
+    "peak": 3.28,
+    "secondary": 2.016,
+    "shorePct": 1.99,
+    "biomePct": [
+      39.5,
+      10,
+      49.6,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 166,
+    "score": 47.722,
+    "peak": 3.28,
+    "secondary": 1.253,
+    "shorePct": 3.28,
+    "biomePct": [
+      40.9,
+      20.4,
+      36.1,
+      2.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 94,
+    "score": 47.144,
+    "peak": 3.28,
+    "secondary": 2.091,
+    "shorePct": 1.16,
+    "biomePct": [
+      46.1,
+      13.7,
+      39.9,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 124,
+    "score": 47.047,
+    "peak": 3.28,
+    "secondary": 1.468,
+    "shorePct": 3.22,
+    "biomePct": [
+      42.6,
+      9.3,
+      45.8,
+      2.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 68,
+    "score": 46.788,
+    "peak": 3.28,
+    "secondary": 2.735,
+    "shorePct": 3.31,
+    "biomePct": [
+      46.6,
+      9.3,
+      42.9,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 86,
+    "score": 46.78,
+    "peak": 3.28,
+    "secondary": 1.922,
+    "shorePct": 4.53,
+    "biomePct": [
+      42.9,
+      10,
+      44.5,
+      2.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 39,
+    "score": 46.594,
+    "peak": 3.28,
+    "secondary": 1.898,
+    "shorePct": 2.8,
+    "biomePct": [
+      41.5,
+      12.8,
+      44.5,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 83,
+    "score": 46.433,
+    "peak": 3.28,
+    "secondary": 2.085,
+    "shorePct": 2.3,
+    "biomePct": [
+      38.4,
+      7.8,
+      52.5,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 109,
+    "score": 46.011,
+    "peak": 3.28,
+    "secondary": 2.045,
+    "shorePct": 2.1,
+    "biomePct": [
+      53.4,
+      13.1,
+      31.5,
+      2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 55,
+    "score": 45.87,
+    "peak": 3.28,
+    "secondary": 1.992,
+    "shorePct": 1.75,
+    "biomePct": [
+      40.8,
+      18.8,
+      39.7,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 8,
+    "score": 45.746,
+    "peak": 3.28,
+    "secondary": 2.992,
+    "shorePct": 6.4,
+    "biomePct": [
+      37.8,
+      2.8,
+      57.5,
+      1.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 13,
+    "score": 45.696,
+    "peak": 3.28,
+    "secondary": 1.259,
+    "shorePct": 2.49,
+    "biomePct": [
+      45.7,
+      13,
+      38.9,
+      2.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 193,
+    "score": 45.235,
+    "peak": 3.28,
+    "secondary": 1.995,
+    "shorePct": 1.08,
+    "biomePct": [
+      50.4,
+      5.6,
+      43.2,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 187,
+    "score": 44.701,
+    "peak": 3.28,
+    "secondary": 1.395,
+    "shorePct": 2.44,
+    "biomePct": [
+      49.3,
+      12,
+      36.4,
+      2.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 60,
+    "score": 44.48,
+    "peak": 3.28,
+    "secondary": 3.086,
+    "shorePct": 3.9,
+    "biomePct": [
+      40.3,
+      7.8,
+      49.5,
+      2.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 189,
+    "score": 44.315,
+    "peak": 3.28,
+    "secondary": 1.997,
+    "shorePct": 1.33,
+    "biomePct": [
+      45.5,
+      12.6,
+      41.3,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 27,
+    "score": 44.103,
+    "peak": 3.28,
+    "secondary": 2.871,
+    "shorePct": 2.85,
+    "biomePct": [
+      43.5,
+      7.8,
+      47.4,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 22,
+    "score": 43.445,
+    "peak": 3.28,
+    "secondary": 2.065,
+    "shorePct": 1.66,
+    "biomePct": [
+      46.2,
+      2.5,
+      50.1,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 72,
+    "score": 43.37,
+    "peak": 3.28,
+    "secondary": 1.963,
+    "shorePct": 1.77,
+    "biomePct": [
+      43.8,
+      16.2,
+      39.4,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 117,
+    "score": 43.281,
+    "peak": 3.28,
+    "secondary": 2.941,
+    "shorePct": 3.8,
+    "biomePct": [
+      37.3,
+      4,
+      57.3,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 180,
+    "score": 42.936,
+    "peak": 3.28,
+    "secondary": 2.102,
+    "shorePct": 1.57,
+    "biomePct": [
+      50.6,
+      3.6,
+      44.9,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 19,
+    "score": 42.683,
+    "peak": 3.28,
+    "secondary": 1.465,
+    "shorePct": 3.07,
+    "biomePct": [
+      48.5,
+      8.3,
+      41.3,
+      1.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 182,
+    "score": 41.542,
+    "peak": 3.28,
+    "secondary": 1.509,
+    "shorePct": 3.31,
+    "biomePct": [
+      45.8,
+      9.8,
+      42.8,
+      1.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 43,
+    "score": 41.511,
+    "peak": 3.28,
+    "secondary": 3.011,
+    "shorePct": 3.13,
+    "biomePct": [
+      44.9,
+      9.8,
+      43.1,
+      2.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 73,
+    "score": 41.304,
+    "peak": 3.28,
+    "secondary": 2.812,
+    "shorePct": 2.55,
+    "biomePct": [
+      49.5,
+      13.2,
+      36.7,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 62,
+    "score": 41.174,
+    "peak": 3.28,
+    "secondary": 1.954,
+    "shorePct": 1.75,
+    "biomePct": [
+      52.8,
+      8.6,
+      38.2,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 59,
+    "score": 41.153,
+    "peak": 3.28,
+    "secondary": 1.691,
+    "shorePct": 3.58,
+    "biomePct": [
+      42.4,
+      8.7,
+      47.8,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 123,
+    "score": 41.148,
+    "peak": 3.28,
+    "secondary": 1.983,
+    "shorePct": 1.79,
+    "biomePct": [
+      38.4,
+      14.8,
+      46.6,
+      0.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 88,
+    "score": 40.957,
+    "peak": 3.28,
+    "secondary": 3.045,
+    "shorePct": 3.64,
+    "biomePct": [
+      42.2,
+      11.1,
+      44.5,
+      2.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 151,
+    "score": 40.878,
+    "peak": 3.28,
+    "secondary": 2.813,
+    "shorePct": 2.53,
+    "biomePct": [
+      44.1,
+      13.3,
+      41.6,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 23,
+    "score": 39.905,
+    "peak": 3.28,
+    "secondary": 1.281,
+    "shorePct": 2.73,
+    "biomePct": [
+      48.8,
+      9.3,
+      40.3,
+      1.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 81,
+    "score": 39.885,
+    "peak": 3.28,
+    "secondary": 1.823,
+    "shorePct": 1.66,
+    "biomePct": [
+      45.5,
+      13.6,
+      40,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 37,
+    "score": 39.865,
+    "peak": 3.28,
+    "secondary": 3.067,
+    "shorePct": 2.33,
+    "biomePct": [
+      43.9,
+      9.6,
+      43.3,
+      3.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 167,
+    "score": 39.862,
+    "peak": 3.28,
+    "secondary": 1.528,
+    "shorePct": 3.8,
+    "biomePct": [
+      37.2,
+      12.1,
+      47.6,
+      3.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 14,
+    "score": 39.839,
+    "peak": 3.28,
+    "secondary": 1.826,
+    "shorePct": 2.72,
+    "biomePct": [
+      46.6,
+      15.3,
+      36.1,
+      2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 161,
+    "score": 39.571,
+    "peak": 3.28,
+    "secondary": 1.017,
+    "shorePct": 2.4,
+    "biomePct": [
+      47.6,
+      14.6,
+      36,
+      1.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 158,
+    "score": 39.203,
+    "peak": 3.28,
+    "secondary": 3.008,
+    "shorePct": 2.64,
+    "biomePct": [
+      46.7,
+      8.2,
+      43.5,
+      1.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 102,
+    "score": 38.886,
+    "peak": 3.28,
+    "secondary": 1.208,
+    "shorePct": 2.75,
+    "biomePct": [
+      49.9,
+      15.1,
+      33.5,
+      1.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 108,
+    "score": 38.737,
+    "peak": 3.28,
+    "secondary": 3.078,
+    "shorePct": 3.64,
+    "biomePct": [
+      40.7,
+      6.4,
+      50.3,
+      2.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 82,
+    "score": 38.48,
+    "peak": 3.28,
+    "secondary": 3.013,
+    "shorePct": 3.75,
+    "biomePct": [
+      40.9,
+      10.6,
+      47.2,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 121,
+    "score": 38.449,
+    "peak": 3.28,
+    "secondary": 1.357,
+    "shorePct": 2.7,
+    "biomePct": [
+      45.8,
+      9.9,
+      42.8,
+      1.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 156,
+    "score": 38.122,
+    "peak": 3.28,
+    "secondary": 2.95,
+    "shorePct": 4.66,
+    "biomePct": [
+      39.9,
+      4.5,
+      55,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 32,
+    "score": 38.095,
+    "peak": 3.28,
+    "secondary": 1.417,
+    "shorePct": 2.15,
+    "biomePct": [
+      47.3,
+      14.6,
+      36.6,
+      1.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 80,
+    "score": 38.021,
+    "peak": 3.28,
+    "secondary": 3.016,
+    "shorePct": 1.93,
+    "biomePct": [
+      52,
+      10.1,
+      35.5,
+      2.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 145,
+    "score": 38.014,
+    "peak": 3.28,
+    "secondary": 0.977,
+    "shorePct": 2.75,
+    "biomePct": [
+      48.9,
+      14,
+      35.7,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 136,
+    "score": 37.748,
+    "peak": 3.28,
+    "secondary": 0.936,
+    "shorePct": 2.68,
+    "biomePct": [
+      49.4,
+      13.2,
+      36.1,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 78,
+    "score": 37.404,
+    "peak": 3.28,
+    "secondary": 1.67,
+    "shorePct": 3.25,
+    "biomePct": [
+      44.4,
+      11.6,
+      43.1,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 6,
+    "score": 37.177,
+    "peak": 3.28,
+    "secondary": 3.049,
+    "shorePct": 3.23,
+    "biomePct": [
+      37.7,
+      15.3,
+      45.6,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 164,
+    "score": 37.027,
+    "peak": 3.28,
+    "secondary": 1.376,
+    "shorePct": 2.57,
+    "biomePct": [
+      49.4,
+      11.2,
+      38.1,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 51,
+    "score": 36.976,
+    "peak": 3.28,
+    "secondary": 1.957,
+    "shorePct": 2.9,
+    "biomePct": [
+      43.5,
+      12.1,
+      43.1,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 3,
+    "score": 36.945,
+    "peak": 3.28,
+    "secondary": 1.875,
+    "shorePct": 2.95,
+    "biomePct": [
+      40.2,
+      12.3,
+      46.1,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 25,
+    "score": 36.645,
+    "peak": 3.28,
+    "secondary": 1.183,
+    "shorePct": 2.93,
+    "biomePct": [
+      53.9,
+      10.7,
+      34.1,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 36,
+    "score": 36.564,
+    "peak": 3.28,
+    "secondary": 1.54,
+    "shorePct": 3.05,
+    "biomePct": [
+      41.3,
+      13.8,
+      43.9,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 197,
+    "score": 36.099,
+    "peak": 3.28,
+    "secondary": 1.405,
+    "shorePct": 1.71,
+    "biomePct": [
+      53.7,
+      8.4,
+      36.4,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 87,
+    "score": 35.896,
+    "peak": 3.28,
+    "secondary": 1.864,
+    "shorePct": 1.36,
+    "biomePct": [
+      46.3,
+      9.1,
+      44.2,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 66,
+    "score": 34.519,
+    "peak": 3.28,
+    "secondary": 1.96,
+    "shorePct": 1.87,
+    "biomePct": [
+      44.4,
+      10.8,
+      44,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 49,
+    "score": 34.131,
+    "peak": 3.28,
+    "secondary": 1.534,
+    "shorePct": 1.74,
+    "biomePct": [
+      47,
+      10.1,
+      41.9,
+      1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 16,
+    "score": 34.015,
+    "peak": 3.28,
+    "secondary": 1.946,
+    "shorePct": 2.41,
+    "biomePct": [
+      44.5,
+      7.4,
+      47,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 129,
+    "score": 33.886,
+    "peak": 3.28,
+    "secondary": 1.424,
+    "shorePct": 1.73,
+    "biomePct": [
+      53.3,
+      11,
+      34.7,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 183,
+    "score": 33.806,
+    "peak": 3.28,
+    "secondary": 1.529,
+    "shorePct": 1.29,
+    "biomePct": [
+      50.9,
+      16.6,
+      31.5,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 137,
+    "score": 33.659,
+    "peak": 3.28,
+    "secondary": 1.604,
+    "shorePct": 3.06,
+    "biomePct": [
+      49.4,
+      7.1,
+      42.9,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 103,
+    "score": 33.574,
+    "peak": 3.28,
+    "secondary": 1.787,
+    "shorePct": 1.02,
+    "biomePct": [
+      51.1,
+      15.3,
+      33.1,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 5,
+    "score": 33.569,
+    "peak": 3.28,
+    "secondary": 3.035,
+    "shorePct": 4.7,
+    "biomePct": [
+      38.9,
+      11.3,
+      49.3,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 20,
+    "score": 33.458,
+    "peak": 3.28,
+    "secondary": 1.166,
+    "shorePct": 3.77,
+    "biomePct": [
+      44.9,
+      13.3,
+      41.2,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 65,
+    "score": 33.204,
+    "peak": 3.28,
+    "secondary": 3.054,
+    "shorePct": 6.03,
+    "biomePct": [
+      45.7,
+      0.7,
+      49.2,
+      4.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 34,
+    "score": 33.183,
+    "peak": 3.28,
+    "secondary": 1.95,
+    "shorePct": 1.49,
+    "biomePct": [
+      51.3,
+      11,
+      37,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 178,
+    "score": 32.778,
+    "peak": 3.28,
+    "secondary": 1.801,
+    "shorePct": 1.37,
+    "biomePct": [
+      49.5,
+      8.2,
+      42,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 76,
+    "score": 32.536,
+    "peak": 3.28,
+    "secondary": 1.816,
+    "shorePct": 1.12,
+    "biomePct": [
+      47.4,
+      13.3,
+      39.1,
+      0.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 67,
+    "score": 32.487,
+    "peak": 3.28,
+    "secondary": 1.213,
+    "shorePct": 3.76,
+    "biomePct": [
+      43,
+      10,
+      46.5,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 141,
+    "score": 32.251,
+    "peak": 3.28,
+    "secondary": 1.292,
+    "shorePct": 2.63,
+    "biomePct": [
+      49.2,
+      11.2,
+      37.2,
+      2.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 56,
+    "score": 32.173,
+    "peak": 3.28,
+    "secondary": 1.547,
+    "shorePct": 2.94,
+    "biomePct": [
+      46.4,
+      4.6,
+      47.2,
+      1.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 31,
+    "score": 32.102,
+    "peak": 3.28,
+    "secondary": 1.709,
+    "shorePct": 3.88,
+    "biomePct": [
+      47.1,
+      6.9,
+      44.9,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 190,
+    "score": 31.759,
+    "peak": 3.28,
+    "secondary": 1.706,
+    "shorePct": 1.29,
+    "biomePct": [
+      46.6,
+      15.8,
+      37.1,
+      0.5
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 46,
+    "score": 31.753,
+    "peak": 3.28,
+    "secondary": 1.555,
+    "shorePct": 3.94,
+    "biomePct": [
+      39.5,
+      10.5,
+      48.5,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 10,
+    "score": 31.598,
+    "peak": 3.28,
+    "secondary": 3.058,
+    "shorePct": 1.39,
+    "biomePct": [
+      59.6,
+      4.6,
+      34.6,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 17,
+    "score": 31.456,
+    "peak": 3.28,
+    "secondary": 1.782,
+    "shorePct": 0.82,
+    "biomePct": [
+      50.2,
+      11.8,
+      37.8,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 61,
+    "score": 31.378,
+    "peak": 3.28,
+    "secondary": 1.724,
+    "shorePct": 1.37,
+    "biomePct": [
+      51.2,
+      10.8,
+      37.6,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 127,
+    "score": 31.368,
+    "peak": 3.28,
+    "secondary": 1.505,
+    "shorePct": 2.37,
+    "biomePct": [
+      44.7,
+      12.6,
+      42.1,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 69,
+    "score": 30.823,
+    "peak": 3.28,
+    "secondary": 1.643,
+    "shorePct": 1.9,
+    "biomePct": [
+      42.2,
+      14.1,
+      43.2,
+      0.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 198,
+    "score": 30.604,
+    "peak": 3.28,
+    "secondary": 1.46,
+    "shorePct": 1.7,
+    "biomePct": [
+      54,
+      9.9,
+      35.4,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 143,
+    "score": 30.137,
+    "peak": 3.28,
+    "secondary": 1.148,
+    "shorePct": 1.63,
+    "biomePct": [
+      52,
+      10.9,
+      36.4,
+      0.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 96,
+    "score": 29.714,
+    "peak": 3.28,
+    "secondary": 0.585,
+    "shorePct": 1.88,
+    "biomePct": [
+      56,
+      17.3,
+      24.9,
+      1.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 104,
+    "score": 29.425,
+    "peak": 3.28,
+    "secondary": 1.219,
+    "shorePct": 2.24,
+    "biomePct": [
+      50.5,
+      11.6,
+      35.8,
+      2.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 75,
+    "score": 29.171,
+    "peak": 3.28,
+    "secondary": 1.067,
+    "shorePct": 1.68,
+    "biomePct": [
+      43.4,
+      23.8,
+      32.2,
+      0.6
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 91,
+    "score": 29.001,
+    "peak": 3.28,
+    "secondary": 1.227,
+    "shorePct": 3.43,
+    "biomePct": [
+      47.8,
+      10.1,
+      40.2,
+      1.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 64,
+    "score": 28.801,
+    "peak": 3.28,
+    "secondary": 1.65,
+    "shorePct": 2.7,
+    "biomePct": [
+      45.6,
+      6.2,
+      47,
+      1.2
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 126,
+    "score": 28.459,
+    "peak": 3.28,
+    "secondary": 1.278,
+    "shorePct": 2.25,
+    "biomePct": [
+      54,
+      5.8,
+      39.9,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 9,
+    "score": 27.629,
+    "peak": 3.28,
+    "secondary": 1.056,
+    "shorePct": 2.06,
+    "biomePct": [
+      54.7,
+      14.9,
+      30.1,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 99,
+    "score": 27.427,
+    "peak": 3.28,
+    "secondary": 1.733,
+    "shorePct": 1.89,
+    "biomePct": [
+      50.2,
+      11.7,
+      36.7,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 196,
+    "score": 26.923,
+    "peak": 3.28,
+    "secondary": 0.705,
+    "shorePct": 1.45,
+    "biomePct": [
+      50.9,
+      9.1,
+      39.7,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 176,
+    "score": 26.848,
+    "peak": 3.28,
+    "secondary": 0.756,
+    "shorePct": 2.41,
+    "biomePct": [
+      56.1,
+      13.9,
+      28.7,
+      1.4
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 138,
+    "score": 26.204,
+    "peak": 3.28,
+    "secondary": 1.23,
+    "shorePct": 2.4,
+    "biomePct": [
+      46.2,
+      12.6,
+      39.9,
+      1.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 101,
+    "score": 24.55,
+    "peak": 3.28,
+    "secondary": 1.569,
+    "shorePct": 2.24,
+    "biomePct": [
+      49.2,
+      5.6,
+      44.3,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 90,
+    "score": 23.849,
+    "peak": 3.28,
+    "secondary": 1.674,
+    "shorePct": 1.18,
+    "biomePct": [
+      47.8,
+      8.2,
+      43.2,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 54,
+    "score": 23.556,
+    "peak": 3.28,
+    "secondary": 1.714,
+    "shorePct": 1.5,
+    "biomePct": [
+      52,
+      10,
+      37.4,
+      0.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 89,
+    "score": 21.683,
+    "peak": 3.28,
+    "secondary": 1.225,
+    "shorePct": 1.79,
+    "biomePct": [
+      50.7,
+      11.2,
+      37.2,
+      0.8
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 174,
+    "score": 20.115,
+    "peak": 3.28,
+    "secondary": 1.021,
+    "shorePct": 2.72,
+    "biomePct": [
+      48.9,
+      8.9,
+      41.1,
+      1.1
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 113,
+    "score": 19.27,
+    "peak": 3.28,
+    "secondary": 1.565,
+    "shorePct": 2.15,
+    "biomePct": [
+      48.3,
+      10.3,
+      40.5,
+      0.9
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 175,
+    "score": 16.788,
+    "peak": 3.28,
+    "secondary": 1.319,
+    "shorePct": 1.22,
+    "biomePct": [
+      53.5,
+      13.4,
+      32.8,
+      0.3
+    ],
+    "speckle": 0,
+    "clipping": 0
+  },
+  {
+    "seed": 11,
+    "score": 16.702,
+    "peak": 3.28,
+    "secondary": 1.274,
+    "shorePct": 1.59,
+    "biomePct": [
+      50.3,
+      14.2,
+      34.8,
+      0.7
+    ],
+    "speckle": 0,
+    "clipping": 0
+  }
+]

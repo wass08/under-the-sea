@@ -1,0 +1,561 @@
+--- before/src/audio.ts
++++ src/audio.ts
+@@ -6,6 +6,7 @@
+   let glass: AudioBuffer | undefined, bubbles: AudioBuffer | undefined, loop: AudioBufferSourceNode | undefined;
+   let loading: Promise<void> | undefined;
+   const voices = new Set<AudioBufferSourceNode>();
++  let generation = 0;
+   async function gesture() {
+     try {
+       context ??= new AudioContext();
+@@ -19,7 +20,8 @@
+     } catch { /* Web Audio is optional. */ }
+   }
+   async function play(full: boolean) {
+-    await gesture(); if (muted || !context || !master || !glass) return;
++    const requestedGeneration = generation;
++    await gesture(); if (requestedGeneration !== generation || muted || !context || !master || !glass) return;
+     try {
+       const source = context.createBufferSource(), gain = context.createGain(); source.buffer = glass;
+       source.connect(gain); gain.connect(master); gain.gain.value = full ? 0.65 : 0.28;
+@@ -44,5 +46,5 @@
+         if (strength === 0) { loop.stop(); loop.disconnect(); loop = undefined; bubblesGain?.disconnect(); }
+       }
+     } catch { /* Audio device may disappear. */ }
+-  }, reset() { for (const voice of voices) { try { voice.stop(); } catch { /* Already ended. */ } } voices.clear(); } };
++  }, reset() { generation++; for (const voice of voices) { try { voice.stop(); } catch { /* Already ended. */ } } voices.clear(); } };
+ }
+--- before/src/lab/index.ts
++++ src/lab/index.ts
+@@ -3,6 +3,7 @@
+ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+ import { Pane } from 'tweakpane';
+ import { createLabPost } from '../lib/post';
++import { physicsDiagnostics } from '../lib/physics';
+ import { createTerrainBench } from './terrain';
+ import { createCausticsBench } from './caustics';
+ import { createShatterBench } from './shatter';
+@@ -86,7 +87,7 @@
+       total += realDt; frames++; if (total > 0.5) { shell.querySelector('.lab-fps')!.textContent = `${Math.round(frames / total)} FPS`; total = 0; frames = 0; }
+     } catch (error) { reportError(error); }
+   });
+-  const hook = { get ready() { return ready && !transitioning; }, get state() { return { ...readLabRoute(), generation, renderer: 'WebGPU', ...bench?.diagnostics() }; }, setReveal(values: Record<string, boolean | number | string>) { bench?.setReveal(values); } };
++  const hook = { get ready() { return ready && !transitioning; }, get state() { return { ...readLabRoute(), generation, renderer: 'WebGPU', resources: { ...renderer.info.memory }, physics: physicsDiagnostics(), ...bench?.diagnostics() }; }, setReveal(values: Record<string, boolean | number | string>) { bench?.setReveal(values); } };
+   Object.assign(window, { lab: hook });
+   return () => {
+     disposed = true; renderer.setAnimationLoop(null); releaseBench(); controls.dispose(); removeEventListener('resize', resize); removeEventListener('keydown', keyboard); removeEventListener('hashchange', routeListener);
+--- before/src/lab/shatter.ts
++++ src/lab/shatter.ts
+@@ -38,15 +38,17 @@
+     const next = await createPhysicsWorld();
+     if (disposed) { next.dispose(); return; }
+     world.dispose(); world = next; setupFloor();
+-    fragments.traverse(o => { if (o instanceof Mesh) o.material = []; }); disposeGraph(fragments); fragments = new Group(); root.add(fragments);
++    disposeGraph(fragments); fragments = new Group(); root.add(fragments);
+     broken = false; intact.visible = true; frame.visible = true; impact = [0, 0]; makePattern(); hint.hidden = clicked; resetting = false;
+   }
+   function fracture(point: Point2) {
+     if (broken || resetting) return;
+     impact = point; makePattern(); broken = true; clicked = true; hint.hidden = true; intact.visible = false; frame.visible = false; overlay.visible = false;
+     const rng = random(117);
++    // Each fracture owns its material so reset also releases its per-shard GPU bindings.
++    const shardGlass = glass.clone();
+     for (const cell of pattern.cells) {
+-      const { geometry, centroid } = buildShardGeometry(cell, 0.05), mesh = new Mesh(geometry, glass);
++      const { geometry, centroid } = buildShardGeometry(cell, 0.05), mesh = new Mesh(geometry, shardGlass);
+       mesh.position.set(centroid[0], centroid[1] + 1.25, 0); mesh.castShadow = true; fragments.add(mesh);
+       // Mass follows area, so a uniform push gives every tile the same launch speed.
+       const area = Math.abs(cell.polygon.reduce((a, p, i) => { const q = cell.polygon[(i + 1) % cell.polygon.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2;
+@@ -83,7 +85,8 @@
+     setReveal(values) { Object.assign(params, values); reveal(); pane.refresh(); },
+     diagnostics() {
+       const center = new Vector3(0, 1.25, 0).project(camera), rect = canvas.getBoundingClientRect();
+-      return { broken, elapsed: world.elapsed, shardCount: pattern.cells.length, impact, paneCenter: { x: rect.left + (center.x + 1) * rect.width / 2, y: rect.top + (1 - center.y) * rect.height / 2 }, ...params };
++      const shardTransforms = fragments.children.map(mesh => [...mesh.position.toArray(), ...mesh.quaternion.toArray()]);
++      return { broken, elapsed: world.elapsed, shardCount: pattern.cells.length, shardTransforms, bodyCount: world.world.bodies.len(), colliderCount: world.world.colliders.len(), impact, paneCenter: { x: rect.left + (center.x + 1) * rect.width / 2, y: rect.top + (1 - center.y) * rect.height / 2 }, ...params };
+     },
+   };
+ }
+--- before/src/lib/physics.ts
++++ src/lib/physics.ts
+@@ -3,21 +3,33 @@
+ type Vec3 = { x: number; y: number; z: number };
+ /** Shared WASM initialization. Await once before creating any physics world. */
+ export const physicsReady = RAPIER.init();
++const liveWorlds = new Set<RAPIER.World>();
++/** Actual live WASM allocations, exposed read-only to runtime verification. */
++export function physicsDiagnostics() {
++  return { worlds: liveWorlds.size, bodies: [...liveWorlds].reduce((n, w) => n + w.bodies.len(), 0), colliders: [...liveWorlds].reduce((n, w) => n + w.colliders.len(), 0) };
++}
+ /** Independent fixed-step Rapier world, owning its bodies, colliders and mesh bindings. */
+ export async function createPhysicsWorld(gravity: Vec3 = { x: 0, y: -9.81, z: 0 }) {
+   await physicsReady;
+   const world = new RAPIER.World(gravity), bindings: { mesh: Mesh; body: RAPIER.RigidBody }[] = [];
++  liveWorlds.add(world);
+   const fixedDt = 1 / 120; let accumulator = 0;
+   const api = {
+     world, timeScale: 1, frozen: false, elapsed: 0,
+     /** Mesh must be in world space with unit scale; geometry coordinates are local. */
+-    addShard(mesh: Mesh, geometry: BufferGeometry, mass: number) {
+-      const position = geometry.getAttribute('position'), vertices = new Float32Array(position.count * 3);
+-      for (let i = 0; i < position.count; i++) vertices.set([position.getX(i), position.getY(i), position.getZ(i)], i * 3);
+-      const collider = RAPIER.ColliderDesc.convexHull(vertices);
+-      if (!collider) throw new Error('Shard is not a valid convex hull');
++    addShard(mesh: Mesh, geometry: BufferGeometry | BufferGeometry[], mass: number) {
++      // Parts share the mesh's local coordinate frame; never hull across the gaps between cells.
++      const parts = Array.isArray(geometry) ? geometry : [geometry];
++      const total = parts.reduce((n, g) => n + g.getAttribute('position').count, 0);
++      const colliders = parts.map(part => {
++        const position = part.getAttribute('position'), vertices = new Float32Array(position.count * 3);
++        for (let i = 0; i < position.count; i++) vertices.set([position.getX(i), position.getY(i), position.getZ(i)], i * 3);
++        const collider = RAPIER.ColliderDesc.convexHull(vertices);
++        if (!collider) throw new Error('Shard is not a valid convex hull');
++        return collider.setMass(mass * position.count / total).setFriction(0.65).setRestitution(0.12);
++      });
+       const body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(mesh.position.x, mesh.position.y, mesh.position.z).setRotation(mesh.quaternion).setCcdEnabled(true).setLinearDamping(0.18).setAngularDamping(0.25));
+-      world.createCollider(collider.setMass(mass).setFriction(0.65).setRestitution(0.12), body);
++      for (const collider of colliders) world.createCollider(collider, body);
+       bindings.push({ mesh, body }); return body;
+     },
+     /** Create a fixed box with full dimensions, centred at position. */
+@@ -37,7 +49,7 @@
+       while (accumulator >= fixedDt) { world.timestep = fixedDt; world.step(); accumulator -= fixedDt; api.elapsed += fixedDt; }
+     },
+     sync() { for (const { mesh, body } of bindings) { mesh.position.copy(body.translation()); mesh.quaternion.copy(body.rotation()); } },
+-    dispose() { bindings.length = 0; world.free(); },
++    dispose() { bindings.length = 0; world.free(); liveWorlds.delete(world); },
+   };
+   return api;
+ }
+--- before/src/lib/post.ts
++++ src/lib/post.ts
+@@ -1,5 +1,5 @@
+-import { type Camera, RenderPipeline, Scene, WebGPURenderer } from 'three/webgpu';
+-import { pass } from 'three/tsl';
++import { type Camera, RenderPipeline, Scene, type ViewportTextureNode, WebGPURenderer } from 'three/webgpu';
++import { pass, viewportOpaqueMipTexture } from 'three/tsl';
+ import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+ /** Bloom-only final pass. dispose() also frees the owned scene pass and bloom targets. */
+ export function createLabPost(renderer: WebGPURenderer, scene: Scene, camera: Camera) {
+@@ -7,6 +7,10 @@
+   const glow = bloom(beauty, 0.25, 0.4, 0.9);
+   pipeline.outputNode = beauty.add(glow);
+   const dispose = pipeline.dispose.bind(pipeline);
+-  pipeline.dispose = () => { glow.dispose(); scenePass.dispose(); dispose(); };
++  pipeline.dispose = () => {
++    // r186 caches the glass transmission copy per render target, but target disposal does not free it.
++    (viewportOpaqueMipTexture() as ViewportTextureNode).getTextureForReference(scenePass.renderTarget).dispose();
++    glow.dispose(); scenePass.dispose(); dispose();
++  };
+   return pipeline;
+ }
+--- before/src/lib/shatter.ts
++++ src/lib/shatter.ts
+@@ -3,6 +3,30 @@
+ import { lloydRelax, polygonCentroid, voronoiCells, type Bounds, type Point2 } from './triangulate';
+ export type ShatterCell = { polygon: Point2[]; seed: Point2; ring: number; distance: number };
+ export type ShatterOptions = { level: 1 | 2 | 3; width: number; height: number; impact: Point2; count: number; seed: number };
++/** Merge only edge-adjacent cells, preferring small groups, until the body budget is met. */
++export function groupAdjacentCells(cells: ShatterCell[], budget: number): ShatterCell[][] {
++  const parents = cells.map((_, i) => i), groups = new Map(cells.map((cell, i) => [i, [cell]]));
++  const root = (i: number): number => parents[i] === i ? i : (parents[i] = root(parents[i]));
++  const edges = new Map<string, number>(), neighbours: [number, number][] = [];
++  const key = (p: Point2) => p.map(v => Math.round(v * 1e7)).join(',');
++  cells.forEach((cell, id) => cell.polygon.forEach((p, i) => {
++    const edge = [key(p), key(cell.polygon[(i + 1) % cell.polygon.length])].sort().join('/');
++    const other = edges.get(edge);
++    if (other === undefined) edges.set(edge, id); else neighbours.push([other, id]);
++  }));
++  while (groups.size > Math.max(1, budget)) {
++    let pair: [number, number] | undefined, smallest = Infinity;
++    for (const [a, b] of neighbours) {
++      const x = root(a), y = root(b);
++      if (x === y) continue;
++      const size = groups.get(x)!.length + groups.get(y)!.length;
++      if (size < smallest) { smallest = size; pair = [x, y]; }
++    }
++    if (!pair) throw new Error('Body budget is smaller than the number of disconnected fracture regions');
++    const [a, b] = pair; parents[b] = a; groups.get(a)!.push(...groups.get(b)!); groups.delete(b);
++  }
++  return [...groups.values()];
++}
+ /** Local, centred fracture cells: grid, random Voronoi, or radial density with ring cracks. */
+ export function generateShatterPattern({ level, width, height, impact, count, seed }: ShatterOptions) {
+   if (!(width > 0 && height > 0 && count >= 12 && Number.isFinite(count))) throw new Error('Fracture dimensions must be positive and count at least 12');
+--- before/src/lib/worley.ts
++++ src/lib/worley.ts
+@@ -44,7 +44,8 @@
+   };
+   if (p.level === 2) {
+     const w = worley(uv.mul(p.scaleA));
+-    return mix(vec3(w.f1.mul(0.14).min(0.15)), vec3(1, 0.3, 0.08), w.seedMask.mul(p.showSeeds));
++    const field = mix(w.f1.mul(0.14).min(0.15), w.f1, p.rawField);
++    return mix(vec3(field), vec3(1, 0.3, 0.08), w.seedMask.mul(p.showSeeds));
+   }
+   const g = sample(uv), r = sample(uv.add(vec2(p.rgbOffset, 0))), b = sample(uv.sub(vec2(p.rgbOffset, 0)));
+   const light = vec3(r.field, g.field, b.field).mul(p.intensity).mul(smoothstep(0, 0.15, p.depth));
+--- before/src/scene/spill.ts
++++ src/scene/spill.ts
+@@ -1,7 +1,23 @@
+ import { AdditiveBlending, CircleGeometry, DoubleSide, DynamicDrawUsage, InstancedBufferAttribute, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, PointsNodeMaterial, Scene, Sprite, Vector3 } from 'three/webgpu';
+ import { bumpMap, color, float, instancedBufferAttribute, positionWorld, smoothstep, uv } from 'three/tsl';
+-import { random, simTime, waterHeight } from '../state';
++import { random, simTime, TANK, waterHeight } from '../state';
+ import type { Opening } from './tank';
++
++/** Split drained tank volume by width × sqrt(head), excluding dry sills in each height interval. */
++export function distributeSpillVolume(from: number, to: number, openings: Pick<Opening, 'bottom' | 'width'>[]) {
++  const volumes = openings.map(() => 0);
++  if (to >= from) return volumes;
++  const heights = [...new Set([from, to, ...openings.map(o => o.bottom).filter(h => h > to && h < from)])].sort((a, b) => b - a);
++  for (let i = 1; i < heights.length; i++) {
++    const middle = (heights[i - 1] + heights[i]) / 2;
++    const rates = openings.map(o => Math.max(0, o.width) * Math.sqrt(Math.max(0, middle - o.bottom)));
++    const total = rates.reduce((sum, rate) => sum + rate, 0);
++    if (total === 0) continue;
++    const volume = (heights[i - 1] - heights[i]) * TANK.width * TANK.depth;
++    rates.forEach((rate, j) => { volumes[j] += volume * rate / total; });
++  }
++  return volumes;
++}
+ 
+ /** Ballistic water: one sprite batch, a parabola ribbon per opening, and a growing puddle. */
+ export function createSpill(scene: Scene, ripple: (point: Vector3, strength: number) => void) {
+@@ -19,8 +35,9 @@
+   puddleMaterial.normalNode = bumpMap(positionWorld.x.mul(9).add(positionWorld.z.mul(7)).sub(simTime.mul(1.8)).sin(), float(0.006));
+   puddleMaterial.envMapIntensity = 1.8;
+   puddleMaterial.opacityNode = smoothstep(0.5, 0.39, uv().sub(0.5).length()).mul(0.32);
+-  type Emitter = { opening: Opening; sheet: Mesh<PlaneGeometry, MeshPhysicalNodeMaterial>; puddle: Mesh; volume: number; carry: number; stopped: number; strength: number; lastHeight: number; wet: boolean; rippleAt: number };
++  type Emitter = { opening: Opening; sheet: Mesh<PlaneGeometry, MeshPhysicalNodeMaterial>; puddle: Mesh; volume: number; carry: number; stopped: number; strength: number; wet: boolean; rippleAt: number };
+   const emitters = new Map<number, Emitter>();
++  let lastHeight = waterHeight.value;
+   const at = new Vector3(), tangent = new Vector3();
+   function add(opening: Opening) {
+     const old = emitters.get(opening.wall);
+@@ -32,19 +49,20 @@
+     puddle.position.x = opening.point.x + opening.normal.x * landingDistance;
+     puddle.position.z = opening.point.z + opening.normal.z * landingDistance;
+     scene.add(puddle);
+-    emitters.set(opening.wall, { opening, sheet, puddle, volume: 0, carry: 0, stopped: -1, strength: 0, lastHeight: waterHeight.value, wet: waterHeight.value > opening.bottom, rippleAt: simTime.value });
++    emitters.set(opening.wall, { opening, sheet, puddle, volume: 0, carry: 0, stopped: -1, strength: 0, wet: waterHeight.value > opening.bottom, rippleAt: simTime.value });
+   }
+   function spawn(p: Vector3, v: Vector3, splash = false) {
+     drops[cursor++ % count] = { p: p.clone(), v: v.clone(), born: simTime.value, life: splash ? 0.22 + rng() * 0.15 : 2.5, size: splash ? 1.5 + rng() * 2 : 2 + rng() * 3, splash };
+   }
+   function update(dt: number) {
++    const active = [...emitters.values()], volumes = distributeSpillVolume(lastHeight, waterHeight.value, active.map(e => e.opening));
++    active.forEach((e, i) => { e.volume += volumes[i]; }); lastHeight = waterHeight.value;
+     for (const e of emitters.values()) {
+       const o = e.opening, head = Math.max(0, waterHeight.value - o.bottom);
+       if (head > 0.001) e.wet = true;
+       if (head < 0.001 && e.stopped < 0) e.stopped = simTime.value;
+       const drips = e.wet && e.stopped >= 0 ? Math.max(0, 1 - (simTime.value - e.stopped) / 2) : 0;
+       e.strength = head > 0.001 ? Math.sqrt(head) : drips * 0.04;
+-      if (e.lastHeight > o.bottom) e.volume += Math.max(0, e.lastHeight - Math.max(o.bottom, waterHeight.value)) * 21 / emitters.size; e.lastHeight = waterHeight.value;
+       if (head > 0.01 && simTime.value > e.rippleAt + 0.8) {
+         ripple(o.point, Math.min(0.2, head * 0.15)); e.rippleAt = simTime.value;
+       }
+@@ -91,6 +109,6 @@
+   }
+   return { add, update, get strength() { return [...emitters.values()].reduce((s, e) => s + e.strength, 0); }, get active() { return [...emitters.values()].some(e => e.strength > 0); }, reset() {
+     for (const e of emitters.values()) { scene.remove(e.sheet, e.puddle); e.sheet.geometry.dispose(); e.sheet.material.dispose(); e.puddle.geometry.dispose(); }
+-    emitters.clear(); drops.fill(undefined); sizes.fill(0); sizeAttribute.needsUpdate = true;
++    emitters.clear(); lastHeight = waterHeight.value; drops.fill(undefined); sizes.fill(0); sizeAttribute.needsUpdate = true;
+   } };
+ }
+--- before/src/scene/tank.ts
++++ src/scene/tank.ts
+@@ -1,8 +1,8 @@
+ import { AdditiveBlending, BoxGeometry, BufferGeometry, Color, DoubleSide, Float32BufferAttribute, LineBasicNodeMaterial, LineSegments, Mesh, MeshPhysicalNodeMaterial, MeshStandardNodeMaterial, Quaternion, Scene, Vector3 } from 'three/webgpu';
+-import { cameraPosition, color, float, normalWorld, positionWorld } from 'three/tsl';
++import { cameraPosition, color, float, normalWorld, output, positionWorld, vec4 } from 'three/tsl';
+ import { underwaterColor } from './lighting';
+ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+-import { buildShardGeometry, generateShatterPattern, type ShatterCell } from '../lib/shatter';
++import { buildShardGeometry, generateShatterPattern, groupAdjacentCells, type ShatterCell } from '../lib/shatter';
+ import { polygonCentroid } from '../lib/triangulate';
+ import { createPhysicsWorld } from '../lib/physics';
+ import { random, TANK } from '../state';
+@@ -44,8 +44,10 @@
+   type Crack = { cells: ShatterCell[]; impact: Vector3; opening: Opening; lines: LineSegments };
+   const cracks = new Map<number, Crack>();
+   const shards: { mesh: Mesh; body: ReturnType<typeof physics.addShard> }[] = [];
+-  // Render all loose glass in one draw. Rapier keeps independent convex hulls.
++  // Render all loose glass in one draw. Each cell keeps its own convex collider.
+   const looseGlass = glass.clone(); looseGlass.opacity = 0.72; looseGlass.opacityNode = null; looseGlass.colorNode = null; looseGlass.depthWrite = true;
++  // Broaden shard glints and bound their HDR output below the bloom threshold.
++  looseGlass.roughness = 0.12; looseGlass.outputNode = vec4(output.rgb.min(1.1), output.a);
+   const loose = new Mesh(new BufferGeometry(), looseGlass); loose.frustumCulled = false; loose.visible = false; scene.add(loose);
+   let offsets: number[] = [];
+   function rebuildBatch() {
+@@ -58,13 +60,13 @@
+   }
+   function clearColliders(wall: number) { for (const body of colliders[wall]) physics.removeBody(body); colliders[wall] = []; }
+   function release(cells: ShatterCell[], wall: number, impact: Vector3, budget: number, full = false) {
+-    const chunk = Math.max(1, Math.ceil(cells.length / Math.max(1, budget)));
+-    for (let i = 0; i < cells.length; i += chunk) {
+-      const group = cells.slice(i, i + chunk), center = polygonCentroid(group[0].polygon);
++    for (const group of groupAdjacentCells(cells, budget)) {
++      const center = polygonCentroid(group[0].polygon);
+       const parts = group.map(cell => { const { geometry, centroid } = buildShardGeometry(cell, 0.05); return geometry.translate(centroid[0] - center[0], centroid[1] - center[1], 0); });
+-      const geometry = mergeGeometries(parts, false)!; parts.forEach(g => g.dispose());
++      const geometry = mergeGeometries(parts, false)!;
+       const mesh = new Mesh(geometry, glass); mesh.position.set(center[0], center[1], 0).applyQuaternion(rotations[wall]).add(origins[wall]); mesh.quaternion.copy(rotations[wall]);
+-      const mass = Math.max(0.008, geometry.getAttribute('position').count * 0.0009), body = physics.addShard(mesh, geometry, mass);
++      const mass = Math.max(0.008, geometry.getAttribute('position').count * 0.0009), body = physics.addShard(mesh, parts, mass);
++      parts.forEach(g => g.dispose());
+       const radial = mesh.position.clone().sub(impact), falloff = Math.exp(-radial.length() * 1.3);
+       const impulse = new Vector3(0, 0, 0.35 + 4.5 * falloff).applyQuaternion(rotations[wall]).addScaledVector(radial.normalize(), 0.6 * falloff);
+       impulse.y += 0.25 + (full ? 6.5 : 1.1) * falloff; impulse.multiplyScalar(mass);
+--- before/README.md
++++ README.md
+@@ -22,17 +22,17 @@
+ 
+ ## Main-page pipeline
+ 
+-`scene/island.ts` builds a seeded, masked Poisson/Delaunay landform with a 4.4 × 2.8 footprint and a summit 0.83 units above the initial waterline. Biome facets, wet shoreline shading, sand, and instanced gravel share depth-aware underwater lighting.
++`scene/island.ts` builds a seeded, masked Poisson/Delaunay landform with a 4.9 × 3.05 footprint and a summit 0.69 units above the initial waterline. Biome facets, wet shoreline shading, sand, and instanced gravel share depth-aware underwater lighting.
+ 
+ `scene/lighting.ts` projects the level-3 RGB Worley field along the animated sun direction. Its light fades in over 0.15 units beneath the shared water plane and attenuates with depth. Water drains below the sand, so caustics disappear after full shatter.
+ 
+ `scene/water.ts` deforms one bounded plane using a damped tilt spring. Physical transmission/IOR, scrolling micro-normal noise, four decaying ripple uniforms, a wall meniscus, and sun specular make the water readable from both sides. Glass and water use alpha compositing alongside transmission: Three's screen-space transmission buffer cannot recursively refract nested transparent objects.
+ 
+-`scene/tank.ts` merges the remaining extruded fracture cells into one pane with a real hole. Remaining cells get fixed convex colliders. Core shards and later full shards use one Rapier world, fixed 1/120-second substeps, CCD, gravity, floor/base/pane collisions, and sleeping. All loose glass is transformed into one render batch. At most 400 dynamic bodies are used; larger multi-wall breaks combine small groups of cells into compound visible fragments with a convex hull collider.
++`scene/tank.ts` merges the remaining extruded fracture cells into one pane with a real hole. Remaining cells get fixed convex colliders. Core shards and later full shards use one Rapier world, fixed 1/120-second substeps, CCD, gravity, floor/base/pane collisions, and sleeping. All loose glass is transformed into one render batch. Released shards use 0.12 roughness and an HDR output cap of 1.1 to keep sun glints below the bloom threshold. At most 400 dynamic bodies are used; larger multi-wall breaks combine edge-adjacent cells into compound fragments with a separate convex collider per cell.
+ 
+ `scene/spill.ts` gives each hole a ballistic particle emitter, a refractive parabola ribbon, and a growing reflective puddle. The level integrates Torricelli's square-root head rate analytically to stop exactly at the lowest hole sill. Dry holes emit nothing; wet holes finish with two seconds of drips. Full break widens the streams and drains quickly. Particles (2,600 slots), physics, camera motion, caustics, ripples, and sunlight all use simulation time.
+ 
+-`post.ts` uses bloom (0.28 strength, 0.85 threshold) and a subtle vignette. No depth of field. Pixel ratio is capped at 1.5. `window.aquarium` exposes read-only mode, cracks, sill heights, spilling, elapsed time, body count, FPS, draw calls, and projected verification targets.
++`post.ts` uses bloom (0.24 strength, 0.4 radius, 1.3 threshold) and a subtle vignette. No depth of field. Pixel ratio is capped at 1.5. `window.aquarium` exposes read-only mode, cracks, sill heights, spilling, elapsed time, body count, FPS, draw calls, and projected verification targets.
+ 
+ ## HDRI attribution
+ 
+--- before/verify/edges.mjs
++++ verify/edges.mjs
+@@ -17,7 +17,11 @@
+   await page.mouse.move(900, 350); await page.mouse.down(); await page.mouse.move(1440, 350, { steps: 30 }); await page.mouse.up(); await page.waitForTimeout(2000);
+   await click((await state()).wallTargets[1]); assert.equal((await state()).cracks, 3);
+   await click((await state()).wallTargets[3]); assert.equal((await state()).cracks, 4);
+-  const multi = await state(); assert.equal(multi.holeBottom, Math.min(...multi.holes.map(h => h.bottom))); results.push('PASS four cracks: independent openings and lowest sill target');
++  const multi = await state(), lowestSill = Math.min(...multi.holes.map(h => h.bottom));
++  assert.ok(multi.height > lowestSill + 0.05, 'Drainage must still be in progress before measuring settlement');
++  await page.waitForFunction(sill => !window.aquarium.spilling && Math.abs(window.aquarium.height - sill) < 0.001, lowestSill, { timeout: 90000 });
++  const settled = await state(); assert.ok(settled.height < multi.height); assert.ok(Math.abs(settled.height - lowestSill) < 0.001); assert.equal(settled.spilling, false);
++  results.push(`PASS four cracks: water drained from ${multi.height} to lowest sill ${settled.height}; spilling stopped`);
+   await page.keyboard.press('Space'); await page.waitForTimeout(1800); const full = await state(); assert.equal(full.mode, 'shattered'); assert.ok(full.brokenCount <= 400); results.push(`PASS four-wall full break: ${full.brokenCount} bodies, ${full.drawCalls} draw calls, ${full.fps} FPS`);
+   await page.keyboard.press('r'); await page.waitForTimeout(200); const reset = await state(); assert.equal(reset.cracks, 0); assert.equal(reset.brokenCount, 0); assert.equal(reset.height, 2.59); assert.equal(reset.spilling, false);
+   assert.deepEqual(errors, []); results.push('PASS reset after four-wall break; zero console errors');
+--- before/verify/lab.mjs
++++ verify/lab.mjs
+@@ -5,14 +5,40 @@
+ const logs = [], errors = [], summary = [];
+ const browser = await chromium.launch({ executablePath: chromium.executablePath(), headless: true, args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
+ const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
++// Track listeners on long-lived targets; a detached canvas count cannot reveal these leaks.
++await page.addInitScript(() => {
++  const add = EventTarget.prototype.addEventListener, remove = EventTarget.prototype.removeEventListener;
++  const listeners = new WeakMap();
++  EventTarget.prototype.addEventListener = function(type, callback, options) {
++    if (callback && !(typeof options === 'object' && options?.once)) {
++      const entries = listeners.get(this) ?? []; listeners.set(this, entries);
++      const capture = typeof options === 'boolean' ? options : !!options?.capture;
++      if (!entries.some(e => e.type === type && e.callback === callback && e.capture === capture)) entries.push({ type, callback, capture });
++    }
++    return add.call(this, type, callback, options);
++  };
++  EventTarget.prototype.removeEventListener = function(type, callback, options) {
++    const entries = listeners.get(this) ?? [], capture = typeof options === 'boolean' ? options : !!options?.capture;
++    const i = entries.findIndex(e => e.type === type && e.callback === callback && e.capture === capture);
++    if (i >= 0) entries.splice(i, 1);
++    return remove.call(this, type, callback, options);
++  };
++  window.labListenerCounts = () => [window, document, document.querySelector('canvas')].map(target => (listeners.get(target) ?? []).length);
++});
+ page.on('console', msg => { logs.push(`[${msg.type()}] ${msg.text()}`); if (msg.type() === 'error') errors.push(msg.text()); });
+ page.on('pageerror', error => { errors.push(error.message); logs.push(`[uncaught] ${error.stack}`); });
+ const base = 'http://localhost:4174/';
+ const capture = async name => { await page.screenshot({ path: `verify/lab/${name}.png` }); };
++const state = () => page.evaluate(() => window.lab.state);
++const resources = async () => {
++  const s = await state();
++  return { physics: s.physics, gpu: Object.fromEntries(['geometries', 'attributes', 'indexAttributes', 'textures', 'renderTargets', 'programs', 'uniformBuffers'].map(key => [key, s.resources[key]])), listeners: await page.evaluate(() => window.labListenerCounts()) };
++};
+ const ready = async (bench, level) => {
+   await page.waitForFunction(({ bench, level }) => window.lab?.ready && window.lab.state.bench === bench && window.lab.state.level === level, { bench, level }, { timeout: 90000 });
+   await page.waitForTimeout(1200);
+   assert.equal(await page.locator('canvas').count(), 1, 'One live renderer canvas');
++  assert.equal(await page.locator('.lab-pane > .tp-rotv').count(), 1, 'One live Tweakpane');
+ };
+ let failed;
+ try {
+@@ -24,9 +50,9 @@
+     await ready(bench, level);
+     assert.equal(await page.locator('.lab-card .level-number').textContent(), `Level ${level} of 3`);
+     await capture(`${bench}-L${level}`);
+-    const state = await page.evaluate(() => window.lab.state);
+-    if (bench === 'terrain' && level === 1) randomSeeds = state.seedCoordinates;
+-    if (bench === 'terrain' && level === 2) assert.deepEqual(state.seedCoordinates, randomSeeds, 'L1/L2 point coordinates match exactly');
++    const benchState = await state();
++    if (bench === 'terrain' && level === 1) randomSeeds = benchState.seedCoordinates;
++    if (bench === 'terrain' && level === 2) assert.deepEqual(benchState.seedCoordinates, randomSeeds, 'L1/L2 point coordinates match exactly');
+     if (bench === 'terrain' && level === 3) {
+       await page.evaluate(() => window.lab.setReveal({ wireframe: true, seeds: true })); await page.waitForTimeout(350); await capture('terrain-L3-reveal');
+       await page.evaluate(() => window.lab.setReveal({ circumcircles: true })); await page.waitForTimeout(200);
+@@ -39,21 +65,58 @@
+     if (bench === 'shatter') {
+       await page.evaluate(() => window.lab.setReveal({ seeds: true, outlines: true })); await page.waitForTimeout(200); await capture(`shatter-L${level}-pattern`);
+       await page.evaluate(() => window.lab.setReveal({ seeds: false, outlines: false }));
+-      const { paneCenter } = await page.evaluate(() => window.lab.state);
+-      const start = await page.evaluate(() => window.lab.state.elapsed);
++      await page.evaluate(() => window.lab.setReveal({ freeze: true }));
++      const { paneCenter } = await state();
+       await page.mouse.click(paneCenter.x, paneCenter.y);
+       await page.waitForFunction(() => window.lab.state.broken);
+-      await page.waitForFunction(start => window.lab.state.elapsed >= start + 1.2, start, { timeout: 60000 });
++      const launched = await state();
++      assert.equal(launched.shardTransforms.length, launched.shardCount);
++      assert.equal(launched.bodyCount, launched.shardCount + 2);
++      assert.equal(launched.colliderCount, launched.shardCount + 2);
++      await page.evaluate(() => window.lab.setReveal({ freeze: false }));
++      await page.waitForFunction(start => window.lab.state.elapsed >= start + 1.2, launched.elapsed, { timeout: 60000 });
+       await page.evaluate(() => window.lab.setReveal({ freeze: true })); await capture(`shatter-L${level}-broken`);
+-      const frozen = await page.evaluate(() => window.lab.state.elapsed); await page.waitForTimeout(200); assert.equal(await page.evaluate(() => window.lab.state.elapsed), frozen);
++      const frozen = await state();
++      const moved = frozen.shardTransforms.filter((pose, i) => Math.hypot(...pose.slice(0, 3).map((v, j) => v - launched.shardTransforms[i][j])) > 0.1).length;
++      assert.ok(moved > launched.shardCount / 2, 'Most shards must physically move, not just advance a clock');
++      await page.waitForTimeout(200); const still = await state();
++      assert.equal(still.elapsed, frozen.elapsed); assert.deepEqual(still.shardTransforms, frozen.shardTransforms, 'Freeze holds mesh transforms');
+       await page.keyboard.press('r'); await page.waitForFunction(() => !window.lab.state.broken);
++      const reset = await state(); assert.equal(reset.bodyCount, 2); assert.equal(reset.colliderCount, 2); assert.deepEqual(reset.shardTransforms, []);
+       await page.evaluate(() => window.lab.setReveal({ freeze: false, slowMotion: true }));
+-      assert.equal(await page.evaluate(() => window.lab.state.slowMotion), true);
++      const rate = await page.evaluate(async () => {
++        const start = performance.now(), elapsed = window.lab.state.elapsed;
++        await new Promise(resolve => setTimeout(resolve, 1500));
++        return (window.lab.state.elapsed - elapsed) / ((performance.now() - start) / 1000);
++      });
++      assert.ok(Math.abs(rate - 0.15) < 0.025, `Measured slow-motion rate ${rate}`);
+     }
+     if (bench === 'shatter') await page.evaluate(() => window.lab.setReveal({ slowMotion: false }));
+     summary.push(`PASS ${bench} L${level}: WebGPU ready, screenshot captured${bench === 'shatter' ? ', click / physics / freeze / reset verified' : ''}`);
+     console.log(summary.at(-1));
+   }
++  // Warm the same shader variants used by the cycles before comparing allocations.
++  await page.evaluate(() => { location.hash = '#/lab/caustics?level=2'; }); await ready('caustics', 2);
++  await page.evaluate(() => { location.hash = '#/lab/terrain?level=1'; }); await ready('terrain', 1);
++  await page.evaluate(() => { location.hash = '#/lab/shatter?level=3'; }); await ready('shatter', 3);
++  // Repeat identical cycles; actual GPU allocations and WASM worlds must return to baseline.
++  const baseline = await resources();
++  for (let cycle = 0; cycle < 3; cycle++) {
++    for (let reset = 0; reset < 2; reset++) {
++      const { paneCenter } = await state(); await page.mouse.click(paneCenter.x, paneCenter.y);
++      await page.waitForFunction(() => window.lab.state.broken && window.lab.state.bodyCount > 2);
++      await page.keyboard.press('r'); await page.waitForFunction(() => !window.lab.state.broken && window.lab.state.bodyCount === 2);
++      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
++      assert.deepEqual(await resources(), baseline, `Reset ${reset + 1} in cycle ${cycle + 1} releases shard allocations`);
++    }
++    await page.evaluate(() => { location.hash = '#/lab/caustics?level=2'; }); await ready('caustics', 2);
++    assert.deepEqual((await state()).physics, { worlds: 0, bodies: 0, colliders: 0 }, 'Leaving shatter frees its world');
++    await page.evaluate(() => { location.hash = '#/lab/terrain?level=1'; }); await ready('terrain', 1);
++    assert.deepEqual((await state()).physics, { worlds: 0, bodies: 0, colliders: 0 });
++    await page.evaluate(() => { location.hash = '#/lab/shatter?level=3'; }); await ready('shatter', 3);
++    assert.deepEqual(await resources(), baseline, `No resource/listener growth after reset and route cycle ${cycle + 1}`);
++  }
++  summary.push(`PASS repeated reset/bench cycles: stable allocations and listeners ${JSON.stringify(baseline)}`);
+   // Bench routing, keyboard level control, and the two page-boundary links.
+   await page.locator('a[data-bench="terrain"]').click(); await ready('terrain', 3);
+   await page.keyboard.press('1'); await ready('terrain', 1);
+--- before/verify/library-entry.ts
++++ verify/library-entry.ts
+@@ -1,10 +1,13 @@
+ import assert from 'node:assert/strict';
+ import { generateTerrain } from '../src/lib/terrain';
+-import { generateShatterPattern, buildShardGeometry } from '../src/lib/shatter';
++import { generateShatterPattern, buildShardGeometry, groupAdjacentCells } from '../src/lib/shatter';
+ import { polygonCentroid, lloydRelax, circumcircles, delaunayFrom } from '../src/lib/triangulate';
+ import { poissonDisk } from '../src/lib/poisson';
+-import { createPhysicsWorld } from '../src/lib/physics';
++import { createPhysicsWorld, physicsDiagnostics } from '../src/lib/physics';
+ import { Mesh, MeshBasicMaterial } from 'three/webgpu';
++import RAPIER from '@dimforge/rapier3d-compat';
++import { distributeSpillVolume } from '../src/scene/spill';
++import { createAudio } from '../src/audio';
+ const options = { size: 14, count: 1500, seed: 42, amplitude: 4.2 };
+ const terrain = [1, 2, 3].map(level => generateTerrain({ ...options, level: level as 1 | 2 | 3 }));
+ assert.deepEqual(terrain[0].seeds, terrain[1].seeds);
+@@ -46,3 +49,67 @@
+ world.dispose(); geometry.dispose(); terrain.forEach(t => t.geometry.dispose()); masked.geometry.dispose();
+ console.log('PASS library: deterministic seeds, shared L1/L2 topology, upward normals, mask, variable-radius spacing, circumcircle, masked Lloyd, fracture coverage/density/rings/centroids, Rapier freeze/slow-motion/settling.');
+ console.log('Terrain samples:', terrain.map(t => t.heights.length).join(' / '));
++
++// Shard-budget grouping must preserve every cell and connectivity, including corner impacts.
++for (const impact of [[0, 0], [2.99, 1.74], [-2.99, -1.74]] as [number, number][]) {
++  const cells = generateShatterPattern({ level: 3, width: 6, height: 3.5, impact, count: 220, seed: 93 }).cells;
++  const groups = groupAdjacentCells(cells, 52);
++  assert.ok(groups.length <= 52); assert.equal(new Set(groups.flat()).size, cells.length);
++  const adjacent = (a: typeof cells[number], b: typeof cells[number]) => a.polygon.filter(p => b.polygon.some(q => Math.hypot(p[0] - q[0], p[1] - q[1]) < 1e-6)).length >= 2;
++  for (const group of groups) {
++    const reached = new Set([group[0]]);
++    for (const cell of reached) for (const next of group) if (adjacent(cell, next)) reached.add(next);
++    assert.equal(reached.size, group.length, 'Each rigid group must be edge-connected');
++  }
++}
++// An L-shaped compound must leave its missing quadrant empty; one outer hull would fill it.
++const compound = await createPhysicsWorld({ x: 0, y: 0, z: 0 });
++const squares = [[[0, 0], [1, 0], [1, 1], [0, 1]], [[1, 0], [2, 0], [2, 1], [1, 1]], [[0, 1], [1, 1], [1, 2], [0, 2]]] as [number, number][][];
++const parts = squares.map(polygon => {
++  const { geometry, centroid } = buildShardGeometry({ polygon, seed: polygon[0], ring: 0, distance: 0 }, 0.05);
++  return geometry.translate(centroid[0], centroid[1], 0);
++});
++const compoundMesh = new Mesh(parts[0], new MeshBasicMaterial()), compoundBody = compound.addShard(compoundMesh, parts, 0.3);
++compound.step(1 / 120);
++assert.equal(compoundBody.numColliders(), 3); assert.ok(Math.abs(compoundBody.mass() - 0.3) < 1e-6);
++assert.equal(compound.world.castRay(new RAPIER.Ray({ x: 1.5, y: 1.5, z: 1 }, { x: 0, y: 0, z: -1 }), 2, true), null, 'No collider bridges the missing quadrant');
++assert.ok(compound.world.castRay(new RAPIER.Ray({ x: 0.5, y: 1.5, z: 1 }, { x: 0, y: 0, z: -1 }), 2, true), 'Visible cell has a collider');
++compound.dispose(); parts.forEach(g => g.dispose()); compoundMesh.material.dispose();
++assert.deepEqual(physicsDiagnostics(), { worlds: 0, bodies: 0, colliders: 0 });
++
++const wet = { bottom: 1, width: 1 }, dry = { bottom: 3, width: 1 };
++const alone = distributeSpillVolume(2.59, 2, [wet])[0];
++assert.deepEqual(distributeSpillVolume(2.59, 2, [wet, dry]), [alone, 0], 'Dry holes cannot steal volume');
++assert.deepEqual(distributeSpillVolume(2.59, 2, [wet, { bottom: 2.59, width: 1 }]), [alone, 0], 'Exhausted holes cannot steal volume');
++const weighted = distributeSpillVolume(2.59, 2, [wet, { ...wet, width: 2 }]);
++assert.ok(Math.abs(weighted[1] / weighted[0] - 2) < 1e-9); assert.ok(Math.abs(weighted[0] + weighted[1] - alone) < 1e-9);
++const crossing = distributeSpillVolume(2, 1, [wet, { bottom: 1.5, width: 1 }]);
++assert.ok(crossing[1] > 0 && crossing[1] < 10.5); assert.ok(Math.abs(crossing[0] + crossing[1] - 21) < 1e-9, 'Conserve volume when a frame crosses a sill');
++assert.deepEqual(distributeSpillVolume(1, 2.59, [wet]), [0], 'Refilling produces no spill');
++
++// Reproduce both pending-resume and pending-decode reset races without depending on real audio hardware.
++const originals = ['AudioContext', 'localStorage', 'fetch'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)] as const);
++try {
++  for (const stage of ['resume', 'decode']) {
++    let release!: () => void, started = 0, contexts = 0;
++    const gate = new Promise<void>(resolve => { release = resolve; });
++    class FakeAudioContext {
++      currentTime = 0; destination = {};
++      constructor() { contexts++; }
++      async resume() { if (stage === 'resume') await gate; }
++      async decodeAudioData() { if (stage === 'decode') await gate; return { duration: 1 }; }
++      createGain() { return { gain: { value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect() {}, disconnect() {} }; }
++      createBufferSource() { return { connect() {}, disconnect() {}, start() { started++; }, stop() {} }; }
++    }
++    Object.defineProperty(globalThis, 'AudioContext', { configurable: true, value: FakeAudioContext });
++    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: { getItem: () => 'on' } });
++    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: async () => ({ arrayBuffer: async () => new ArrayBuffer(0) }) });
++    const audio = createAudio(); assert.equal(contexts, 0, 'No AudioContext before gesture');
++    const pending = audio.play(true); await new Promise(resolve => setTimeout(resolve, 0)); audio.reset(); release(); await pending;
++    assert.equal(started, 0, `Reset cancels pending ${stage}`);
++    await audio.play(true); assert.equal(started, 1, 'New playback still works after reset'); audio.reset();
++  }
++} finally {
++  for (const [key, descriptor] of originals) if (descriptor) Object.defineProperty(globalThis, key, descriptor); else Reflect.deleteProperty(globalThis, key);
++}
++console.log('PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, discharge-weighted volume, dry/exhausted sills, pending audio cancellation.');
+--- before/verify/library.mjs
++++ verify/library.mjs
+@@ -1,4 +1,4 @@
+ import { build } from 'rolldown';
+ import { execFileSync } from 'node:child_process';
+-await build({ input: 'verify/library-entry.ts', external: ['node:assert/strict', 'three/webgpu', '@dimforge/rapier3d-compat'], output: { file: 'verify/lab/library.bundle.mjs', format: 'esm' } });
++await build({ input: 'verify/library-entry.ts', transform: { define: { 'import.meta.env.BASE_URL': '"/"' } }, external: ['node:assert/strict', 'three/webgpu', '@dimforge/rapier3d-compat'], output: { file: 'verify/lab/library.bundle.mjs', format: 'esm' } });
+ console.log(execFileSync(process.execPath, ['verify/lab/library.bundle.mjs'], { encoding: 'utf8' }));

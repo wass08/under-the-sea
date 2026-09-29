@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#082c43;font:14px system-ui;color:#e6f5ff}canvas{display:block}#label{position:absolute;left:22px;top:18px;font-weight:650;letter-spacing:.04em}#caption{position:absolute;bottom:18px;left:22px;color:#a8c9d9;font-size:11px}</style></head><body><div id="label"></div><div id="caption">POISSON / DELAUNAY · FIXED LAMP · SAME CAMERA & MATERIAL</div><script type="module">
+import {WebGPURenderer,Scene,PerspectiveCamera,Mesh,BufferGeometry,Float32BufferAttribute,Color,AgXToneMapping} from 'three/webgpu';
+import {generateIslandTerrain} from '/src/lib/terrain.ts';
+import {createIslandMaterial} from '/src/scene/island.ts';
+import {createLighting} from '/src/scene/lighting.ts';
+import {waterHeight,simTime} from '/src/state.ts';
+const renderer=new WebGPURenderer({antialias:true});renderer.setSize(640,400);renderer.setPixelRatio(1);renderer.toneMapping=AgXToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;await renderer.init();document.body.append(renderer.domElement);
+const scene=new Scene();await createLighting(scene,renderer);for(const c of [...scene.children])if(c.isMesh)scene.remove(c);scene.background=new Color('#082c43');
+const camera=new PerspectiveCamera(36,640/400,.1,100);camera.position.set(5.8,5.0,7.1);camera.lookAt(0,1.1,0);waterHeight.value=-1;simTime.value=0;
+let mesh;const material=createIslandMaterial();
+window.renderIsland=async tile=>{if(mesh){scene.remove(mesh);mesh.geometry.dispose();}let geometry;if(tile.baseline){geometry=new BufferGeometry();const attrs=await(await fetch('/verify/run-o/baseline-42.json')).json();for(const [key,a]of Object.entries(attrs))geometry.setAttribute(key,new Float32BufferAttribute(a.array,a.itemSize));}else geometry=generateIslandTerrain(tile.seed).geometry;mesh=new Mesh(geometry,material);mesh.position.y=.18;mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);document.querySelector('#label').textContent=`${tile.baseline?'RUN N BASELINE · ':''}SEED ${tile.seed}   /   ${tile.score.toFixed(2)}`;await renderer.renderAsync(scene,camera);await renderer.renderAsync(scene,camera);};window.sheetReady=true;
+</script></body></html>

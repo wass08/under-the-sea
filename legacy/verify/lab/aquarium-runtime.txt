@@ -1,0 +1,9 @@
+Idle: {"mode":"idle","timeScale":1,"elapsed":4.665100000023843,"brokenCount":0,"hasImpact":false,"impact":[0.6,2.15,1.75],"wall":0,"height":2.59,"normal":[0,1,0],"renderer":"WebGPU","environment":"Poly Haven · CC0","drawCalls":171}
+Shatter: {"mode":"shattered","timeScale":1,"elapsed":8.826600000023834,"brokenCount":10,"hasImpact":true,"impact":[0.24842576049438492,1.3730215039431994,1.7499999999999982],"wall":0,"height":0.5300696027119349,"normal":[-0.01025703074670903,0.9973335070851173,-0.07225419687161015],"renderer":"WebGPU","environment":"Poly Haven · CC0","drawCalls":168}
+Reset: {"mode":"idle","timeScale":1,"elapsed":13.033260000020286,"brokenCount":0,"hasImpact":false,"impact":[0.6,2.15,1.75],"wall":0,"height":2.589779876994691,"normal":[-0.0000011138205060564777,0.9999999999685987,-0.000007846150422242076],"renderer":"WebGPU","environment":"Poly Haven · CC0","drawCalls":171}
+PASS: console contains no warnings or errors.
+PASS: neutral Aquarium title and trimmed branding.
+PASS: WebGPU rendered; slosh, shatter, drain/refill, slow motion, reset, drag and buttons verified.
+Screenshots: verify/idle.png, verify/slosh.png, verify/shatter.png, verify/reset.png
+PASS: missing-WebGPU guard displays a clear message without uncaught exceptions.
+Console: verify/console.txt

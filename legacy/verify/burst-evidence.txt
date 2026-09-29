@@ -1,0 +1,48 @@
+ROOT CAUSE: Dense Lab launch fidelity was gated by aquarium collision grace: 48/12 became 4/1 immediately. Default 220-cell Lab trajectories already matched the reference.
+R=pre-perf reference; B=before fix; A=after fix. Equality labels mean exact measured equality.
+Time is solver seconds; velocity scene units/s; angular velocity rad/s; outward is a fraction.
+stage case t radialMean radialP90 outward speedP50 speedP90 angularP50 angularP90
+R=B=A L2 0.10 0.860 1.728 1.000 2.267 2.418 4.400 9.818
+R=B=A L2 0.25 1.375 2.579 0.878 2.922 3.132 3.595 7.388
+R=B=A L2 0.50 1.226 3.233 0.658 1.090 4.598 2.380 5.470
+R=B=A L3 0.10 1.360 2.090 0.987 1.953 2.669 3.758 6.279
+R=B=A L3 0.25 1.509 2.570 0.987 2.181 3.025 3.602 5.811
+R=B=A L3 0.50 1.525 3.473 0.840 3.034 4.336 2.823 9.898
+R main 0.10 1.151 2.899 0.897 1.880 3.598 2.263 7.917
+R main 0.25 1.322 3.228 0.923 1.925 3.463 2.208 7.790
+R main 0.50 2.013 4.068 0.897 3.373 4.537 1.868 5.784
+B=A main 0.10 4.566 7.801 0.986 4.674 7.821 4.403 6.763
+B=A main 0.25 4.432 7.473 0.991 4.732 7.513 3.923 6.185
+B=A main 0.50 2.231 5.816 0.904 3.134 6.274 3.536 17.059
+Speed retention at 0.25/0.10s: p50 ratio / mean-speed ratio (R, B, A)
+L2: 1.289/1.198 | 1.289/1.198 | 1.289/1.198
+L3: 1.117/1.131 | 1.117/1.131 | 1.117/1.131
+main: 1.024/1.020 | 1.012/0.997 | 1.012/0.997
+First 0.5 solver seconds: 30 steps in every case; solver 12/4; no sleeping or pose-cached bodies.
+Steps completed in first 0.5 wall seconds L2 R/B/A: 27/28/28
+Steps completed in first 0.5 wall seconds L3 R/B/A: 28/29/28
+Steps completed in first 0.5 wall seconds main R/B/A: 30/30/29
+Damping body-steps airborne/supported/quiet: L2 R=B=A 972/258/0; L3 R=B=A 1905/338/7; main R 2098/242/0, B=A 5805/775/20.
+Damping linear/angular: airborne 0.45/1.2; supported Lab 3/1, individual main 6/5; quiet 8/20. First-step support count: zero.
+Dense Lab 600-cell check: radial mean at 0.10/0.25/0.50s; effective solver/PGS
+L2/600 R=A: 0.846/1.342/1.305 solver 48/12
+L2/600 B: 0.846/1.331/1.312 solver 4/1
+L3/600 R=A: 1.183/1.376/1.304 solver 48/12
+L3/600 B: 1.178/1.329/1.401 solver 4/1
+FPS single: airborne median 60.24, settled median 59.88
+FPS four: airborne median 53.48, settled median 59.88
+PASS reference reconstruction: Lab L2/L3 first 30 steps are bit-identical to saved pre-performance physics.ts.
+PASS dense Lab launch: L2/L3 at 600 cells match saved 48/12 solver trajectories for all first 30 steps.
+PASS four-wall full break: 880 bodies, 49 draw calls, 60 FPS
+PASS expanded launch budget: 880 single-cell bodies, zero awake by 5 s
+PASS shatter L1: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L2: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS Run K: shared release, 10× density invariance for linear/angular launch, bounded spin, rotated pane normals, level-dependent falloff, disposal.
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, pending audio cancellation.
+PASS Lab launch fidelity: deterministic 48/12 release window and three-step catch-up without collision grace.
+PASS: "eight camera presets, Run L Gerstner waves/planar reflection/shore foam and depth-aware pour, stable puddle frames, unified floor light, saturation gain, underwater contrast >=1.8, bubbles/pop/reset, submerged motes, draining floor caustics, logo breakpoints, accessible hover/focus/touch spoiler, trimmed same-frame audio, crack/spill/sill, physics cap, 3–4s/8–10s rest and native sleep by 5s, 0.15× clock, 3.2s rewind with three distinct stages and skip, drag, branding, responsive layout, WebGPU guard"
+FRAME L3 0.15s: perf-before/lab-L3-burst-015.png and perf-after/lab-L3-burst-015.png; exact displayed transforms match.
+FRAME L3 0.40s: perf-before/lab-L3-burst-040.png and perf-after/lab-L3-burst-040.png; exact displayed transforms match.
+UNMET: main-page +/-10% radial target; reference has 78 compounds, current has 220 independent cells and much higher outward speeds. Main speed/contact trials were reverted.

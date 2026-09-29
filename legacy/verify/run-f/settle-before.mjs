@@ -1,0 +1,13 @@
+import { registerHooks } from 'node:module';
+import { writeFile } from 'node:fs/promises';
+registerHooks({resolve(s,c,next){if(s.startsWith('.')&&!/\.[a-z]+$/.test(s)){try{return next(s+'.ts',c);}catch{}}return next(s,c);}});
+const {createTank}=await import(process.argv.includes('--before') ? './before/src/scene/tank.ts' : '../../src/scene/tank.ts');
+const {Scene,Vector3}=await import('three/webgpu');
+const scene=new Scene(), tank=await createTank(scene);scene.updateMatrixWorld(true);
+for(const [wall,p] of [[0,[0,1.5,1.775]],[1,[0,1.5,-1.775]],[2,[3.025,1.5,0]],[3,[-3.025,1.5,0]]])tank.crack(new Vector3(...p),wall);
+tank.shatter(new Vector3(0,1.5,1.775),0);
+const poses=()=>tank.shards.map(s=>[...s.mesh.position.toArray(),...s.mesh.quaternion.toArray()]);
+for(let i=0;i<960;i++)tank.update(1/120);const a=poses(),awake8=tank.shards.filter(s=>s.body.isDynamic()&&!s.body.isSleeping()).length;
+for(let i=0;i<240;i++)tank.update(1/120);const b=poses();
+const result={shards:a.length,awake8,awake10:tank.shards.filter(s=>s.body.isDynamic()&&!s.body.isSleeping()).length,maxDisplacement:Math.max(...a.map((p,i)=>Math.hypot(...p.slice(0,3).map((v,j)=>v-b[i][j])))),maxRotation:Math.max(...a.map((p,i)=>2*Math.acos(Math.min(1,Math.abs(p.slice(3).reduce((s,v,j)=>s+v*b[i][j+3],0)/(Math.hypot(...p.slice(3))*Math.hypot(...b[i].slice(3))))))))};
+await writeFile(process.argv.includes('--before') ? 'verify/run-f/settle-before.json' : 'verify/run-f/settle-after.json',JSON.stringify(result,null,2));console.log(result);tank.reset();

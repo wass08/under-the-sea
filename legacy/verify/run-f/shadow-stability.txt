@@ -1,0 +1,7 @@
+{
+  floorCount: 1,
+  contactPlanes: 0,
+  receiveShadow: false,
+  material: 'MeshBasicNodeMaterial',
+  regionCenter: [ 2097.9404453298457, 877.438294708873 ]
+}

@@ -1,0 +1,2 @@
+previous floor captured 2.0005 s: 132 bodies, histogram 118,5,3,6
+individual floor captured 2.0167 s: 220 bodies, histogram 220,0,0,0

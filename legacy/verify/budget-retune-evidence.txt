@@ -1,0 +1,42 @@
+Exact aquarium-only 100/80/65/50% fracture-order budgets; 649 replaces the dropped 560-body target.
+Every original protected strike seed survives; outer ring anchors share the exact budget; Lab untouched.
+PASS main-page single-wall trajectories: all 300 physics steps bit-identical with full and adaptive budgets.
+walls wall cells fraction core live-after-crack total-after-Space
+1 0 220 1.0000 72 72 220
+2 2 176 0.8000 76 148 396
+3 1 143 0.6500 84 232 539
+4 3 110 0.5000 99 331 649
+PASS four-wall budgets: 649 bodies after Space; existing flying fragments untouched; all four core bursts captured at 0.3 s.
+Four-wall airborne: median 59.88 FPS; physics 8.141 ms/frame; steps mean/max 1.14/3.
+Four-wall settled: median 59.524 FPS; physics 0.217 ms/frame; steps mean/max 1/1.
+edges.mjs:
+PASS above-water crack: no jet/drips, no drainage
+PASS one crack per wall
+PASS four cracks: water drained from 1.5521131639603145 to lowest sill 0.16000000000000014; spilling stopped
+PASS four-wall full break: 649 bodies, 48 draw calls, 60 FPS
+PASS adaptive launch budget: 649 single-cell bodies, zero awake by 5 s
+PASS reset mid-spill: reverse audio, water rises, frozen physics, 0.15× rewind, second Reset skips to pristine
+PASS pond under shards: pixel 1134,572 RGB 129,141,146; glass-last 129,141,146, pond-last 40,52,64; floor depth-testing retained
+PASS reset after four-wall break; zero console errors
+library.mjs:
+PASS aquarium profile: all 300 steps of positions, rotations and linear/angular velocities are bit-identical to pre-tuning sources.
+PASS Lab profile: deterministic render chunking, density-invariant impulses, bounded tumble, 3-4s rest and native sleep by 5s for L1-L3.
+PASS Lab burst settings: old defaults migrate once; subsequent custom values persist.
+PASS aquarium wall budgets: 220/176/143/110 = 649 independent cells; protected strike seeds, ring anchors, full coverage and deterministic patterns.
+PASS aquarium first-wall pattern: all seeds, polygons and vertex order bit-identical at 100%.
+PASS library: deterministic grid/random/Poisson sampling, shared analytic heights, Lab erosion/carving off, grid circumcircles/neighbours/resolution, upward normals, mask, variable-radius spacing, circumcircle, masked Lloyd, fracture coverage/density/rings/centroids, Rapier freeze/slow-motion/settling.
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, pending audio cancellation.
+PASS Run I regression: inset removes short edges without collider spikes.
+PASS Run I base contact: float rounding cannot bypass grounded damping; native sleep.
+PASS Run J: coherent biome graph, normalized blend weights, deterministic erosion topology and conservation.
+PASS Run K: shared release, 10× density invariance for linear/angular launch, bounded spin, rotated pane normals, level-dependent falloff, disposal.
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS Run O: active warp/thermal/carve, deterministic channel networks, cliff override, upper snow, coherent biomes, wall clearance; Lab technique unchanged.
+PASS physics cap: glass launch three ticks, generic two, crowded tail one; drop backlog and resume fixed stepping.
+PASS sleeping shard sync: wake-up retains the final cached pose.
+PASS launch phase: bit-identical crowded trajectories, 48-to-4 solver ramp, restored contacts, three-step cap and dropped backlog.
+PASS individual aquarium cells: 220 cells remain 220 independent bodies; connected-compound Run D behavior retained.
+PASS Lab launch fidelity: deterministic 48/12 release window and three-step catch-up without collision grace.
+runtime.mjs:
+PASS: "eight camera presets, Run L Gerstner waves/planar reflection/shore foam and depth-aware pour, stable puddle frames, unified floor light, saturation gain, underwater contrast >=1.8, bubbles/pop/reset, submerged motes, draining floor caustics, logo breakpoints, accessible hover/focus/touch spoiler, trimmed same-frame audio, crack/spill/sill, physics cap, 3–4s/8–10s rest and native sleep by 5s, 0.15× clock, 3.2s rewind with three distinct stages and skip, drag, branding, responsive layout, WebGPU guard"
+Build: npx tsc --noEmit && npx vite build --outDir dist-perf passed. Preview 4175 stopped; dist-perf removed.

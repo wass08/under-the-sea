@@ -1,0 +1,26 @@
+{
+  "shatter-settled": {
+    "before": {
+      "maxChannel": 117,
+      "p99": 108,
+      "whitePixels": 0
+    },
+    "after": {
+      "maxChannel": 152,
+      "p99": 118,
+      "whitePixels": 0
+    }
+  },
+  "rewind-mid": {
+    "before": {
+      "maxChannel": 199,
+      "p99": 167,
+      "whitePixels": 0
+    },
+    "after": {
+      "maxChannel": 167,
+      "p99": 150,
+      "whitePixels": 0
+    }
+  }
+}

@@ -1,0 +1,6 @@
+PASS aquarium profile: all 300 steps of positions, rotations and linear/angular velocities are bit-identical to pre-tuning sources.
+Lab L1 rest: {"maxDisplacement":0.000052320359979642605,"maxRotation":0.002174862284287196,"awake5":0}
+Lab L2 rest: {"maxDisplacement":0,"maxRotation":0.0006363701866467635,"awake5":0}
+Lab L3 rest: {"maxDisplacement":1.228781230931777e-7,"maxRotation":0.0011000752859150998,"awake5":0}
+PASS Lab profile: deterministic render chunking, density-invariant impulses, bounded tumble, 3-4s rest and native sleep by 5s for L1-L3.
+

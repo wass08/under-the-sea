@@ -1,0 +1,118 @@
+{
+  "rows": [
+    {
+      "walls": 1,
+      "wall": 0,
+      "cells": 220,
+      "fraction": 1,
+      "core": 72,
+      "crackBodies": 72,
+      "spaceBodies": 220
+    },
+    {
+      "walls": 2,
+      "wall": 2,
+      "cells": 176,
+      "fraction": 0.8,
+      "core": 76,
+      "crackBodies": 148,
+      "spaceBodies": 396
+    },
+    {
+      "walls": 3,
+      "wall": 1,
+      "cells": 143,
+      "fraction": 0.65,
+      "core": 84,
+      "crackBodies": 232,
+      "spaceBodies": 539
+    },
+    {
+      "walls": 4,
+      "wall": 3,
+      "cells": 110,
+      "fraction": 0.5,
+      "core": 99,
+      "crackBodies": 331,
+      "spaceBodies": 649
+    }
+  ],
+  "age": 0.30710000002384286,
+  "physics": {
+    "profile": "launch",
+    "shardBodyLimit": 880,
+    "targetBodyBudget": 649,
+    "wallBudgets": [
+      {
+        "wall": 0,
+        "ordinal": 1,
+        "cells": 220,
+        "fraction": 1,
+        "requestedFraction": 1,
+        "coreCells": 72,
+        "released": 220,
+        "awake": 220
+      },
+      {
+        "wall": 2,
+        "ordinal": 2,
+        "cells": 176,
+        "fraction": 0.8,
+        "requestedFraction": 0.8,
+        "coreCells": 76,
+        "released": 176,
+        "awake": 176
+      },
+      {
+        "wall": 1,
+        "ordinal": 3,
+        "cells": 143,
+        "fraction": 0.65,
+        "requestedFraction": 0.65,
+        "coreCells": 84,
+        "released": 143,
+        "awake": 143
+      },
+      {
+        "wall": 3,
+        "ordinal": 4,
+        "cells": 110,
+        "fraction": 0.5,
+        "requestedFraction": 0.5,
+        "coreCells": 99,
+        "released": 110,
+        "awake": 110
+      }
+    ],
+    "releasePhysicsAge": 0.3,
+    "lastReleaseTime": 2.1652000000476828,
+    "maxCellsPerBody": 1,
+    "individualCells": true,
+    "launch": {
+      "radialFraction": 0.8391619665289617,
+      "count": 649,
+      "min": 1.0617112584667656,
+      "median": 3.1835308749802875,
+      "max": 5.800667081321152,
+      "maxAngular": 7.389936348912945
+    },
+    "fixedHz": 60,
+    "solverIterations": 4,
+    "internalPgs": 12,
+    "lengthUnit": 6,
+    "quietDamping": [
+      32,
+      120
+    ],
+    "allowedError": 0.00029999999242136255,
+    "prediction": 0.006000000284984708,
+    "erp": 0,
+    "contactSkinMax": 0.003,
+    "inertiaRatioLimit": 4,
+    "massRange": [
+      5,
+      242.40744018554688
+    ],
+    "fixedFallbacks": 0
+  }
+}

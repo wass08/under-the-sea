@@ -1,0 +1,17 @@
+PASS terrain L1: WebGPU ready, screenshot captured
+PASS terrain L2: WebGPU ready, screenshot captured
+PASS terrain L3: WebGPU ready, screenshot captured
+PASS caustics L1: WebGPU ready, screenshot captured
+PASS caustics L2: WebGPU ready, screenshot captured
+PASS caustics L3: WebGPU ready, screenshot captured
+L1 launch: {"count":228,"min":2.200000047683716,"median":2.200000047683716,"max":2.200000047683716,"maxAngular":0}
+L1 settling: {"samples":61,"maxDisplacement":0,"maxRotation":5.960464477539063e-8}; awake at 5 s: 0
+PASS shatter L1: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+L2 launch: {"count":41,"min":2.1999998092651367,"median":2.200000047683716,"max":2.200000047683716,"maxAngular":6.961948871612549}
+L2 settling: {"samples":61,"maxDisplacement":0,"maxRotation":4.2146848510894035e-8}; awake at 5 s: 0
+PASS shatter L2: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+L3 launch: {"count":74,"min":2.701355347081084,"median":4.15493417587651,"max":5.490356935504595,"maxAngular":6.514302904879684}
+L3 settling: {"samples":61,"maxDisplacement":0,"maxRotation":5.960464477539063e-8}; awake at 5 s: 0
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS aquarium renders; both page links, Lab navigation and keyboard levels work.
+Console: 0 errors; 0 warnings.

@@ -1,0 +1,77 @@
+✓ Aquarium · Wawa Sensei
+  http://127.0.0.1:4176/
+true
+✓ Screenshot saved to verify/terrain/main-idle.png
+✓ Aquarium · Wawa Sensei
+  http://127.0.0.1:4176/?camera=top
+true
+✓ Screenshot saved to verify/terrain/main-top.png
+✓ Aquarium · Wawa Sensei
+  http://127.0.0.1:4176/?camera=front
+true
+✓ Screenshot saved to verify/terrain/main-front-low.png
+✓ Aquarium · Wawa Sensei
+  http://127.0.0.1:4176/#/lab/terrain?level=1
+true
+✓ Screenshot saved to verify/terrain/lab-terrain-L1.png
+✓ The Lab · Wawa Sensei
+  http://127.0.0.1:4176/#/lab/terrain?level=3
+true
+✓ Screenshot saved to verify/terrain/lab-terrain-L3.png
+[
+  {
+    name: 'main-idle',
+    url: 'http://127.0.0.1:4176',
+    diagnostics: {
+      drawCalls: 128,
+      elapsed: 3.9608999999761583,
+      medianFPS: 60,
+      renderer: 'WebGPU'
+    },
+    errors: ''
+  },
+  {
+    name: 'main-top',
+    url: 'http://127.0.0.1:4176/?camera=top',
+    diagnostics: {
+      drawCalls: 128,
+      elapsed: 4.081,
+      medianFPS: 60,
+      renderer: 'WebGPU'
+    },
+    errors: ''
+  },
+  {
+    name: 'main-front-low',
+    url: 'http://127.0.0.1:4176/?camera=front',
+    diagnostics: {
+      drawCalls: 128,
+      elapsed: 3.989899999976158,
+      medianFPS: 60,
+      renderer: 'WebGPU'
+    },
+    errors: ''
+  },
+  {
+    name: 'lab-terrain-L1',
+    url: 'http://127.0.0.1:4176/#/lab/terrain?level=1',
+    diagnostics: {
+      level: 1,
+      renderer: 'WebGPU',
+      seedCount: 1656,
+      triangleCount: 3154
+    },
+    errors: ''
+  },
+  {
+    name: 'lab-terrain-L3',
+    url: 'http://127.0.0.1:4176/#/lab/terrain?level=3',
+    diagnostics: {
+      level: 3,
+      renderer: 'WebGPU',
+      seedCount: 1777,
+      triangleCount: 3396
+    },
+    errors: ''
+  }
+]

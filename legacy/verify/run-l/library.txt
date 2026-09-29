@@ -1,0 +1,9 @@
+PASS library: deterministic seeds, shared L1/L2 topology, upward normals, mask, variable-radius spacing, circumcircle, masked Lloyd, fracture coverage/density/rings/centroids, Rapier freeze/slow-motion/settling.
+Terrain samples: 1656 / 1656 / 1777
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, discharge-weighted volume, dry/exhausted sills, pending audio cancellation.
+PASS Run I regression: inset removes short edges without collider spikes.
+PASS Run I base contact: float rounding cannot bypass grounded damping; native sleep.
+PASS Run J: coherent biome graph, normalized blend weights, deterministic erosion topology and conservation.
+PASS Run K: shared release, 10× density invariance for linear/angular launch, bounded spin, rotated pane normals, level-dependent falloff, disposal.
+Gerstner spectrum: compression bound 0.9503283267189822 minimum Jacobian eigenvalue 0.04967167328101785
+

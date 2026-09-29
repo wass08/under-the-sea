@@ -1,0 +1,53 @@
+{
+  "facetResults": [
+    {
+      "state": "wet",
+      "peak": "main",
+      "lit": 0.109675136450803,
+      "far": 0.05149342613630785,
+      "ratio": 2.1298861753825196,
+      "litCount": 12,
+      "farCount": 131
+    },
+    {
+      "state": "wet",
+      "peak": "secondary",
+      "lit": 0.10571485894212168,
+      "far": 0.04889469595575042,
+      "ratio": 2.162092572122616,
+      "litCount": 17,
+      "farCount": 179
+    },
+    {
+      "state": "drained",
+      "peak": "main",
+      "lit": 0.16802268397660158,
+      "far": 0.07293639019441715,
+      "ratio": 2.3036879605465135,
+      "litCount": 9,
+      "farCount": 132
+    },
+    {
+      "state": "drained",
+      "peak": "secondary",
+      "lit": 0.16725141335493934,
+      "far": 0.0755143077572902,
+      "ratio": 2.214830782697505,
+      "litCount": 18,
+      "farCount": 188
+    }
+  ],
+  "stripes": {
+    "lines": 1037,
+    "facets": 501,
+    "shadowLines": 994,
+    "litLines": 43,
+    "striped": 0
+  },
+  "sand": {
+    "shadow": 0.13284596774734178,
+    "lit": 0.24831398226873275,
+    "ratio": 0.5349918942686519
+  },
+  "runtime": "PASS; thresholds unchanged; all 9 performance samples 60 FPS"
+}

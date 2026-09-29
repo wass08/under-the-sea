@@ -1,0 +1,10 @@
+FRAME before L3 0.10s verify/impulse-before/lab-L3-impulse-010.png
+FRAME before L3 0.25s verify/impulse-before/lab-L3-impulse-025.png
+FRAME before L3 0.50s verify/impulse-before/lab-L3-impulse-050.png
+FRAME before L3 1.00s verify/impulse-before/lab-L3-impulse-100.png
+FRAME before L3 2.00s verify/impulse-before/lab-L3-impulse-200.png
+FRAME after L3 0.10s verify/perf-after/lab-L3-impulse-010.png
+FRAME after L3 0.25s verify/perf-after/lab-L3-impulse-025.png
+FRAME after L3 0.50s verify/perf-after/lab-L3-impulse-050.png
+FRAME after L3 1.00s verify/perf-after/lab-L3-impulse-100.png
+FRAME after L3 2.00s verify/perf-after/lab-L3-impulse-200.png

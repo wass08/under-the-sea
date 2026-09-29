@@ -1,0 +1,32 @@
+diff --git a/src/lib/worley.ts b/src/lib/worley.ts
+index bbb105a..e2234a1 100644
+--- a/src/lib/worley.ts
++++ b/src/lib/worley.ts
+@@ -32,11 +32,9 @@ export type CausticsParams = ReturnType<typeof createCausticsUniforms> & { level
+ export function causticsField(uv: Node<'vec2'>, time: Node<'float'>, p: CausticsParams) {
+   if (p.level === 1) {
+     const t = time.mul(p.speed);
+-    // Fixed skewed axes only translate: tuning frequency/speed cannot break the plaid.
+-    const a = sin(dot(uv, vec2(1, 0.28)).mul(p.scaleA).add(t));
+-    const b = sin(dot(uv, vec2(-0.22, 1)).mul(p.scaleB).add(t));
+-    const raw = a.add(b).mul(0.25).add(0.5);
+-    return vec3(mix(raw.pow(3), raw, p.rawField));
++    const w = worley(uv.mul(p.scaleA).add(vec2(t.mul(0.33), t.mul(0.12))), t);
++    const field = mix(w.f1.clamp().pow(3).mul(p.intensity), w.f1, p.rawField);
++    return mix(vec3(field), vec3(1, 0.3, 0.08), w.seedMask.mul(p.showSeeds));
+   }
+   const sample = (at: Node<'vec2'>) => {
+     const t = time.mul(p.speed);
+@@ -50,8 +48,10 @@ export function causticsField(uv: Node<'vec2'>, time: Node<'float'>, p: Caustics
+     return { field, raw: p.layer.greaterThan(1.5).select(b.f1, a.f1), seeds: p.layer.greaterThan(1.5).select(b.seedMask, p.layer.greaterThan(0.5).select(a.seedMask, max(a.seedMask, b.seedMask))) };
+   };
+   if (p.level === 2) {
+-    const w = worley(uv.mul(p.scaleA));
+-    const field = mix(w.f1.mul(0.14).min(0.15), w.f1, p.rawField);
++    const t = time.mul(p.speed);
++    const w = worley(uv.mul(p.scaleA).add(vec2(t.mul(0.33), t.mul(0.12))), t);
++    const raw = w.f2.sub(w.f1);
++    const field = mix(float(1).sub(raw.clamp()).pow(p.sharpness).mul(p.intensity), raw, p.rawField);
+     return mix(vec3(field), vec3(1, 0.3, 0.08), w.seedMask.mul(p.showSeeds));
+   }
+   const g = sample(uv), r = sample(uv.add(vec2(p.rgbOffset, 0))), b = sample(uv.sub(vec2(p.rgbOffset, 0)));

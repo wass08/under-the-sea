@@ -1,0 +1,90 @@
+THREE.WARNING: Multiple instances of Three.js being imported.
+wasm://wasm/007b5d42:1
+
+
+RuntimeError: unreachable
+    at wasm://wasm/007b5d42:wasm-function[1122]:0x1b1bd2
+    at wasm://wasm/007b5d42:wasm-function[1856]:0x1d6f88
+    at wasm://wasm/007b5d42:wasm-function[1477]:0x1c8b88
+    at wasm://wasm/007b5d42:wasm-function[35]:0x25356
+    at wasm://wasm/007b5d42:wasm-function[227]:0x10d29c
+    at s.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:45332)
+    at Rg.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:125066)
+    at pg.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:135959)
+    at Object.step (file:///private/var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs:15673:11)
+    at Object.update (file:///private/var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs:16214:12)
+
+Node.js v26.8.2
+node:internal/errors:999
+  const err = new Error(message);
+              ^
+
+Error: Command failed: /opt/homebrew/Cellar/node/26.8.2/bin/node --import /var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/setup.mjs /var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs
+THREE.WARNING: Multiple instances of Three.js being imported.
+wasm://wasm/007b5d42:1
+
+
+RuntimeError: unreachable
+    at wasm://wasm/007b5d42:wasm-function[1122]:0x1b1bd2
+    at wasm://wasm/007b5d42:wasm-function[1856]:0x1d6f88
+    at wasm://wasm/007b5d42:wasm-function[1477]:0x1c8b88
+    at wasm://wasm/007b5d42:wasm-function[35]:0x25356
+    at wasm://wasm/007b5d42:wasm-function[227]:0x10d29c
+    at s.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:45332)
+    at Rg.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:125066)
+    at pg.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:135959)
+    at Object.step (file:///private/var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs:15673:11)
+    at Object.update (file:///private/var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs:16214:12)
+
+Node.js v26.8.2
+
+    at genericNodeError (node:internal/errors:999:15)
+    at wrappedFn (node:internal/errors:544:14)
+    at checkExecSyncError (node:child_process:942:11)
+    at execFileSync (node:child_process:978:15)
+    at file:///Users/wawa/Documents/Projects/wawasensei/aquarium/verify/burst-tune.mjs:3:422 {
+  status: 1,
+  signal: null,
+  output: [
+    null,
+    '',
+    'THREE.WARNING: Multiple instances of Three.js being imported.\n' +
+      'wasm://wasm/007b5d42:1\n' +
+      '\n' +
+      '\n' +
+      'RuntimeError: unreachable\n' +
+      '    at wasm://wasm/007b5d42:wasm-function[1122]:0x1b1bd2\n' +
+      '    at wasm://wasm/007b5d42:wasm-function[1856]:0x1d6f88\n' +
+      '    at wasm://wasm/007b5d42:wasm-function[1477]:0x1c8b88\n' +
+      '    at wasm://wasm/007b5d42:wasm-function[35]:0x25356\n' +
+      '    at wasm://wasm/007b5d42:wasm-function[227]:0x10d29c\n' +
+      '    at s.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:45332)\n' +
+      '    at Rg.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:125066)\n' +
+      '    at pg.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:135959)\n' +
+      '    at Object.step (file:///private/var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs:15673:11)\n' +
+      '    at Object.update (file:///private/var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs:16214:12)\n' +
+      '\n' +
+      'Node.js v26.8.2\n'
+  ],
+  pid: 72156,
+  stdout: '',
+  stderr: 'THREE.WARNING: Multiple instances of Three.js being imported.\n' +
+    'wasm://wasm/007b5d42:1\n' +
+    '\n' +
+    '\n' +
+    'RuntimeError: unreachable\n' +
+    '    at wasm://wasm/007b5d42:wasm-function[1122]:0x1b1bd2\n' +
+    '    at wasm://wasm/007b5d42:wasm-function[1856]:0x1d6f88\n' +
+    '    at wasm://wasm/007b5d42:wasm-function[1477]:0x1c8b88\n' +
+    '    at wasm://wasm/007b5d42:wasm-function[35]:0x25356\n' +
+    '    at wasm://wasm/007b5d42:wasm-function[227]:0x10d29c\n' +
+    '    at s.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:45332)\n' +
+    '    at Rg.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:125066)\n' +
+    '    at pg.step (file:///Users/wawa/Documents/Projects/wawasensei/aquarium/node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs:1:135959)\n' +
+    '    at Object.step (file:///private/var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs:15673:11)\n' +
+    '    at Object.update (file:///private/var/folders/hx/ppmbvw4d3rv6h5_kj9wbnr680000gn/T/aquarium-burst-tune-HWT1zK/tune.mjs:16214:12)\n' +
+    '\n' +
+    'Node.js v26.8.2\n'
+}
+
+Node.js v26.8.2

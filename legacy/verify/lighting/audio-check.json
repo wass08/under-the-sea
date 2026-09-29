@@ -1,0 +1,131 @@
+{
+  "startup": {
+    "audio": {
+      "contextState": "suspended",
+      "lampPlays": 0,
+      "lastLamp": null,
+      "lastPlay": null,
+      "muted": false,
+      "offsets": {
+        "bubbles": 0.38079166666666664,
+        "glass": 0.4039583333333333
+      },
+      "ready": true
+    },
+    "cracks": 0,
+    "done": true,
+    "on": 1,
+    "time": 3.4671000000238417
+  },
+  "click": {
+    "audio": {
+      "contextState": "running",
+      "lampPlays": 1,
+      "lastLamp": {
+        "at": 5428.100000023842,
+        "frame": 16,
+        "on": false
+      },
+      "lastPlay": null,
+      "muted": false,
+      "offsets": {
+        "bubbles": 0.38079166666666664,
+        "glass": 0.4039583333333333
+      },
+      "ready": true
+    },
+    "cracks": 0,
+    "done": true,
+    "on": 0,
+    "time": 4.133700000047683
+  },
+  "key": {
+    "audio": {
+      "contextState": "running",
+      "lampPlays": 2,
+      "lastLamp": {
+        "at": 5962.299999952316,
+        "frame": 48,
+        "on": true
+      },
+      "lastPlay": null,
+      "muted": false,
+      "offsets": {
+        "bubbles": 0.38079166666666664,
+        "glass": 0.4039583333333333
+      },
+      "ready": true
+    },
+    "cracks": 0,
+    "done": true,
+    "on": 1,
+    "time": 4.599899999976157
+  },
+  "muted": {
+    "audio": {
+      "contextState": "running",
+      "lampPlays": 2,
+      "lastLamp": {
+        "at": 5962.299999952316,
+        "frame": 48,
+        "on": true
+      },
+      "lastPlay": null,
+      "muted": true,
+      "offsets": {
+        "bubbles": 0.38079166666666664,
+        "glass": 0.4039583333333333
+      },
+      "ready": true
+    },
+    "cracks": 0,
+    "done": true,
+    "on": 0,
+    "time": 5.2836000000238394
+  },
+  "reset": {
+    "audio": {
+      "contextState": "running",
+      "lampPlays": 2,
+      "lastLamp": {
+        "at": 5962.299999952316,
+        "frame": 48,
+        "on": true
+      },
+      "lastPlay": null,
+      "muted": true,
+      "offsets": {
+        "bubbles": 0.38079166666666664,
+        "glass": 0.4039583333333333
+      },
+      "ready": true
+    },
+    "cracks": 0,
+    "done": true,
+    "on": 0,
+    "time": 9.95039999997615
+  },
+  "unmuted": {
+    "audio": {
+      "contextState": "running",
+      "lampPlays": 3,
+      "lastLamp": {
+        "at": 11865.100000023842,
+        "frame": 402,
+        "on": true
+      },
+      "lastPlay": null,
+      "muted": false,
+      "offsets": {
+        "bubbles": 0.38079166666666664,
+        "glass": 0.4039583333333333
+      },
+      "ready": true
+    },
+    "cracks": 0,
+    "done": true,
+    "on": 1,
+    "time": 10.56870000004768
+  },
+  "errors": []
+}

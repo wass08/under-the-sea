@@ -1,0 +1,22 @@
+PASS terrain L1: WebGPU ready, screenshot captured
+PASS terrain L2: WebGPU ready, screenshot captured
+PASS terrain L3: WebGPU ready, screenshot captured
+PASS caustics L1: WebGPU ready, screenshot captured
+PASS caustics L2: WebGPU ready, screenshot captured
+PASS caustics L3: WebGPU ready, screenshot captured
+L1 launch: {"radialFraction":0,"count":228,"min":2.200000047683716,"median":2.200000047683716,"max":2.200000047683716,"maxAngular":0}
+L1 settling: {"samples":61,"maxDisplacement":0.000052025613827803505,"maxRotation":0.0020561351744178545}; awake at 5 s: 0
+PASS shatter L1: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+L2 launch: {"radialFraction":0.17715299858356906,"count":41,"min":2.1999997818598254,"median":2.2000000192316396,"max":2.200000026270391,"maxAngular":8.2321138381958}
+L2 settling: {"samples":61,"maxDisplacement":0,"maxRotation":5.960464477539063e-8}; awake at 5 s: 0
+PASS shatter L2: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+L3 launch: {"radialFraction":0.8391455837987004,"count":74,"min":1.843971775179709,"median":2.464701062273388,"max":6.0351302402033715,"maxAngular":11.119312969353246}
+AssertionError [ERR_ASSERTION]: L3 displacement 0.00505986903783017
+    at file:///Users/wawa/Documents/Projects/wawasensei/aquarium/verify/lab.mjs:100:14 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

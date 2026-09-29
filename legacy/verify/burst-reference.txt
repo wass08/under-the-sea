@@ -1,0 +1,3 @@
+PASS reference reconstruction: Lab L2/L3 first 30 steps are bit-identical to saved pre-performance physics.ts.
+PASS dense Lab launch: L2/L3 at 600 cells match saved 48/12 solver trajectories for all first 30 steps.
+

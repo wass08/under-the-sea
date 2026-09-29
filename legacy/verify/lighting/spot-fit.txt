@@ -1,0 +1,2 @@
+Spot fit: PASS 900 rounded-box vertices, 0 outside shadow frustum, max angle 50.704°, cone 43.0°, shadow half-FOV 53.8°, margin 3.046°
+Upper plinth fit: PASS 24 vertices, 0 outside shadow frustum

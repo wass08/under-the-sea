@@ -1,0 +1,5 @@
+src/scene/lighting.ts:3:import { causticsField, createCausticsUniforms } from '../lib/worley';
+src/scene/lighting.ts:23:export const causticLight = causticsField(causticCoordinates(), simTime, { ...causticParams, level: 3, depth: waterDepth })
+src/scene/lighting.ts:25:export const rockCaustics = causticLight.mul(normalWorldGeometry.dot(sunDirection).max(0))
+src/scene/stage.ts:5:import { causticsField } from '../lib/worley';
+src/scene/stage.ts:30:    If(pool.mul(amount).greaterThan(0.001), () => { light.assign(causticsField(causticCoordinates(.38), simTime, { ...causticParams, level: 3, depth: float(1) }).mul(color('#8fe3ff')).mul(pool).mul(amount).mul(causticDrain).mul(.55)); });

@@ -1,0 +1,35 @@
+[
+  {
+    "name": "main-front-low",
+    "url": "http://localhost:4177/?camera=front",
+    "diagnostics": {
+      "drawCalls": 122,
+      "elapsed": 4.044999999999999,
+      "medianFPS": 60,
+      "renderer": "WebGPU"
+    },
+    "errors": ""
+  },
+  {
+    "name": "secondary-flank",
+    "url": "http://localhost:4177/?camera=rock-underwater",
+    "diagnostics": {
+      "drawCalls": 115,
+      "elapsed": 4.1088000000715255,
+      "medianFPS": 60,
+      "renderer": "WebGPU"
+    },
+    "errors": ""
+  },
+  {
+    "name": "lab-terrain-L3",
+    "url": "http://localhost:4177/#/lab/terrain?level=3",
+    "diagnostics": {
+      "level": 3,
+      "renderer": "WebGPU",
+      "seedCount": 1777,
+      "triangleCount": 3396
+    },
+    "errors": ""
+  }
+]

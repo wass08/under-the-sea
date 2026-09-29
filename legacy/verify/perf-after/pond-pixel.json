@@ -1,0 +1,78 @@
+{
+  "age": 3.000000000000002,
+  "candidate": {
+    "shard": 177,
+    "world": [
+      0.7428927378728488,
+      -0.3780743882710538,
+      2.9840914438901995
+    ],
+    "pixel": [
+      1134.342534285988,
+      571.51185883676
+    ],
+    "pond": 0
+  },
+  "pixels": {
+    "normal": [
+      129,
+      141,
+      146
+    ],
+    "pond-only": [
+      20,
+      33,
+      48
+    ],
+    "glass-only": [
+      129,
+      141,
+      146
+    ],
+    "glass-last": [
+      129,
+      141,
+      146
+    ],
+    "pond-last": [
+      40,
+      52,
+      64
+    ]
+  },
+  "ordering": {
+    "ponds": [
+      {
+        "order": -4,
+        "y": -0.418,
+        "depthWrite": false,
+        "depthTest": true
+      },
+      {
+        "order": -3.99,
+        "y": -0.4178,
+        "depthWrite": false,
+        "depthTest": true
+      },
+      {
+        "order": -3.98,
+        "y": -0.41759999999999997,
+        "depthWrite": false,
+        "depthTest": true
+      },
+      {
+        "order": -3.97,
+        "y": -0.4174,
+        "depthWrite": false,
+        "depthTest": true
+      }
+    ],
+    "shard": {
+      "order": 5,
+      "depthWrite": false,
+      "depthTest": true,
+      "transparent": true,
+      "transmission": 1
+    }
+  }
+}

@@ -1,0 +1,272 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@300;400;500;600&display=swap');
+:root {
+  font-family:'DM Sans',sans-serif;
+  color:#e4ece8;
+  background:#142029;
+  font-synthesis:none;
+  -webkit-font-smoothing:antialiased
+}
+* {
+  box-sizing:border-box
+}
+body {
+  margin:0;
+  overflow:hidden
+}
+canvas {
+  display:block;
+  width:100%;
+  height:100%;
+  touch-action:none
+}
+#app {
+  position:fixed;
+  inset:0
+}
+.masthead {
+  position:fixed;
+  top:42px;
+  left:48px;
+  pointer-events:none
+}
+.eyebrow {
+  font-size:10px;
+  letter-spacing:.23em;
+  color:#a4b9b8
+}
+h1 {
+  font-family:Manrope,sans-serif;
+  font-weight:300;
+  font-size:58px;
+  letter-spacing:-.055em;
+  line-height:1.2;
+  margin:12px 0 8px
+}
+h1 span {
+  font-size:14px;
+  vertical-align:top;
+  display:inline-block;
+  padding:12px 0 0 7px;
+  letter-spacing:0
+}
+.masthead p {
+  margin:0;
+  color:#b2c3c3;
+  font-size:12px;
+  letter-spacing:.035em
+}
+.edition {
+  position:fixed;
+  right:46px;
+  top:49px;
+  font-size:9px;
+  letter-spacing:.18em;
+  color:#b9ccca;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  width:160px
+}
+.edition-sub {
+  width:100%;
+  font-size:8px;
+  color:#7e9697;
+  letter-spacing:.18em;
+  padding:5px 0 0 14px
+}
+.live-dot,.control-top i {
+  display:inline-block;
+  width:5px;
+  height:5px;
+  background:#8bd9c6;
+  border-radius:50%;
+  box-shadow:0 0 7px #8bd9c644
+}
+.controls {
+  position:fixed;
+  bottom:36px;
+  left:42px;
+  width:404px;
+  padding:18px 20px 17px;
+  background:linear-gradient(120deg,#15272cdc,#101e23dd);
+  border:1px solid #d5f8ed20;
+  border-radius:12px;
+  backdrop-filter:blur(18px);
+  box-shadow:0 14px 40px #0002
+}
+.control-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:10px;
+  color:#bdd2cd;
+  letter-spacing:.025em
+}
+.control-top i {
+  margin-right:6px
+}
+.control-top .broken {
+  background:#e6b784;
+  box-shadow:none
+}
+#fps {
+  font-size:9px;
+  color:#849e9d;
+  font-variant-numeric:tabular-nums
+}
+.controls p {
+  font-size:12px;
+  color:#e0e9e5;
+  margin:13px 0 16px
+}
+.buttons {
+  display:flex;
+  gap:7px
+}
+button {
+  font:500 10px 'DM Sans',sans-serif;
+  white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  color:#d7e4df;
+  border:1px solid #c5e8df29;
+  background:#a8d7ca08;
+  border-radius:6px;
+  height:33px;
+  padding:0 9px;
+  cursor:pointer;
+  transition:background .2s,border-color .2s
+}
+button:hover {
+  background:#bddbd71c;
+  border-color:#bddbd75c
+}
+button:focus-visible {
+  outline:2px solid #99d6c5;
+  outline-offset:3px
+}
+button:disabled {
+  opacity:.45;
+  cursor:default
+}
+#shatter {
+  color:#122b2a;
+  background:#b8d9ce;
+  border-color:#b8d9ce
+}
+#shatter:hover {
+  background:#d0e9df
+}
+.button-icon {
+  font-size:15px
+}
+kbd {
+  font-family:inherit;
+  font-size:8px;
+  opacity:.55
+}
+button.active {
+  color:#dafcee;
+  border-color:#9cdec88c;
+  background:#79bba62e
+}
+.caption {
+  position:fixed;
+  right:46px;
+  bottom:42px;
+  text-align:right;
+  font-size:8px;
+  letter-spacing:.19em;
+  color:#8eaaa9;
+  pointer-events:none
+}
+.caption span {
+  display:block;
+  font-size:10px;
+  letter-spacing:.025em;
+  color:#bdceca;
+  margin-top:10px
+}
+#loading {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:13px;
+  color:#d5e8e2;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  background:#11232eea;
+  padding:22px 28px;
+  border:1px solid #bce4d32a;
+  border-radius:10px;
+  max-width:90vw;
+  line-height:1.7;
+  z-index:3
+}
+#loading[hidden] {
+  display:none
+}
+.loader {
+  width:15px;
+  height:15px;
+  border:1px solid #6aa59d;
+  border-top-color:transparent;
+  border-radius:50%;
+  animation:spin 1s linear infinite
+}
+.sr-only {
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0)
+}
+@keyframes spin {
+  to {
+    transform:rotate(360deg)
+  }
+}
+@media(max-width:650px) {
+  .masthead {
+    top:27px;
+    left:25px
+  }
+  h1 {
+    font-size:44px
+  }
+  .edition {
+    right:22px;
+    top:33px;
+    width:125px;
+    font-size:8px
+  }
+  .edition-sub {
+    font-size:7px
+  }
+  .controls {
+    bottom:20px;
+    left:20px;
+    right:20px;
+    width:auto;
+    padding:16px
+  }
+  .caption {
+    display:none
+  }
+  .buttons {
+    gap:6px
+  }
+  button {
+    flex:1;
+    font-size:9px;
+    padding:0 6px
+  }
+  kbd {
+    font-size:7px
+  }
+}

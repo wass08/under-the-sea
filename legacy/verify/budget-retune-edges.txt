@@ -1,0 +1,9 @@
+Five-second budget diagnostics {"profile":"launch","shardBodyLimit":880,"targetBodyBudget":649,"wallBudgets":[{"wall":0,"ordinal":1,"cells":220,"fraction":1,"requestedFraction":1,"coreCells":89,"released":220,"awake":0},{"wall":2,"ordinal":2,"cells":176,"fraction":0.8,"requestedFraction":0.8,"coreCells":76,"released":176,"awake":0},{"wall":1,"ordinal":3,"cells":143,"fraction":0.65,"requestedFraction":0.65,"coreCells":84,"released":143,"awake":0},{"wall":3,"ordinal":4,"cells":110,"fraction":0.5,"requestedFraction":0.5,"coreCells":99,"released":110,"awake":0}],"releasePhysicsAge":4.333333333333333,"lastReleaseTime":18.23470000004772,"maxCellsPerBody":1,"individualCells":true,"launch":{"radialFraction":0.8384647550779879,"count":649,"min":1.0617112584667656,"median":3.127128629846344,"max":5.800667081321152,"maxAngular":7.389936348912945},"fixedHz":60,"solverIterations":4,"internalPgs":1,"lengthUnit":6,"quietDamping":[32,120],"allowedError":0.00029999999242136255,"prediction":0.006000000284984708,"erp":0,"contactSkinMax":0.003,"inertiaRatioLimit":4,"massRange":[5,311.23541259765625],"fixedFallbacks":0}
+PASS above-water crack: no jet/drips, no drainage
+PASS one crack per wall
+PASS four cracks: water drained from 1.5521131639603145 to lowest sill 0.16000000000000014; spilling stopped
+PASS four-wall full break: 649 bodies, 48 draw calls, 60 FPS
+PASS adaptive launch budget: 649 single-cell bodies, zero awake by 5 s
+PASS reset mid-spill: reverse audio, water rises, frozen physics, 0.15× rewind, second Reset skips to pristine
+PASS pond under shards: pixel 1134,572 RGB 129,141,146; glass-last 129,141,146, pond-last 40,52,64; floor depth-testing retained
+PASS reset after four-wall break; zero console errors

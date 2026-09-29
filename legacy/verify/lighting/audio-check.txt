@@ -1,0 +1,1 @@
+Lamp audio: PASS (locked startup silent; rocker OFF and L ON play; M suppresses voices; R does not replay startup; unmute restores clack)

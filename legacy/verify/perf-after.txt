@@ -1,0 +1,96 @@
+{
+  "label": "after",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1.5,
+  "airborne": {
+    "frames": 105,
+    "fpsMedian": 56.497,
+    "ms": {
+      "frame": 18.127,
+      "physics": 10.8,
+      "rapier": 9.77,
+      "collision": 5.183,
+      "solver": 1.502,
+      "ccd": 0,
+      "sync": 0.104,
+      "batch": 3.581,
+      "spill": 0.522,
+      "rewind": 0.044,
+      "render": 1.275,
+      "shadow": 0.087
+    },
+    "stepsMean": 0.99,
+    "stepsMax": 1,
+    "drawCalls": 49,
+    "shadowCalls": 10,
+    "gcMsPerFrame": 0.122,
+    "gcEvents": 34,
+    "heapGrowthKBPerFrame": 6618.605,
+    "uploadsKBPerFrame": 1395.516,
+    "awakeMedian": 276
+  },
+  "settled": {
+    "frames": 120,
+    "fpsMedian": 59.88,
+    "ms": {
+      "frame": 16.667,
+      "physics": 0.108,
+      "rapier": 0.018,
+      "collision": 0.001,
+      "solver": 0.001,
+      "ccd": 0,
+      "sync": 0.001,
+      "batch": 0.017,
+      "spill": 0.007,
+      "rewind": 0.037,
+      "render": 0.493,
+      "shadow": 0.058
+    },
+    "stepsMean": 1,
+    "stepsMax": 1,
+    "drawCalls": 49,
+    "shadowCalls": 10,
+    "gcMsPerFrame": 0.008,
+    "gcEvents": 2,
+    "heapGrowthKBPerFrame": 466.47,
+    "uploadsKBPerFrame": 0,
+    "awakeMedian": 0
+  },
+  "final": {
+    "bodies": 285,
+    "awake": 0,
+    "physics": {
+      "launch": {
+        "radialFraction": 0.8390975008504283,
+        "count": 285,
+        "min": 2.4300524492244233,
+        "median": 2.600249482780381,
+        "max": 5.039444068693017,
+        "maxAngular": 7.365770572932899
+      },
+      "fixedHz": 60,
+      "solverIterations": 4,
+      "internalPgs": 1,
+      "lengthUnit": 6,
+      "allowedError": 0.00029999999242136255,
+      "prediction": 0.006000000284984708,
+      "erp": 0,
+      "contactSkinMax": 0.003,
+      "inertiaRatioLimit": 4,
+      "massRange": [
+        4.999999046325684,
+        311.23541259765625
+      ],
+      "fixedFallbacks": 0
+    }
+  },
+  "errors": []
+}
+PASS four-wall-perf: airborne >=45 FPS, settled >=55 FPS, bounded physics steps, zero console errors
+before airborne: FPS 6.357; ms/frame physics 145.1 (Rapier 139.029), sync 0.126, batch 4.047, spill 1.429, rewind 0.137, render 1.582 (shadow 0.124), GC 0.226; steps mean/max 3/3; draws 50 (shadow 15); heap +KB/frame 6171.726; shard upload KB/frame 1395.516.
+before settled: FPS 59.88; ms/frame physics 0.122 (Rapier 0.015), sync 0.107, batch 2.606, spill 1.173, rewind 0.048, render 1.009 (shadow 0.096), GC 0.097; steps mean/max 1/2; draws 50 (shadow 15); heap +KB/frame 6040.226; shard upload KB/frame 1395.516.
+after airborne: FPS 56.497; ms/frame physics 10.8 (Rapier 9.77), sync 0.104, batch 3.581, spill 0.522, rewind 0.044, render 1.275 (shadow 0.087), GC 0.122; steps mean/max 0.99/1; draws 49 (shadow 10); heap +KB/frame 6618.605; shard upload KB/frame 1395.516.
+after settled: FPS 59.88; ms/frame physics 0.108 (Rapier 0.018), sync 0.001, batch 0.017, spill 0.007, rewind 0.037, render 0.493 (shadow 0.058), GC 0.008; steps mean/max 1/1; draws 49 (shadow 10); heap +KB/frame 466.47; shard upload KB/frame 0.

@@ -1,0 +1,110 @@
+[
+  {
+    "label": "Pond 3s",
+    "afterCrack": 3.0341999999284717,
+    "height": 1.59557194120148,
+    "pixelRatio": 1.5,
+    "puddle": {
+      "depthWrite": false,
+      "maxRadius": 1.1531452599722294,
+      "order": 10,
+      "poolDepth": 0.025,
+      "position": [
+        0.6,
+        -0.394,
+        3.6336882559715034
+      ],
+      "radius": [
+        1.1531452599722294,
+        0.980173470976395
+      ],
+      "sample": {
+        "x": 353.9966630262404,
+        "y": 699.7110304703821
+      },
+      "sheetVolume": 0.0771991282421099
+    },
+    "spilling": true
+  },
+  {
+    "label": "Pond 10s",
+    "afterCrack": 10.036099999904648,
+    "height": 1.0820121306330504,
+    "pixelRatio": 1.5,
+    "puddle": {
+      "depthWrite": false,
+      "maxRadius": 1.4483551215317036,
+      "order": 10,
+      "poolDepth": 0.025,
+      "position": [
+        0.6,
+        -0.394,
+        3.07209412189012
+      ],
+      "radius": [
+        1.4483551215317036,
+        1.231101853301948
+      ],
+      "sample": {
+        "x": 417.327156475502,
+        "y": 660.9233532521563
+      },
+      "sheetVolume": 0.12255259579302576
+    },
+    "spilling": true
+  },
+  {
+    "label": "Pond after drain",
+    "afterCrack": 10.786099999904655,
+    "height": 1.0820121306330504,
+    "pixelRatio": 1.5,
+    "puddle": {
+      "depthWrite": false,
+      "maxRadius": 1.4483551215317036,
+      "order": 10,
+      "poolDepth": 0.025,
+      "position": [
+        0.6,
+        -0.394,
+        3.07209412189012
+      ],
+      "radius": [
+        1.4483551215317036,
+        1.231101853301948
+      ],
+      "sample": {
+        "x": 417.327156475502,
+        "y": 660.9233532521563
+      },
+      "sheetVolume": 0.12255259579302576
+    },
+    "spilling": false
+  },
+  {
+    "label": "Pond wide 12s",
+    "afterCrack": 12.054799999952296,
+    "height": 1.1062959828507064,
+    "pixelRatio": 1.5,
+    "puddle": {
+      "depthWrite": false,
+      "maxRadius": 1.4362109650108286,
+      "order": 10,
+      "poolDepth": 0.025,
+      "position": [
+        0.6,
+        -0.394,
+        3.069601955298967
+      ],
+      "radius": [
+        1.4362109650108286,
+        1.2207793202592043
+      ],
+      "sample": {
+        "x": 802.8902207990259,
+        "y": 828.9570495453302
+      },
+      "sheetVolume": 0.12048386684611503
+    },
+    "spilling": false
+  }
+]

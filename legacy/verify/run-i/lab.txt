@@ -1,0 +1,11 @@
+PASS terrain L1: WebGPU ready, screenshot captured
+PASS terrain L2: WebGPU ready, screenshot captured
+PASS terrain L3: WebGPU ready, screenshot captured
+PASS caustics L1: WebGPU ready, screenshot captured
+PASS caustics L2: WebGPU ready, screenshot captured
+PASS caustics L3: WebGPU ready, screenshot captured
+PASS shatter L1: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L2: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS aquarium renders; both page links, Lab navigation and keyboard levels work.
+Console: 0 errors; 0 warnings.

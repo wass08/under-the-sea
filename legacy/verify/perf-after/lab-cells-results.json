@@ -1,0 +1,20 @@
+[
+  {
+    "level": 3,
+    "count": 220,
+    "airborne": 59.88023952095874,
+    "settled": 59.88023952095874,
+    "awake": 0,
+    "physicsMs": 0,
+    "rapierMs": 0
+  },
+  {
+    "level": 3,
+    "count": 600,
+    "airborne": 59.88023952095874,
+    "settled": 59.88023952095874,
+    "awake": 0,
+    "physicsMs": 0,
+    "rapierMs": 0
+  }
+]

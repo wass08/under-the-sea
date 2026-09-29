@@ -1,0 +1,7 @@
+HIST L1 count=600 cells=589 bodies=589 histogram(1/2/3-5/6+)=589/0/0/0
+FPS L1 600: airborne=15.04 settled=59.88 awake=396 physics=74.46ms rapier=58.69ms
+HIST L2 count=600 cells=600 bodies=600 histogram(1/2/3-5/6+)=600/0/0/0
+FPS L2 600: airborne=43.10 settled=59.88 awake=0 physics=35.27ms rapier=30.18ms
+HIST L3 count=600 cells=600 bodies=600 histogram(1/2/3-5/6+)=600/0/0/0
+FPS L3 600: airborne=44.25 settled=59.88 awake=0 physics=21.17ms rapier=19.57ms
+HIST L3 count=220 cells=220 bodies=220 histogram(1/2/3-5/6+)=220/0/0/0

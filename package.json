@@ -1,16 +1,14 @@
 {
-  "name": "tideline-glass-aquarium",
+  "name": "wawasensei-school",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "verify": "node verify/runtime.mjs"
+    "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
-    "@dimforge/rapier3d-compat": "^0.20.0",
     "d3-delaunay": "^6.0.4",
     "simplex-noise": "^4.0.3",
     "three": "0.186.0",

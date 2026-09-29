@@ -1,0 +1,45 @@
+{
+  "styles": {
+    ".lab-sidebar": {
+      "color": "rgb(230, 238, 245)",
+      "background": "rgba(10, 26, 43, 0.92)",
+      "radius": "0px",
+      "border": "rgb(230, 238, 245) rgba(159, 230, 255, 0.2) rgb(230, 238, 245) rgb(230, 238, 245)"
+    },
+    ".lab-card": {
+      "color": "rgb(230, 238, 245)",
+      "background": "rgb(16, 42, 64)",
+      "radius": "6px",
+      "border": "rgba(159, 230, 255, 0.2)"
+    },
+    ".lab-sidebar nav a.active": {
+      "color": "rgb(159, 230, 255)",
+      "background": "rgb(33, 76, 105)",
+      "radius": "6px",
+      "border": "rgb(143, 211, 255)"
+    },
+    ".lab-pane .tp-rotv": {
+      "color": "rgb(230, 238, 245)",
+      "background": "rgb(10, 26, 43)",
+      "radius": "6px",
+      "border": "rgb(230, 238, 245)"
+    },
+    ".lab-pane .tp-lblv_l": {
+      "color": "rgb(176, 195, 214)",
+      "background": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "border": "rgb(176, 195, 214)"
+    },
+    ".lab-pane .tp-btnv_b": {
+      "color": "rgb(230, 238, 245)",
+      "background": "rgb(16, 42, 64)",
+      "radius": "6px",
+      "border": "rgb(81, 109, 132)"
+    }
+  },
+  "focus": {
+    "outline": "rgb(143, 211, 255) solid 2px",
+    "offset": "3px"
+  },
+  "errors": []
+}

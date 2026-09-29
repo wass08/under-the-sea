@@ -1,0 +1,3 @@
+import { chromium } from 'playwright';
+const b=await chromium.launch({headless:true,args:['--enable-unsafe-webgpu','--use-angle=metal','--ignore-gpu-blocklist']});const p=await b.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1.5});
+await p.goto('http://localhost:4174/?camera=default');await p.waitForFunction(()=>window.aquarium?.elapsed>2);await p.keyboard.press('Space');const s=await p.evaluate(()=>aquarium);console.log(JSON.stringify(s.physics.launch));await p.waitForFunction(t=>aquarium.elapsed>=t,s.elapsed+.25);await p.screenshot({path:'verify/run-n/burst-dev.png'});await b.close();

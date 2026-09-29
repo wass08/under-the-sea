@@ -1,0 +1,31 @@
+--- before/src/lab/index.ts
++++ src/lab/index.ts
+@@ -29,13 +29,13 @@
+   await renderer.init();
+   if (!('isWebGPUBackend' in renderer.backend) || !renderer.backend.isWebGPUBackend) { renderer.dispose(); throw new Error('The Lab requires a WebGPU adapter.'); }
+   stage.prepend(renderer.domElement);
+-  const scene = new Scene(); scene.background = new Color('#0a1a2b'); scene.fog = new FogExp2('#0a1a2b', 0.017);
++  const scene = new Scene(); scene.background = new Color('#041e34'); scene.fog = new FogExp2('#041e34', 0.017);
+   const hdr = await new HDRLoader().loadAsync(`${import.meta.env.BASE_URL}hdri/sky.hdr`), pmrem = new PMREMGenerator(renderer);
+   const environment = pmrem.fromEquirectangular(hdr); scene.environment = environment.texture; scene.environmentIntensity = 0.65; hdr.dispose(); pmrem.dispose();
+-  const sun = new DirectionalLight('#fff0d8', 3); sun.position.set(-8, 16, 9); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
++  const sun = new DirectionalLight('#e6f2ff', 3); sun.position.set(-8, 16, 9); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+   Object.assign(sun.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11, near: 0.1, far: 50 }); sun.shadow.normalBias = 0.035; sun.shadow.bias = -0.0002;
+-  scene.add(sun, sun.target, new HemisphereLight('#cee9e5', '#263333', 1));
+-  const floor = new Mesh(new PlaneGeometry(200, 200), new MeshStandardNodeMaterial({ color: '#26383d', roughness: 0.65, metalness: 0.15 })); floor.rotation.x = -Math.PI / 2; floor.position.y = -0.025; floor.receiveShadow = true; scene.add(floor);
++  scene.add(sun, sun.target, new HemisphereLight('#d6eaff', '#102a48', 1));
++  const floor = new Mesh(new PlaneGeometry(200, 200), new MeshStandardNodeMaterial({ color: '#062e48', roughness: 0.65, metalness: 0.15 })); floor.rotation.x = -Math.PI / 2; floor.position.y = -0.025; floor.receiveShadow = true; scene.add(floor);
+   const camera = new PerspectiveCamera(42, 1, 0.05, 240), controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.48;
+   let bench: Bench | undefined, root: Group | undefined, pane: Pane | undefined, post: ReturnType<typeof createLabPost> | undefined;
+   const settings: Record<BenchName, Record<string, boolean | number | string>> = { terrain: {}, caustics: {}, shatter: {} };
+--- before/src/lab/shatter.ts
++++ src/lab/shatter.ts
+@@ -14,7 +14,7 @@
+   const glass = new MeshPhysicalNodeMaterial({ color: '#e8fffc', transmission: 1, thickness: 0.05, roughness: 0.05, ior: 1.5, attenuationColor: new Color('#b3e2d7'), attenuationDistance: 3, envMapIntensity: 1.3 });
+   const intact = new Mesh(new BoxGeometry(3.2, 2, 0.05), glass); intact.position.y = 1.25; root.add(intact);
+   const frame = new LineSegments(buildOutlineGeometry([{ polygon: [[-1.6, -1], [1.6, -1], [1.6, 1], [-1.6, 1]], seed: [0, 0], ring: 0, distance: 0 }]), new LineBasicMaterial({ color: '#bdddd5', transparent: true, opacity: 0.6 })); frame.position.copy(intact.position); root.add(frame);
+-  const plinth = new Mesh(new BoxGeometry(3.55, 0.22, 0.55), new MeshStandardNodeMaterial({ color: '#25383b', roughness: 0.3, metalness: 0.6 })); plinth.position.y = 0.11; root.add(plinth);
++  const plinth = new Mesh(new BoxGeometry(3.55, 0.22, 0.55), new MeshStandardNodeMaterial({ color: '#123550', roughness: 0.3, metalness: 0.6 })); plinth.position.y = 0.11; root.add(plinth);
+   // Low-frequency colour makes transmission/refraction legible through the intact slab.
+   for (const [x, y, z, radius, tint] of [[-1.25, 1.1, -1.1, 0.75, '#dd9474'], [0.4, 0.85, -1.45, 0.72, '#5cacaa'], [1.4, 1.6, -1.7, 0.6, '#aeacd3']] as const) {
+     const sphere = new Mesh(new SphereGeometry(radius, 40, 24), new MeshStandardNodeMaterial({ color: tint, roughness: 0.33, metalness: 0.15 })); sphere.position.set(x, y, z); sphere.castShadow = true; root.add(sphere);

@@ -1,0 +1,85 @@
+{
+  "label": "trial",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1.5,
+  "airborne": {
+    "frames": 40,
+    "fpsMedian": 20.121,
+    "ms": {
+      "frame": 50.93,
+      "physics": 41.82,
+      "rapier": 35.932,
+      "sync": 0.107,
+      "batch": 4.618,
+      "spill": 1.593,
+      "rewind": 0.13,
+      "render": 1.835,
+      "shadow": 0.205
+    },
+    "stepsMean": 2,
+    "stepsMax": 2,
+    "drawCalls": 69,
+    "shadowCalls": 30,
+    "gcMsPerFrame": 0.248,
+    "gcEvents": 20,
+    "heapGrowthKBPerFrame": 7169.915,
+    "uploadsKBPerFrame": 1395.516,
+    "awakeMedian": 279
+  },
+  "settled": {
+    "frames": 120,
+    "fpsMedian": 60.241,
+    "ms": {
+      "frame": 16.575,
+      "physics": 3.292,
+      "rapier": 3.244,
+      "sync": 0.029,
+      "batch": 0.314,
+      "spill": 1.187,
+      "rewind": 0.052,
+      "render": 1.005,
+      "shadow": 0.176
+    },
+    "stepsMean": 1,
+    "stepsMax": 1,
+    "drawCalls": 69,
+    "shadowCalls": 30,
+    "gcMsPerFrame": 0.035,
+    "gcEvents": 12,
+    "heapGrowthKBPerFrame": 2522.477,
+    "uploadsKBPerFrame": 534.948,
+    "awakeMedian": 0
+  },
+  "final": {
+    "bodies": 285,
+    "awake": 0,
+    "physics": {
+      "launch": {
+        "radialFraction": 0.8390975008504283,
+        "count": 285,
+        "min": 2.4300524492244233,
+        "median": 2.600249482780381,
+        "max": 5.039444068693017,
+        "maxAngular": 7.365770572932899
+      },
+      "fixedHz": 60,
+      "solverIterations": 12,
+      "internalPgs": 4,
+      "lengthUnit": 6,
+      "allowedError": 0.00029999999242136255,
+      "prediction": 0.006000000284984708,
+      "erp": 0,
+      "contactSkinMax": 0.003,
+      "inertiaRatioLimit": 4,
+      "massRange": [
+        4.999999046325684,
+        311.23541259765625
+      ],
+      "fixedFallbacks": 0
+    }
+  },
+  "errors": []
+}

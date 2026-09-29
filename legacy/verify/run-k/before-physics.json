@@ -1,0 +1,367 @@
+[
+  {
+    "name": "main-1-wall",
+    "count": 61,
+    "t0": {
+      "speed": {
+        "min": 2.087161874279579,
+        "median": 3.297722079688114,
+        "max": 4.408545919818953
+      },
+      "angular": {
+        "min": 2.754798445281896,
+        "median": 3.139461224916538,
+        "max": 4.91362597713132
+      },
+      "mass": {
+        "min": 13.805298805236816,
+        "median": 26.35487174987793,
+        "max": 287.268798828125
+      }
+    },
+    "spawn": {
+      "overlap": 0,
+      "skinOverlap": 0
+    },
+    "window3to4": {
+      "maxDisplacement": 1.1920928955078125e-7,
+      "maxRotation": 5.95300923449941e-7
+    },
+    "awake5": 0,
+    "fixedFallbacks": 0,
+    "track": [
+      {
+        "time": 0.5,
+        "awake": 61
+      },
+      {
+        "time": 1,
+        "awake": 61
+      },
+      {
+        "time": 1.5,
+        "awake": 61
+      },
+      {
+        "time": 2,
+        "awake": 61
+      },
+      {
+        "time": 2.5,
+        "awake": 61
+      },
+      {
+        "time": 3,
+        "awake": 0
+      },
+      {
+        "time": 3.5,
+        "awake": 0
+      },
+      {
+        "time": 4,
+        "awake": 0
+      },
+      {
+        "time": 4.5,
+        "awake": 0
+      },
+      {
+        "time": 5,
+        "awake": 0
+      }
+    ]
+  },
+  {
+    "name": "main-4-wall",
+    "count": 233,
+    "t0": {
+      "speed": {
+        "min": 2.087161874279579,
+        "median": 3.1096343512995044,
+        "max": 4.408545919818953
+      },
+      "angular": {
+        "min": 2.738106605008606,
+        "median": 3.2800781721558807,
+        "max": 4.991234234461197
+      },
+      "mass": {
+        "min": 12.764486312866211,
+        "median": 24.583711624145508,
+        "max": 287.268798828125
+      }
+    },
+    "spawn": {
+      "overlap": 0,
+      "skinOverlap": 0
+    },
+    "window3to4": {
+      "maxDisplacement": 0,
+      "maxRotation": 5.960464477539063e-8
+    },
+    "awake5": 0,
+    "fixedFallbacks": 0,
+    "track": [
+      {
+        "time": 0.5,
+        "awake": 233
+      },
+      {
+        "time": 1,
+        "awake": 233
+      },
+      {
+        "time": 1.5,
+        "awake": 233
+      },
+      {
+        "time": 2,
+        "awake": 233
+      },
+      {
+        "time": 2.5,
+        "awake": 113
+      },
+      {
+        "time": 3,
+        "awake": 0
+      },
+      {
+        "time": 3.5,
+        "awake": 0
+      },
+      {
+        "time": 4,
+        "awake": 0
+      },
+      {
+        "time": 4.5,
+        "awake": 0
+      },
+      {
+        "time": 5,
+        "awake": 0
+      }
+    ]
+  },
+  {
+    "name": "lab-L1",
+    "count": 228,
+    "t0": {
+      "speed": {
+        "min": 2.200000047683716,
+        "median": 2.200000047683716,
+        "max": 2.200000047683716
+      },
+      "angular": {
+        "min": 0,
+        "median": 0,
+        "max": 0
+      },
+      "mass": {
+        "min": 0.0042105261236429214,
+        "median": 0.0042105261236429214,
+        "max": 0.0042105261236429214
+      }
+    },
+    "spawn": {
+      "overlap": 0,
+      "skinOverlap": 0
+    },
+    "window3to4": {
+      "maxDisplacement": 0,
+      "maxRotation": 5.960464477539063e-8
+    },
+    "awake5": 0,
+    "fixedFallbacks": 0,
+    "track": [
+      {
+        "time": 0.5,
+        "awake": 228
+      },
+      {
+        "time": 1,
+        "awake": 226
+      },
+      {
+        "time": 1.5,
+        "awake": 207
+      },
+      {
+        "time": 2,
+        "awake": 187
+      },
+      {
+        "time": 2.5,
+        "awake": 170
+      },
+      {
+        "time": 3,
+        "awake": 0
+      },
+      {
+        "time": 3.5,
+        "awake": 0
+      },
+      {
+        "time": 4,
+        "awake": 0
+      },
+      {
+        "time": 4.5,
+        "awake": 0
+      },
+      {
+        "time": 5,
+        "awake": 0
+      }
+    ]
+  },
+  {
+    "name": "lab-L2",
+    "count": 220,
+    "t0": {
+      "speed": {
+        "min": 2.1999998092651367,
+        "median": 2.200000047683716,
+        "max": 2.200000286102295
+      },
+      "angular": {
+        "min": 0,
+        "median": 0,
+        "max": 0
+      },
+      "mass": {
+        "min": 0.0020000000949949026,
+        "median": 0.0037098501343280077,
+        "max": 0.015039636753499508
+      }
+    },
+    "spawn": {
+      "overlap": 0,
+      "skinOverlap": 0
+    },
+    "window3to4": {
+      "maxDisplacement": 0.03579373751607171,
+      "maxRotation": 0.5230421992505401
+    },
+    "awake5": 103,
+    "fixedFallbacks": 0,
+    "track": [
+      {
+        "time": 0.5,
+        "awake": 220
+      },
+      {
+        "time": 1,
+        "awake": 210
+      },
+      {
+        "time": 1.5,
+        "awake": 193
+      },
+      {
+        "time": 2,
+        "awake": 143
+      },
+      {
+        "time": 2.5,
+        "awake": 127
+      },
+      {
+        "time": 3,
+        "awake": 123
+      },
+      {
+        "time": 3.5,
+        "awake": 103
+      },
+      {
+        "time": 4,
+        "awake": 103
+      },
+      {
+        "time": 4.5,
+        "awake": 103
+      },
+      {
+        "time": 5,
+        "awake": 103
+      }
+    ]
+  },
+  {
+    "name": "lab-L3",
+    "count": 220,
+    "t0": {
+      "speed": {
+        "min": 1.6189160772851807,
+        "median": 4.151037405452476,
+        "max": 6.8459105044565085
+      },
+      "angular": {
+        "min": 0.14519304209931388,
+        "median": 18.21232905197242,
+        "max": 248.2045272072075
+      },
+      "mass": {
+        "min": 0.0020000000949949026,
+        "median": 0.0020000000949949026,
+        "max": 0.06010475382208824
+      }
+    },
+    "spawn": {
+      "overlap": 1,
+      "skinOverlap": 1
+    },
+    "window3to4": {
+      "maxDisplacement": 0.033112281209497725,
+      "maxRotation": 0.2123979776036942
+    },
+    "awake5": 61,
+    "fixedFallbacks": 0,
+    "track": [
+      {
+        "time": 0.5,
+        "awake": 220
+      },
+      {
+        "time": 1,
+        "awake": 220
+      },
+      {
+        "time": 1.5,
+        "awake": 199
+      },
+      {
+        "time": 2,
+        "awake": 119
+      },
+      {
+        "time": 2.5,
+        "awake": 84
+      },
+      {
+        "time": 3,
+        "awake": 66
+      },
+      {
+        "time": 3.5,
+        "awake": 67
+      },
+      {
+        "time": 4,
+        "awake": 67
+      },
+      {
+        "time": 4.5,
+        "awake": 67
+      },
+      {
+        "time": 5,
+        "awake": 61
+      }
+    ]
+  }
+]

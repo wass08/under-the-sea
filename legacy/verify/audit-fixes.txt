@@ -1,0 +1,49 @@
+$ npm run build (tail -8)
+dist/assets/terrain-DwLeqMWw.js   3,869.74 kB │ gzip: 1,378.38 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 2000 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 211ms
+$ npm run preview -- --port 4174; node verify/runtime.mjs
+Idle performance: {"medianFPS":60,"drawCalls":116,"pixelRatio":1.5}
+Shattered performance: {"medianFPS":60,"drawCalls":61,"pixelRatio":1.5}
+PASS: "eight camera presets, Run L Gerstner waves/planar reflection/shore foam and depth-aware pour, stable puddle frames, unified floor light, saturation gain, underwater contrast >=1.8, bubbles/pop/reset, submerged motes, draining floor caustics, logo breakpoints, accessible hover/focus/touch spoiler, trimmed same-frame audio, crack/spill/sill, physics cap, 3–4s/8–10s rest and native sleep by 5s, 0.15× clock, 3.2s rewind with three distinct stages and skip, drag, branding, responsive layout, WebGPU guard"
+$ VERIFY_URL=http://localhost:4174/ node verify/lab.mjs
+PASS terrain L1: WebGPU ready, screenshot captured
+PASS terrain L2: WebGPU ready, screenshot captured
+PASS terrain L3: WebGPU ready, screenshot captured
+PASS caustics L1: WebGPU ready, screenshot captured
+PASS caustics L2: WebGPU ready, screenshot captured
+PASS caustics L3: WebGPU ready, screenshot captured
+PASS shatter L1: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L2: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS repeated reset/bench cycles: stable allocations and listeners {"physics":{"worlds":1,"bodies":2,"colliders":2},"gpu":{"geometries":8,"attributes":14,"indexAttributes":6,"textures":18,"renderTargets":14,"programs":21,"uniformBuffers":24},"listeners":[18,1,7]}
+PASS aquarium renders; both page links, Lab navigation and keyboard levels work.
+$ node verify/library.mjs
+PASS library: deterministic grid/random/Poisson sampling, shared analytic heights, Lab erosion/carving off, grid circumcircles/neighbours/resolution, upward normals, mask, variable-radius spacing, circumcircle, masked Lloyd, fracture coverage/density/rings/centroids, Rapier freeze/slow-motion/settling.
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, pending audio cancellation.
+PASS Run I regression: inset removes short edges without collider spikes.
+PASS Run I base contact: float rounding cannot bypass grounded damping; native sleep.
+PASS Run J: coherent biome graph, normalized blend weights, deterministic erosion topology and conservation.
+PASS Run K: shared release, 10× density invariance for linear/angular launch, bounded spin, rotated pane normals, level-dependent falloff, disposal.
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS Run O: active warp/thermal/carve, deterministic channel networks, cliff override, upper snow, coherent biomes, wall clearance; Lab technique unchanged.
+PASS four-wall physics: one-step crowded/two-step small-world caps drop backlog and resume fixed stepping.
+PASS sleeping shard sync: wake-up retains the final cached pose.
+PASS launch phase: bit-identical crowded trajectories, 48-to-4 solver ramp, restored contacts, three-step cap and dropped backlog.
+$ node verify/terrain/mesh-check.mjs
+Mesh summary: PASS 9 sheet seeds, 0 bad faces, 0 coplanar bed faces, 0 unexpected boundary edges
+$ VERIFY_URL=http://localhost:4174/ node verify/lab/caustics-isolation.mjs
+PASS L2: L1 sine 5 / 7 / .9; frozen t=0; scene crop 1280x810: 0 differing pixels
+PASS L3: L1 sine 5 / 7 / .9; frozen t=0; scene crop 1280x810: 0 differing pixels
+$ VERIFY_URL=http://localhost:4174/ node verify/ui/lab-capture.mjs
+CAPTURE terrain L3: 1600x1000
+CAPTURE terrain L3: 430x900
+PASS sand-shadow ratio: 0.5543774759966583 (0.35–0.70); 44.56225240033417% darker over 30 frames
+$ ls -l verify/lab/library.bundle.mjs verify/lighting/power-capture.js
+ls: verify/lab/library.bundle.mjs: No such file or directory
+ls: verify/lighting/power-capture.js: No such file or directory

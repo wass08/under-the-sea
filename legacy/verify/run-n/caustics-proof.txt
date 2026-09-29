@@ -1,0 +1,12 @@
+src/scene/island.ts:3:import { causticLight, rockCaustics, signedWaterDistance, submerged, underwaterColor, waterDepth } from './lighting';
+src/scene/island.ts:30:  sand.emissiveNode = causticLight;
+src/scene/island.ts:34:  gravelMaterial.colorNode = underwaterColor(color('#a19882').rgb); gravelMaterial.emissiveNode = causticLight;
+src/scene/reef.ts:4:import { causticLight, submerged, underwaterColor } from './lighting';
+src/scene/reef.ts:54:  coralMaterial.colorNode = underwaterColor(color('#ffffff').rgb); coralMaterial.aoNode = mix(float(1), float(0.46), submerged); coralMaterial.emissiveNode = causticLight.mul(0.12);
+src/scene/stage.ts:4:import { causticCoordinates, causticParams, causticDrain } from './lighting';
+src/scene/stage.ts:5:import { causticsField } from '../lib/worley';
+src/scene/stage.ts:30:    If(pool.mul(amount).greaterThan(0.001), () => { light.assign(causticsField(causticCoordinates(.38), simTime, { ...causticParams, level: 3, depth: float(1) }).mul(color('#8fe3ff')).mul(pool).mul(amount).mul(causticDrain).mul(.55)); });
+src/scene/lighting.ts:3:import { causticsField, createCausticsUniforms } from '../lib/worley';
+src/scene/lighting.ts:17:export function causticCoordinates(stretch = 1) {
+src/scene/lighting.ts:23:export const causticLight = causticsField(causticCoordinates(), simTime, { ...causticParams, level: 3, depth: waterDepth })
+src/scene/lighting.ts:25:export const rockCaustics = causticLight.mul(normalWorldGeometry.dot(sunDirection).max(0))

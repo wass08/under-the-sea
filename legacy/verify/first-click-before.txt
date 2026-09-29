@@ -1,0 +1,3 @@
+before run 1: longest frame gap 91.5 ms, load time 1777.6 ms, handler 29.8 ms, render 78.9 ms, new pipelines 8
+before run 2: longest frame gap 88.1 ms, load time 1817.7 ms, handler 29.1 ms, render 76.1 ms, new pipelines 8
+before run 3: longest frame gap 78.5 ms, load time 1675.5 ms, handler 28.0 ms, render 66.7 ms, new pipelines 8

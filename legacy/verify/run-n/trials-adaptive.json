@@ -1,0 +1,994 @@
+[
+  {
+    "spread": 0.3,
+    "drag": 0.1,
+    "passes": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.0189027378235684,
+          "maxRotation": 0.10026078433869395
+        },
+        "awake5": 24
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.01946457608793653,
+          "maxRotation": 0.4945739259746543
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.0019521738747765357,
+          "maxRotation": 0.023414449260801527
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.0025940465346331204,
+          "maxRotation": 0.049114541465426306
+        },
+        "awake5": 16
+      }
+    ]
+  },
+  {
+    "spread": 0.3,
+    "drag": 1,
+    "passes": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.003915656138532086,
+          "maxRotation": 0.05307040059303785
+        },
+        "awake5": 28
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.028643137070527794,
+          "maxRotation": 0.36970978146850836
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0.005197366989045144,
+          "maxRotation": 0.049094453258143926
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.014274447230694423,
+          "maxRotation": 0.4439539886205249
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.006871752530496068,
+          "maxRotation": 0.08231151271420853
+        },
+        "awake5": 19
+      }
+    ]
+  },
+  {
+    "spread": 0.3,
+    "drag": 2,
+    "passes": [
+      true,
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.12102316359845884,
+          "maxRotation": 0.8759051569676002
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.008494921010836588,
+          "maxRotation": 0.17995872543926014
+        },
+        "awake5": 168
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.0018329577933360645,
+          "maxRotation": 0.05056230449172251
+        },
+        "awake5": 4
+      }
+    ]
+  },
+  {
+    "spread": 0.3,
+    "drag": 3,
+    "passes": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.013736565090685013,
+          "maxRotation": 0.1745386644517918
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.05669506722165375,
+          "maxRotation": 0.4008177920598349
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0.006609017541478499,
+          "maxRotation": 0.05494410016032262
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.003971096453873647,
+          "maxRotation": 0.10559951903904768
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  {
+    "spread": 0.6,
+    "drag": 0.1,
+    "passes": [
+      false,
+      true,
+      false,
+      true,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.009589256466451607,
+          "maxRotation": 0.08064292656482228
+        },
+        "awake5": 18
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0.006106405425719874,
+          "maxRotation": 0.019525210544392144
+        },
+        "awake5": 3
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.0005211432305235507,
+          "maxRotation": 0.005827035287692337
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 4.2146848510894035e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.002186912043090228,
+          "maxRotation": 0.023326738014781856
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  {
+    "spread": 0.6,
+    "drag": 1,
+    "passes": [
+      false,
+      true,
+      false,
+      true,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.0019971796731273563,
+          "maxRotation": 0.031108271423091985
+        },
+        "awake5": 2
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0.00856403028441448,
+          "maxRotation": 0.22584707936727955
+        },
+        "awake5": 72
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.00848556156970369,
+          "maxRotation": 0.07563274699288677
+        },
+        "awake5": 41
+      }
+    ]
+  },
+  {
+    "spread": 0.6,
+    "drag": 2,
+    "passes": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.00818820402184618,
+          "maxRotation": 0.044254192312753717
+        },
+        "awake5": 4
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.10028135482619882,
+          "maxRotation": 0.7186360892694229
+        },
+        "awake5": 110
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 4.2146848510894035e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.000599228502285182,
+          "maxRotation": 0.00843838801576333
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  {
+    "spread": 0.6,
+    "drag": 3,
+    "passes": [
+      true,
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.12383628006006042,
+          "maxRotation": 0.5629489254176103
+        },
+        "awake5": 170
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 4.2146848510894035e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.004694461584978752,
+          "maxRotation": 0.059390151270937455
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.0022735895731888023,
+          "maxRotation": 0.04617797242755205
+        },
+        "awake5": 7
+      }
+    ]
+  },
+  {
+    "spread": 0.85,
+    "drag": 0.1,
+    "passes": [
+      true,
+      false,
+      false,
+      true,
+      true,
+      true
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.006568926705875147,
+          "maxRotation": 0.3150257445125349
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0.003937942618144154,
+          "maxRotation": 0.013565443275773633
+        },
+        "awake5": 71
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  {
+    "spread": 0.85,
+    "drag": 1,
+    "passes": [
+      false,
+      true,
+      true,
+      false,
+      true,
+      true
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.008377969506936906,
+          "maxRotation": 0.12895491502842044
+        },
+        "awake5": 32
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 1.2686131390209653e-06,
+          "maxRotation": 1.2307817929836841e-05
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 6.664001874625056e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.01726742750699015,
+          "maxRotation": 0.4699391662154034
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  {
+    "spread": 0.85,
+    "drag": 2,
+    "passes": [
+      true,
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.00017711911086037987,
+          "maxRotation": 0.0009631039631302744
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.07473268069420717,
+          "maxRotation": 0.28831273157724335
+        },
+        "awake5": 159
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0.00010375520555643522,
+          "maxRotation": 0.0037179755604763165
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.0039024827703735315,
+          "maxRotation": 0.05319310334975073
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 4.2146848510894035e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.004571211376388217,
+          "maxRotation": 0.07098346541019346
+        },
+        "awake5": 44
+      }
+    ]
+  },
+  {
+    "spread": 0.85,
+    "drag": 3,
+    "passes": [
+      true,
+      false,
+      false,
+      true,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.0019419292142126322,
+          "maxRotation": 0.024721507080600762
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0.06914616571664109,
+          "maxRotation": 0.2035778507052141
+        },
+        "awake5": 72
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.0009640159760243028,
+          "maxRotation": 0.027280701358335192
+        },
+        "awake5": 8
+      }
+    ]
+  },
+  {
+    "spread": 0.95,
+    "drag": 0.1,
+    "passes": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.008435322672218392,
+          "maxRotation": 0.08663528213714017
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.010643139422492629,
+          "maxRotation": 0.282336917957363
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.003770155834401641,
+          "maxRotation": 0.05322706611688673
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 4.2146848510894035e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.0009267685325743132,
+          "maxRotation": 0.042971727392683956
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  {
+    "spread": 0.95,
+    "drag": 1,
+    "passes": [
+      true,
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.012180523991541096,
+          "maxRotation": 0.08082348056261993
+        },
+        "awake5": 88
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 7.636845111846924e-07,
+          "maxRotation": 8.737723785834856e-06
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.004147089214929177,
+          "maxRotation": 0.053942191200485254
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.007167179341204543,
+          "maxRotation": 0.1879642937462127
+        },
+        "awake5": 28
+      }
+    ]
+  },
+  {
+    "spread": 0.95,
+    "drag": 2,
+    "passes": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      true
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0.04253395604283718,
+          "maxRotation": 0.5884997854602532
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.02445417538015068,
+          "maxRotation": 0.17987104008083568
+        },
+        "awake5": 83
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.00476898308740764,
+          "maxRotation": 0.03737075500412405
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.0001613748239364037,
+          "maxRotation": 0.0017132199151235008
+        },
+        "awake5": 0
+      }
+    ]
+  },
+  {
+    "spread": 0.95,
+    "drag": 3,
+    "passes": [
+      true,
+      false,
+      false,
+      false,
+      true,
+      true
+    ],
+    "results": [
+      {
+        "name": "main-1-wall",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 5.960464477539063e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-4-wall",
+        "rest": {
+          "maxDisplacement": 0.0008580156568377054,
+          "maxRotation": 0.04016059513490259
+        },
+        "awake5": 0
+      },
+      {
+        "name": "main-settled-crack-wall",
+        "rest": {
+          "maxDisplacement": 0.0035530282181092023,
+          "maxRotation": 0.021538965871916962
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L1",
+        "rest": {
+          "maxDisplacement": 0.04597107443603997,
+          "maxRotation": 0.5587247671314056
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L2",
+        "rest": {
+          "maxDisplacement": 0,
+          "maxRotation": 4.2146848510894035e-08
+        },
+        "awake5": 0
+      },
+      {
+        "name": "lab-L3",
+        "rest": {
+          "maxDisplacement": 0.00015759728188098813,
+          "maxRotation": 0.0020624962142813006
+        },
+        "awake5": 0
+      }
+    ]
+  }
+]

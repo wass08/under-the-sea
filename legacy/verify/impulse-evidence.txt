@@ -1,0 +1,40 @@
+DEFAULTS: impulse=1.60 (0.5–3), falloff=3.8 (0.5–6), forward=0.60 (0.15–0.9), spin=1.00 (0–2); applied next break.
+LAB: faster core/slower outer fan, forward velocity and bounded small-fragment tumble; L1 and aquarium formulas unchanged.
+case stage t(s) radialMean radialP90 outwardFraction
+L2 before 0.10 0.860 1.728 1.000
+L2 before 0.25 1.375 2.579 0.878
+L2 before 0.50 1.226 3.233 0.658
+L2 after 0.10 2.860 4.870 1.000
+L2 after 0.25 2.357 4.006 1.000
+L2 after 0.50 1.321 3.389 0.878
+L3 before 0.10 1.360 2.090 0.987
+L3 before 0.25 1.509 2.570 0.987
+L3 before 0.50 1.525 3.473 0.840
+L3 after 0.10 3.766 6.389 1.000
+L3 after 0.25 2.683 4.916 0.947
+L3 after 0.50 1.664 3.905 0.867
+aquarium before=after 0.10 4.566 7.801 0.986
+aquarium before=after 0.25 4.432 7.473 0.991
+aquarium before=after 0.50 2.231 5.816 0.904
+Cloud radius = p90 body-centre distance from impact (scene units); retention = median speed(0.25s)/median speed(0.10s).
+case stage radius@0.25 radius@0.50 radius@1.00 retention
+L2 before 1.621 1.997 2.135 1.289
+L2 after 2.119 2.829 3.422 0.897
+L3 before 1.608 1.949 2.375 1.117
+L3 after 1.959 2.824 3.839 0.798
+aquarium before=after 2.244 3.361 4.671 1.012
+FPS L2: airborne median 60.24, settled median 59.88
+FPS L3: airborne median 60.24, settled median 59.88
+L3 core radius@0.5s (initial radius<0.35): 1.740 -> 3.742.
+PASS shatter L1: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L2: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, pending audio cancellation.
+PASS Run K: shared release, 10× density invariance for linear/angular launch, bounded spin, rotated pane normals, level-dependent falloff, disposal.
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS aquarium profile: all 300 steps of positions, rotations and linear/angular velocities are bit-identical to pre-tuning sources.
+PASS Lab profile: deterministic render chunking, density-invariant impulses, bounded tumble, 3-4s rest and native sleep by 5s for L1-L3.
+PASS Lab controls: defaults, real Tweakpane edits, next-break application, settings persistence, frozen poses and unchanged L1.
+FRAMES: verify/perf-after/lab-L3-impulse-010.png / -025.png / -050.png / -100.png; exact solver times, original burst camera.
+LOOK: core opens first, the outer fan follows; wider airborne spread at 0.5s; many shards land by 1s and scatter across the floor/plinth by 2s. Fast core pieces can leave the framing.
+TRAJECTORIES: existing Run D/K/N expectations unchanged; added Lab-profile determinism and frozen-source aquarium equality checks.

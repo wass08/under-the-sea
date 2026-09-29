@@ -1,0 +1,114 @@
+{
+  "verify/island-sheet.png": {
+    "sha256": "d015d224e0617d253be2cf2293e394676904ccdce26ab8d022bc357d2798f216",
+    "bytes": 425785
+  },
+  "verify/pass-default.png": {
+    "sha256": "bec9c28c57b41ed1a708c5854de6eab917860c7337a4edce9d90a6eff3994f2b",
+    "bytes": 1661507
+  },
+  "verify/pass-front.png": {
+    "sha256": "f8f88ca4d08bdd875ac26c29aa01a21c9aacaee1fa2e53333504ad9a55dddabf",
+    "bytes": 1631690
+  },
+  "verify/pass-floor.png": {
+    "sha256": "a1d3b42f73a79a82d2f8225d01e3f780d2984f72ad21b18240202bf01062b351",
+    "bytes": 2623868
+  },
+  "verify/idle.png": {
+    "sha256": "60e181c1138d3e845367050deb2514fc4318c1af6eb2e3750e250f24734bfffd",
+    "bytes": 1665891
+  },
+  "verify/crack.png": {
+    "sha256": "8ab89ba7e4fed19a9b964451a41b11680f201b5f726bd1f126291ed05e25aa7b",
+    "bytes": 1716258
+  },
+  "verify/spill.png": {
+    "sha256": "e61a852c24126bd48541119b3d6ba37331844ca9ad14dd151bb1de4ffadbc462",
+    "bytes": 1626719
+  },
+  "verify/shatter-airborne.png": {
+    "sha256": "9fe190d8ea2fc1ed547c8c1032b59bf3f4bc57c18ccb0c1352f3d02ed0873d7c",
+    "bytes": 1544074
+  },
+  "verify/shatter.png": {
+    "sha256": "c163371c5fd6c1f5d5985bdd18caba2a7f17c86ae2036582ad0dca0c5356db6f",
+    "bytes": 1327114
+  },
+  "verify/shatter-settled.png": {
+    "sha256": "013badf96fabde4d09a471e0ac175db71b0bdab35feab35ced354f46959b4d23",
+    "bytes": 1435525
+  },
+  "verify/lab/terrain-L3.png": {
+    "sha256": "c15a5283bff48aa105df5d8f33dc4a894acb1e7cbd33b47509662cbaf87f5cf2",
+    "bytes": 379536
+  },
+  "verify/lab/shatter-L3-broken.png": {
+    "sha256": "524473c870867e9d4247317edfbe2bcf228fddd656619743c85c2b592a5c35c6",
+    "bytes": 319933
+  },
+  "verify/lab/caustics-L3.png": {
+    "sha256": "4dc1a5f10eb0ca3976e8cc6296a4f4390a462c78bf7b92e6ca0ac2ab2c036d0b",
+    "bytes": 367404
+  },
+  "verify/run-o/tsc.txt": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "verify/run-o/build.txt": {
+    "sha256": "a1714ebabacbf847eec6f8d9c4b44322cabc4ad056e7c4fc1428ffe593bcb818",
+    "bytes": 1071
+  },
+  "verify/run-o/runtime.txt": {
+    "sha256": "9c329624501b0ab5bd90111e1c501fe27bcd31ad9698cf445fbc66011df0d056",
+    "bytes": 16473
+  },
+  "verify/run-o/edges.txt": {
+    "sha256": "e25f31dd3f8e4010c7af24c5bd22dac816655668f02387db62e79d1832024c31",
+    "bytes": 409
+  },
+  "verify/run-o/lab.txt": {
+    "sha256": "0018db99e28c61309fb48be81d2a959a566fef0e54044d839f8d8caa648ff5dd",
+    "bytes": 1494
+  },
+  "verify/run-o/library.txt": {
+    "sha256": "86d27442b6dae40c58985f7d832d81f1a8779b8db767f24009905dad2568eb2a",
+    "bytes": 1218
+  },
+  "verify/run-o/physics.txt": {
+    "sha256": "b9c109a2a2d2d58c8697da9eb7f203d97f5240c0271dcde7819dd6ff983e4459",
+    "bytes": 30982
+  },
+  "verify/run-o/after-physics.json": {
+    "sha256": "b9c109a2a2d2d58c8697da9eb7f203d97f5240c0271dcde7819dd6ff983e4459",
+    "bytes": 30982
+  },
+  "verify/run-o/before-physics.json": {
+    "sha256": "00f11d22ca2b1e04898ceb6510fbbf66567616ae375919f647c9d99ff9d13a2b",
+    "bytes": 22322
+  },
+  "verify/run-o/metrics.json": {
+    "sha256": "021c9300b586db153c3cd413b9403a2a96a00e09281402367b79da4776bbf59b",
+    "bytes": 1990
+  },
+  "verify/run-o/height-stats.json": {
+    "sha256": "8e2f5d6c278b7a9b72c9ef22c42033982b925f6f412b1f4d0ad7bf6f8de1592f",
+    "bytes": 4226
+  },
+  "verify/run-o/seed-scores.json": {
+    "sha256": "d57221dc1d859100d3bf8857f746246e05bf6a025e1a2ef30c3cb20a899a2ad7",
+    "bytes": 159251
+  },
+  "verify/run-o/sheet.json": {
+    "sha256": "b26874c0846ff1734661f77e3a88b4e430591a82902caf5cd475120f37813af4",
+    "bytes": 5819
+  },
+  "verify/run-o/source-hashes.json": {
+    "sha256": "cd2ae7d0e4114ab1d6c5bd2d32341ab075577736bb5338a546a1776f4bf56c64",
+    "bytes": 4581
+  },
+  "verify/run-o/REPORT.md": {
+    "sha256": "6f850205f4eb8f3fd91331f3737bfbe86ba6fbc25f7be2c5c317b86078f72886",
+    "bytes": 14232
+  }
+}

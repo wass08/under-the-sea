@@ -1,0 +1,160 @@
+--- verify/run-g/before/src/scene/island.ts
++++ src/scene/island.ts
+@@ -1,6 +1,6 @@
+ import { DataTexture, FloatType, RedFormat, LinearFilter, BoxGeometry, DodecahedronGeometry, InstancedMesh, Mesh, MeshStandardNodeMaterial, Object3D, Scene } from 'three/webgpu';
+ import { attribute, color, float, mix, mx_noise_float, positionWorld, smoothstep } from 'three/tsl';
+-import { causticLight, rockCaustics, signedWaterDistance, underwaterColor } from './lighting';
++import { causticLight, rockCaustics, signedWaterDistance, submerged, underwaterColor } from './lighting';
+ import { generateTerrain } from '../lib/terrain';
+ import { random, TANK } from '../state';
+ 
+@@ -33,6 +33,8 @@
+   const tint = region.lessThan(0.5).select(color('#c2b394'), region.lessThan(1.5).select(color('#70835a'), region.lessThan(2.5).select(color('#85817a'), color('#e6ecf0'))));
+   const wet = smoothstep(0, 0.035, signedWaterDistance).mul(float(1).sub(smoothstep(0.04, 0.16, signedWaterDistance)));
+   material.colorNode = underwaterColor(tint.mul(float(1).sub(wet.mul(0.42))));
++  // Water attenuates diffuse sky/environment fill; preserve direct sun contrast.
++  material.aoNode = mix(float(1), float(0.045), submerged);
+   material.emissiveNode = rockCaustics;
+   const peak = new Mesh(geometry, material);
+   peak.position.y = TANK.floor + 0.02; peak.castShadow = true; peak.receiveShadow = true; scene.add(peak);
+--- verify/run-g/before/src/scene/lighting.ts
++++ src/scene/lighting.ts
+@@ -22,7 +22,7 @@
+ export function underwaterColor(base: Node<'vec3'>) {
+   return mix(base, base.mul(color('#529f98')).mul(waterDepth.mul(-0.14).exp()), submerged.mul(0.80));
+ }
+-// Shafts and motes share the same light-space mask.
++// Light-space mask for drifting motes.
+ export function lightShaftMask(point: Node<'vec3'>) {
+   const projected = point.xz.sub(sunDirection.xz.mul(point.y.div(sunDirection.y.max(0.2))));
+   return projected.x.mul(3.5).add(projected.y.mul(1.7)).add(simTime.mul(0.12)).sin().mul(0.5).add(0.5).pow(12);
+--- verify/run-g/before/src/scene/shafts.ts
++++ src/scene/shafts.ts
+@@ -1,7 +1,6 @@
+ import { AdditiveBlending, BackSide, BoxGeometry, DataTexture, Mesh, MeshBasicNodeMaterial, Scene } from 'three/webgpu';
+ import { Fn, If, Loop, cameraPosition, cameraProjectionMatrixInverse, color, float, getViewPosition, positionWorld, screenCoordinate, screenUV, smoothstep, texture, vec2, vec3, viewportDepthTexture } from 'three/tsl';
+-import { lightShaftMask } from './lighting';
+-import { sunDirection, sunElevation, TANK, waterHeight, waterNormal } from '../state';
++import { simTime, sunDirection, sunElevation, TANK, waterHeight, waterNormal } from '../state';
+ 
+ export function createShafts(scene: Scene, terrain: DataTexture) {
+   const material = new MeshBasicNodeMaterial({ transparent: true, blending: AdditiveBlending, depthWrite: false, depthTest: false, side: BackSide });
+@@ -11,7 +10,10 @@
+   const depth = viewportDepthTexture();
+   material.opacityNode = Fn(() => {
+     const ray = positionWorld.sub(cameraPosition).normalize().toVar();
+-    const safeRay = ray.greaterThanEqual(0).select(ray.max(0.00001), ray.min(-0.00001));
++    // TSL select takes a scalar condition; preserve each axis sign separately.
++    // A vector condition chose the x sign for y/z and erased front-left rays.
++    const safeAxis = (axis: typeof ray.x) => axis.greaterThanEqual(0).select(axis.max(0.00001), axis.min(-0.00001));
++    const safeRay = vec3(safeAxis(ray.x), safeAxis(ray.y), safeAxis(ray.z));
+     const a = vec3(-2.94, TANK.floor + 0.12, -1.69).sub(cameraPosition).div(safeRay);
+     const b = vec3(2.94, TANK.top, 1.69).sub(cameraPosition).div(safeRay);
+     const near = a.min(b), far = a.max(b);
+@@ -40,10 +42,18 @@
+         const height = texture(terrain, towardSun.xz.div(vec2(6, 3.5)).add(0.5)).level(float(0)).r;
+         visibility.mulAssign(smoothstep(-0.03, 0.08, towardSun.y.sub(height)));
+       }
++      // Five localized light-space apertures; a 1D stripe mask integrates into
++      // a veil along oblique view rays. Gaps between these beams have zero light.
++      const surfacePoint = point.xz.add(sunDirection.xz.mul(waterHeight.sub(point.y).div(sunDirection.y.max(0.2))));
++      const mask = float(0).toVar();
++      for (const [x, z] of [[-2.65, -0.7], [-2.5, 1.35], [-0.8, 1.4], [1.3, 1.3], [2.4, -0.45]]) {
++        const delta = surfacePoint.sub(vec2(x, z).add(vec2(simTime.mul(0.12).sin().mul(0.06), 0)));
++        mask.addAssign(smoothstep(0.34, 0.08, delta.length()));
++      }
+       const density = belowSurface.mul(-0.85).exp().mul(edge).mul(visibility);
+-      light.addAssign(lightShaftMask(point).mul(0.92).add(0.008).mul(density).mul(step).mul(distance.sub(entry).mul(-0.12).exp()));
++      light.addAssign(mask.mul(density).mul(step).mul(distance.sub(entry).mul(-0.12).exp()));
+     });
+-    return light.mul(sunElevation).mul(0.09).min(0.18);
++    return light.mul(sunElevation).mul(0.32).min(0.20);
+   })();
+   const box = new Mesh(new BoxGeometry(5.88, TANK.top - TANK.floor - 0.12, 3.38), material);
+   box.name = 'Water single scattering'; box.position.y = (TANK.top + TANK.floor + 0.12) / 2;
+--- verify/run-g/before/src/scene/spill.ts
++++ src/scene/spill.ts
+@@ -30,12 +30,14 @@
+   type Drop = { p: Vector3; v: Vector3; born: number; life: number; size: number; splash: boolean };
+   const drops: (Drop | undefined)[] = Array(count); let cursor = 0;
+   const sheetMaterial = new MeshPhysicalNodeMaterial({ color: '#bbebe2', transmission: 0.9, ior: 1.33, roughness: 0.04, thickness: 0.035, side: DoubleSide, transparent: true, opacity: 0.44, depthWrite: false });
+-  const puddleMaterial = new MeshPhysicalNodeMaterial({ color: '#35585d', transmission: 0.35, thickness: 0.025, ior: 1.33, metalness: 0, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.12, transparent: true, opacity: 0.52, depthWrite: false });
++  const puddleMaterial = new MeshPhysicalNodeMaterial({ color: '#35585d', transmission: 0.35, thickness: 0.025, ior: 1.33, metalness: 0, roughness: 0.22, clearcoat: 0.35, clearcoatRoughness: 0.25, transparent: true, opacity: 0.52, depthWrite: false });
+   // Keep both water and clearcoat sun reflections below the 1.3 bloom threshold.
+-  puddleMaterial.outputNode = vec4(output.rgb.min(1.1), output.a);
++  // Rewind restores transforms only; this bounded material serves both directions.
++  puddleMaterial.fog = false;
++  puddleMaterial.outputNode = vec4(output.rgb.div(output.rgb.div(0.22).add(1)), output.a);
+   // A shallow traveling normal catches the sky without hiding the floor below.
+   puddleMaterial.normalNode = bumpMap(positionWorld.x.mul(9).add(positionWorld.z.mul(7)).sub(simTime.mul(1.8)).sin(), float(0.006));
+-  puddleMaterial.envMapIntensity = 1.8;
++  puddleMaterial.envMapIntensity = 1.1;
+   puddleMaterial.opacityNode = smoothstep(0.5, 0.39, uv().sub(0.5).length()).mul(0.32);
+   type Emitter = { opening: Opening; sheet: Mesh<PlaneGeometry, MeshPhysicalNodeMaterial>; puddle: Mesh; volume: number; carry: number; stopped: number; strength: number; wet: boolean; rippleAt: number };
+   const emitters = new Map<number, Emitter>();
+--- verify/run-g/before/src/scene/tank.ts
++++ src/scene/tank.ts
+@@ -1,5 +1,5 @@
+ import { AdditiveBlending, BoxGeometry, BufferGeometry, Color, DoubleSide, Float32BufferAttribute, LineBasicNodeMaterial, LineSegments, Mesh, MeshPhysicalNodeMaterial, MeshStandardNodeMaterial, Quaternion, Scene, Vector3 } from 'three/webgpu';
+-import { cameraPosition, color, float, normalWorld, output, positionWorld, vec4 } from 'three/tsl';
++import { attribute, cameraPosition, color, float, normalWorld, output, positionWorld, vec4 } from 'three/tsl';
+ import { underwaterColor } from './lighting';
+ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+ import { buildShardGeometry, generateShatterPattern, groupAdjacentCells, insetCell, type ShatterCell } from '../lib/shatter';
+@@ -13,6 +13,7 @@
+   const physics = await createPhysicsWorld(), rng = random(912), height = TANK.top - TANK.floor;
+   const glass = new MeshPhysicalNodeMaterial({ color: '#f6fffc', transmission: 1, thickness: 0.05, ior: 1.52, roughness: 0.04, attenuationColor: new Color('#cfe8e4'), attenuationDistance: 1.5, dispersion: 0.015, clearcoat: 0, side: DoubleSide, transparent: true, opacity: 0.28, depthWrite: false });
+   const grazing = float(1).sub(normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).abs()).pow(5);
++  glass.fog = false; // The opaque interior already contains distance fog.
+   glass.opacityNode = grazing.mul(0.24).add(0.16);
+   glass.colorNode = underwaterColor(color('#f6fffc').rgb);
+   glass.emissiveNode = color('#9ebbbd').mul(grazing).mul(0.045);
+@@ -45,9 +46,13 @@
+   const cracks = new Map<number, Crack>();
+   const shards: { mesh: Mesh; body: ReturnType<typeof physics.addShard> }[] = [];
+   // Render all loose glass in one draw. Each cell keeps its own convex collider.
+-  const looseGlass = glass.clone(); looseGlass.opacity = 0.42; looseGlass.opacityNode = null; looseGlass.colorNode = null; looseGlass.depthWrite = false;
++  const looseGlass = glass.clone(); looseGlass.opacity = 0.55; looseGlass.opacityNode = grazing.mul(0.30).add(0.55); looseGlass.colorNode = null; looseGlass.depthWrite = false;
+   // Broaden shard glints and bound their HDR output below the bloom threshold.
+-  looseGlass.roughness = 0.12; looseGlass.outputNode = vec4(output.rgb.min(1.1), output.a);
++  looseGlass.roughness = 0.18;
++  // Smoothly compress glints, rather than clipping a whole sun lobe to white.
++  // The same batch/material is used for physics and rewind playback.
++  looseGlass.emissiveNode = color('#b9dedb').mul(attribute('shardEdge', 'float').mul(0.12).add(grazing.max(0).sqrt().mul(0.10)));
++  looseGlass.outputNode = vec4(output.rgb.div(output.rgb.div(0.55).add(1)), output.a);
+   const loose = new Mesh(new BufferGeometry(), looseGlass); loose.frustumCulled = false; loose.visible = false; scene.add(loose);
+   let offsets: number[] = [];
+   function rebuildBatch() {
+@@ -56,6 +61,14 @@
+     loose.geometry.dispose(); loose.geometry = new BufferGeometry();
+     loose.geometry.setAttribute('position', new Float32BufferAttribute(new Float32Array(total * 3), 3));
+     loose.geometry.setAttribute('normal', new Float32BufferAttribute(new Float32Array(total * 3), 3));
++    // The extrusion's thin side faces catch light even when a face lies flat.
++    // This static channel survives every transform, including reverse playback.
++    const edge = new Float32Array(total);
++    shards.forEach(({ mesh }, j) => {
++      const normals = mesh.geometry.getAttribute('normal');
++      for (let i = 0; i < normals.count; i++) edge[offsets[j] + i] = Math.abs(normals.getZ(i)) < 0.5 ? 1 : 0;
++    });
++    loose.geometry.setAttribute('shardEdge', new Float32BufferAttribute(edge, 1));
+     loose.visible = total > 0;
+   }
+   function clearColliders(wall: number) { for (const body of colliders[wall]) physics.removeBody(body); colliders[wall] = []; }
+--- verify/run-g/before/src/scene/water.ts
++++ src/scene/water.ts
+@@ -5,6 +5,7 @@
+ 
+ export function createWater(scene: Scene) {
+   const surfaceMaterial = new MeshPhysicalNodeMaterial({ color: '#a2d5cd', transmission: 1, roughness: 0.03, metalness: 0, ior: 1.333, thickness: 0.16, attenuationColor: new Color('#b5e6dc'), attenuationDistance: 4, side: DoubleSide, transparent: true, opacity: 0.88, depthWrite: false });
++  surfaceMaterial.fog = false;
+   const ripples = Array.from({ length: 4 }, () => uniform(new Vector4(0, 0, -100, 0)));
+   let rippleIndex = 0;
+   let waves = mx_noise_float(positionWorld.mul(vec3(3.5, 0, 3.5)).add(vec3(simTime.mul(0.24), simTime.mul(0.17), 0)))
+@@ -39,6 +40,7 @@
+   surface.renderOrder = 3; scene.add(surface);
+ 
+   const volumeMaterial = new MeshPhysicalNodeMaterial({ color: '#bbdfd8', transmission: 1, roughness: 0.04, ior: 1.333, thickness: 0.22, attenuationColor: new Color('#429b91'), attenuationDistance: 1, side: DoubleSide, transparent: true, opacity: 0.10, depthWrite: false });
++  volumeMaterial.fog = false;
+   volumeMaterial.colorNode = Fn(() => {
+     Discard(signedWaterDistance.greaterThan(0));
+     return color('#89c6bc').rgb.mul(vec3(0.16, 0.025, 0.018).mul(waterDepth).negate().exp());

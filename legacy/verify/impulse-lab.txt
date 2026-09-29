@@ -1,0 +1,25 @@
+PASS terrain L1: WebGPU ready, screenshot captured
+PASS terrain L2: WebGPU ready, screenshot captured
+PASS terrain L3: WebGPU ready, screenshot captured
+PASS caustics L1: WebGPU ready, screenshot captured
+PASS caustics L2: WebGPU ready, screenshot captured
+PASS caustics L3: WebGPU ready, screenshot captured
+L1 launch: {"radialFraction":0,"count":228,"min":2.200000047683716,"median":2.200000047683716,"max":2.200000047683716,"maxAngular":0}; impact: [0.02,0.01]
+L1 settling: {"samples":61,"maxDisplacement":0.00005126726188591283,"maxRotation":0.0017497630228169236}; awake at 5 s: 0
+PASS shatter L1: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+L2 launch: {"radialFraction":0.800000001320907,"count":41,"min":3.5431247080939805,"median":3.7740158202517757,"max":9.627438639276594,"maxAngular":8.483102986744495}; impact: [0.02,0.01]
+L2 settling: {"samples":61,"maxDisplacement":0,"maxRotation":5.960464477539063e-8}; awake at 5 s: 0
+PASS shatter L2: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+L3 launch: {"radialFraction":0.8000000053085967,"count":75,"min":3.5441011998245004,"median":4.24616069795221,"max":12.36918405325889,"maxAngular":12.175006940256573}; impact: [0.02,0.01]
+L3 settling: {"samples":61,"maxDisplacement":4.43582816273305e-8,"maxRotation":0.0000010844114660418316}; awake at 5 s: 0
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS camera auto-rotate L1→L2: before={"position":[13.49256901929156,15.000000000000007,20.85546885734423],"target":[0,1,0],"zoom":1,"distance":28.513154858766537,"autoRotate":true} after={"position":[13.426796070478764,15.000000000000009,20.897874228776896],"target":[0,1,0],"zoom":1,"distance":28.513154858766537,"autoRotate":true}
+PASS camera rotating terrain→caustics: default pose applied with no residual orbit momentum
+PASS camera terrain L1→L2: before={"position":[-8.307701996053693,21.077624426380346,13.646237569900668],"target":[-1.0740122198028763,1.4835863111422525,-0.47176787747167015],"zoom":1,"distance":25.21052707208784,"autoRotate":false} after={"position":[-8.30770200800243,21.077624431974552,13.646237557485064],"target":[-1.0740122220056745,1.483586312137287,-0.4717678785106349],"zoom":1,"distance":25.21052707208784,"autoRotate":false}; settings preserved
+PASS camera terrain L1→L3: before={"position":[-8.307701996053693,21.077624426380346,13.646237569900668],"target":[-1.0740122198028763,1.4835863111422525,-0.47176787747167015],"zoom":1,"distance":25.21052707208784,"autoRotate":false} after={"position":[-8.307702008210496,21.077624432072003,13.646237557268822],"target":[-1.0740122220440371,1.4835863121546151,-0.47176787852872887],"zoom":1,"distance":25.21052707208784,"autoRotate":false}; settings preserved
+PASS camera terrain slider L3→L2: pose, stopped auto-rotate and settings preserved
+PASS camera bench switch terrain→caustics: before={"position":[-8.307701996053693,21.077624426380346,13.646237569900668],"target":[-1.0740122198028763,1.4835863111422525,-0.47176787747167015],"zoom":1,"distance":25.21052707208784,"autoRotate":false} after={"position":[12,13.000000000000005,16],"target":[0,0.4,0],"zoom":1,"distance":23.638104830971542,"autoRotate":false}; defaults applied
+PASS caustics L3→L1→L2: camera, reveal toggles and parameters preserved
+PASS shatter L3→L1→L2: camera, reveal toggles, count, freeze and slowMotion preserved; measured rate=0.14436744847651295
+PASS aquarium renders; both page links, Lab navigation and keyboard levels work.
+Console: 0 errors; 0 warnings.

@@ -20,3 +20,5 @@ verify/**/followup-before/
 verify/lab/
 verify/ui/*.png
 dist-*/
+legacy/verify/**/*.png
+shots/

@@ -1,0 +1,151 @@
+{
+  "lab": [
+    {
+      "level": 1,
+      "vertices": 1656,
+      "triangles": 3154,
+      "unchanged": true
+    },
+    {
+      "level": 2,
+      "vertices": 1656,
+      "triangles": 3154,
+      "unchanged": true
+    },
+    {
+      "level": 3,
+      "vertices": 1777,
+      "triangles": 3396,
+      "unchanged": true
+    }
+  ],
+  "metrics": {
+    "seed": 166,
+    "eligible": true,
+    "score": 96.849,
+    "mainAboveWater": 0.5299999046325685,
+    "secondaryAboveWater": -0.03244764328002914,
+    "saddleDepth": 0.6782936525344847,
+    "footprintFraction": 0.41472277796448326,
+    "ratio": 0.7836740120988264,
+    "peak": 2.7799999046325685,
+    "secondary": 2.217552356719971,
+    "saddle": 1.571706347465515,
+    "main": {
+      "i": 7,
+      "h": 2.5999999046325684,
+      "x": -1.412701964378357,
+      "z": -0.6081410646438599
+    },
+    "second": {
+      "i": 447,
+      "h": 2.0375523567199707,
+      "x": 0.5334070920944214,
+      "z": -0.567223072052002
+    },
+    "dryHeightFraction": 0.2038461246434038,
+    "dryAreaFraction": 0.03470116529507811,
+    "biomePct": [
+      43.40432838474731,
+      6.413833857077392,
+      50.18183775817533,
+      0
+    ],
+    "gullies": 4,
+    "speckle": 0,
+    "clipping": 0,
+    "terms": {
+      "summit": 14.933483794076242,
+      "ratio": 14.958735338176531,
+      "secondary": 14.987940915120912,
+      "saddle": 19.300927042633294,
+      "separation": 10,
+      "footprint": 12.667708689997674,
+      "gullies": 10,
+      "snow": 0,
+      "clipping": 0,
+      "speckle": 0
+    }
+  },
+  "heightTextureMaxError": 1.16609510936172e-7,
+  "objects": [
+    {
+      "name": "gravel",
+      "count": 130,
+      "checked": 9540,
+      "penetrations": 0
+    },
+    {
+      "name": "Coral fans",
+      "count": 25,
+      "checked": 22500,
+      "penetrations": 0
+    },
+    {
+      "name": "Tube coral",
+      "count": 23,
+      "checked": 32016,
+      "penetrations": 0
+    },
+    {
+      "name": "Brain coral",
+      "count": 20,
+      "checked": 8560,
+      "penetrations": 0
+    },
+    {
+      "name": "Seagrass",
+      "count": 135,
+      "checked": 6075,
+      "penetrations": 0
+    }
+  ],
+  "dryFaces": 107,
+  "dryFacesWithGreen": 18,
+  "snowWeight": 0,
+  "diagnostics": {
+    "unwarped": {
+      "min": 0,
+      "max": 2.928971290588379,
+      "mean": 0.8424471930649465,
+      "rms": 1.1237835896546065
+    },
+    "warped": {
+      "min": 0,
+      "max": 2.9638566970825195,
+      "mean": 0.8475328426358578,
+      "rms": 1.1344140838426362
+    },
+    "thermal": {
+      "min": 0,
+      "max": 2.928426742553711,
+      "mean": 0.8475328457871797,
+      "rms": 1.1254525747390325
+    },
+    "carved": {
+      "min": 0,
+      "max": 2.884366512298584,
+      "mean": 0.7968950473150854,
+      "rms": 1.0701512332296408
+    },
+    "warpChange": {
+      "meanAbsolute": 0.03775667450553612,
+      "maxAbsolute": 0.2687597870826721,
+      "changed": 1396
+    },
+    "thermalChange": {
+      "meanAbsolute": 0.021315705728309507,
+      "maxAbsolute": 0.163274884223938,
+      "changed": 1120
+    },
+    "carveChange": {
+      "meanAbsolute": 0.05063779847209422,
+      "maxAbsolute": 0.22593510150909424,
+      "changed": 1211
+    },
+    "dropletPaths": 420,
+    "gullyCount": 4,
+    "gullyVertices": 541,
+    "maximumIncision": 0.23999999463558197
+  }
+}

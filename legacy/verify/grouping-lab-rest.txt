@@ -1,0 +1,3 @@
+{"profile":"launch","trial":0,"impact":[0.02,0.01],"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":9,"awake5":0}
+{"profile":"launch","trial":1,"impact":[0.02,0.01],"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":9,"awake5":0}
+{"profile":"launch","trial":2,"impact":[0.02,0.01],"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":9,"awake5":0}

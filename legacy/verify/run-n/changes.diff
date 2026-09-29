@@ -1,0 +1,880 @@
+diff -ru verify/run-n/before/src/aquarium.ts src/aquarium.ts
+--- verify/run-n/before/src/aquarium.ts	2026-09-16 13:49:33
++++ src/aquarium.ts	2026-09-16 13:54:29
+@@ -38,7 +38,7 @@
+   try { await renderer.init(); } catch (error) { fail('WebGPU could not start. Enable hardware acceleration and open in current Chrome or Edge.', error, 'unavailable'); return; }
+   if (!('isWebGPUBackend' in renderer.backend) || !renderer.backend.isWebGPUBackend) { renderer.dispose(); fail('No WebGPU adapter is available. Enable hardware acceleration and try Chrome or Edge.', undefined, 'unavailable'); return; }
+   document.querySelector('#app')!.appendChild(renderer.domElement);
+-  const scene = new Scene(); scene.fog = new FogExp2('#122c36', 0.018);
++  const scene = new Scene(); scene.fog = new FogExp2('#08324f', 0.018);
+   const rig = createCamera(renderer.domElement);
+   const lighting = await createLighting(scene, renderer);
+   // Match the fully fogged floor exactly; the HDRI remains scene.environment.
+@@ -110,11 +110,13 @@
+     return { x: (p.x * 0.5 + 0.5) * innerWidth, y: (-p.y * 0.5 + 0.5) * innerHeight };
+   };
+   Object.defineProperty(window, 'aquarium', { get: () => ({
+-    crackTarget: screenPoint(new Vector3(0.6, 1.75, TANK.depth / 2 + 0.026)),
+-    aboveTarget: screenPoint(new Vector3(0.6, 3.3, TANK.depth / 2 + 0.026)),
+-    wallTargets: [new Vector3(0, 1.5, 1.776), new Vector3(0, 1.5, -1.776), new Vector3(3.026, 1.5, 0), new Vector3(-3.026, 1.5, 0)].map(screenPoint),
++    tank: TANK,
++    crackTarget: screenPoint(new Vector3(0.6, TANK.base - .84, TANK.depth / 2 + 0.026)),
++    aboveTarget: screenPoint(new Vector3(0.6, TANK.top - .16, TANK.depth / 2 + 0.026)),
++    wallTargets: [new Vector3(0, TANK.base-.84, TANK.depth/2+.026), new Vector3(0, TANK.base-.84, -TANK.depth/2-.026), new Vector3(TANK.width/2+.026, TANK.base-.84, 0), new Vector3(-TANK.width/2-.026, TANK.base-.84, 0)].map(screenPoint),
+     cracks: state.cracks, spilling: state.spilling, rewinding: state.rewinding, rewindProgress: rewind.progress, historyFrames: rewind.count,
+     shardBodies: tank.bodyCount, awakeShards: tank.awakeCount, physics: tank.diagnostics, shardTransforms: Array.from(tank.capture().poses), audio: audio.diagnostics, impactFrame,
++    spillFlow: spill.flowDiagnostics,
+     puddles: spill.puddles.map(p=>({...p, sample:screenPoint(new Vector3(p.position[0],p.position[1],p.position[2]+p.radius[1]*.55))})),
+     holeBottom: tank.openings.length ? Math.min(...tank.openings.map(o => o.bottom)) : null,
+     holes: tank.openings.map(o => ({ wall: o.wall, bottom: o.bottom })),
+@@ -123,6 +125,7 @@
+     hasImpact: state.hasImpact, impact: state.impact.toArray(), wall: state.wall,
+     gpu: waterProfile.diagnostics, water: water.diagnostics, height: waterHeight.value, normal: waterNormal.value.toArray(), renderer: 'WebGPU',
+     motes: dust.count, motesAboveSurface: dust.aboveSurface, bubbles: bubbles.count, bubblePops: bubbles.pops, floorCausticIntensity: stage.intensity,
++    lampPosition: lighting.lampPosition, lightDirection: lighting.sun.position.clone().sub(lighting.sun.target.position).normalize().toArray(),
+     sunAzimuth: Math.atan2(lighting.sun.position.z-lighting.sun.target.position.z,lighting.sun.position.x-lighting.sun.target.position.x)*180/Math.PI,
+     causticAzimuth: Math.atan2(-(lighting.sun.position.z-lighting.sun.target.position.z),-(lighting.sun.position.x-lighting.sun.target.position.x))*180/Math.PI,
+     environment: lighting.environment, drawCalls: renderer.info.render.drawCalls,
+@@ -138,7 +141,7 @@
+       water.update(dt); tank.update(dt); spill.update(dt); rewind.record();
+       audio.update(spill.strength, state.timeScale); rig.update(dt);
+     }
+-    state.spilling = spill.active; lighting.update(simTime.value); stage.update(); dust.update(); bubbles.update(); shafts.update(); ui.update(realDt);
++    state.spilling = spill.active; stage.update(); dust.update(); bubbles.update(); shafts.update(); ui.update(realDt);
+     try {
+       renderer.info.reset(); post.render(); waterProfile.update();
+       if (!rendered) { rendered = true; loading.hidden = true; document.documentElement.dataset.status = 'ready'; }
+diff -ru verify/run-n/before/src/camera.ts src/camera.ts
+--- verify/run-n/before/src/camera.ts	2026-09-16 13:49:33
++++ src/camera.ts	2026-09-16 13:53:16
+@@ -1,20 +1,20 @@
+ import { MathUtils, PerspectiveCamera, Vector3 } from 'three/webgpu';
+ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+-import { state } from './state';
++import { state, TANK } from './state';
+ 
+ export function createCamera(canvas: HTMLCanvasElement) {
+   const camera = new PerspectiveCamera(39, innerWidth / innerHeight, 0.1, 2000);
+-  camera.position.set(9.6, 7.1, 12.4);
++  camera.position.set(10.8, 7.7, 14.8);
+   const controls = new OrbitControls(camera, canvas);
+-  controls.target.set(0, 1.45, 0); controls.enableDamping = true; controls.dampingFactor = 0.07;
+-  controls.minDistance = 3; controls.maxDistance = 24; controls.maxPolarAngle = Math.PI / 2 - 0.025;
++  controls.target.set(0, 1.85, 0); controls.enableDamping = true; controls.dampingFactor = 0.07;
++  controls.minDistance = 3; controls.maxDistance = TANK.width * 4; controls.maxPolarAngle = Math.PI / 2 - 0.025;
+   controls.autoRotateSpeed = 0.24; controls.enablePan = false;
+   const preset = new URLSearchParams(location.search).get('camera');
+-  const presets: Record<string, [number, number, number]> = { '34': [-7, 4.5, 8], front: [0, 2.2, 9.5], low: [-7, 1.25, 8], plaque: [0, 0.25, 4.5], floor: [7, 4.6, 8.5], surface: [4.4, 3.45, 5.2], shore: [2.4, 3.65, 3.8] };
++  const presets: Record<string, [number, number, number]> = { '34': [-9, 5.5, 11], front: [0, 2.6, 12.5], low: [-9, 1.25, 11], plaque: [0, 0.25, TANK.depth/2+2.75], floor: [7, 4.6, 8.5], surface: [5.1, 3.1, 6.2], shore: [2.7, 3.3, 4.3] };
+   if (preset && presets[preset]) { camera.position.set(...presets[preset]); controls.maxPolarAngle = Math.PI * 0.58; }
+-  if (preset === 'shore') controls.target.set(.4,2.45,.35);
+-  if (preset === 'surface') controls.target.set(0,2.45,0);
+-  if (preset === 'plaque') controls.target.set(0, -0.20, 1.95);
++  if (preset === 'shore') controls.target.set(.4,TANK.base-.14,.35);
++  if (preset === 'surface') controls.target.set(0,TANK.base-.14,0);
++  if (preset === 'plaque') controls.target.set(0, -0.20, TANK.depth/2+.2);
+   if (preset === 'floor') controls.target.set(2.7, -0.1, 1.5);
+   controls.update();
+   let inputAt = -10000, dragging = false, transition: 'none' | 'push' | 'reset' = 'none', progress = 0;
+diff -ru verify/run-n/before/src/lab/shatter.ts src/lab/shatter.ts
+--- verify/run-n/before/src/lab/shatter.ts	2026-09-16 13:49:33
++++ src/lab/shatter.ts	2026-09-16 14:26:09
+@@ -1,3 +1,4 @@
++import { attribute, color } from 'three/tsl';
+ import { BoxGeometry, Color, Group, LineBasicMaterial, LineSegments, Mesh, MeshPhysicalNodeMaterial, MeshStandardNodeMaterial, Sprite, Raycaster, SphereGeometry, Quaternion, Vector2, Vector3 } from 'three/webgpu';
+ import { buildOutlineGeometry, buildSeedPoints, generateShatterPattern } from '../lib/shatter';
+ import { type PhysicsWorld } from '../lib/physics';
+@@ -45,10 +46,12 @@
+   }
+   function fracture(point: Point2) {
+     if (broken || resetting) return;
+-    impact = point; makePattern(); broken = true; clicked = true; hint.hidden = true; intact.visible = false; frame.visible = false; overlay.visible = false;
++    // Match the main page: pixel rounding must not perturb seeded fracture geometry.
++    impact = [Math.round(point[0] * 100) / 100, Math.round(point[1] * 100) / 100]; makePattern(); broken = true; clicked = true; hint.hidden = true; intact.visible = false; frame.visible = false; overlay.visible = false;
+     const rng = random(117);
+     // Each fracture owns its material so reset also releases its per-shard GPU bindings.
+     const shardGlass = glass.clone();
++    shardGlass.emissiveNode = color('#cbefff').mul(attribute('impactGlow', 'float')).mul(.45);
+     released = releaseShards({ cells: pattern.cells, world, material: shardGlass, origin: intact.position, rotation: new Quaternion(),
+       impact: new Vector3(impact[0], impact[1] + 1.25, 0), width: 3.2, height: 2, level, budget: 400,
+       minimumArea: level === 1 ? 0 : level === 2 ? 0.1 : 0.025, floorY: 0, random: rng });
+diff -ru verify/run-n/before/src/lib/physics.ts src/lib/physics.ts
+--- verify/run-n/before/src/lib/physics.ts	2026-09-16 13:49:33
++++ src/lib/physics.ts	2026-09-16 14:19:18
+@@ -78,12 +78,21 @@
+       supported.delete(body.handle); supportSurfaces.delete(body.handle); world.removeRigidBody(body);
+     },
+     applyImpulse(body: RAPIER.RigidBody, impulse: Vec3, point?: Vec3) { if (point) body.applyImpulseAtPoint(impulse, point, true); else body.applyImpulse(impulse, true); },
++    // Release starts on a solver boundary, independent of render-frame/idle phase.
++    beginRelease() { accumulator = 0; },
+     step(dt: number) {
+       if (api.frozen) return;
++      if (glassSettling) {
++        // Four fractured panes have > 800 convex hulls; give their coupled contact
++        // piles more iterations while keeping the small one-pane/Lab worlds light.
++        const crowded = world.colliders.len() > 512;
++        world.numSolverIterations = crowded ? 24 : 12;
++        world.numInternalPgsIterations = crowded ? 8 : 4;
++      }
+       accumulator += Math.min(Math.max(dt, 0), 0.1) * api.timeScale;
+-      while (accumulator >= fixedDt) {
++      while (accumulator + 1e-10 >= fixedDt) {
+         for (const binding of bindings) { binding.previousPosition?.copy(binding.body.translation()); binding.previousRotation?.copy(binding.body.rotation()); }
+-        world.timestep = fixedDt; world.step(); accumulator -= fixedDt; api.elapsed = ++ticks * fixedDt;
++        world.timestep = fixedDt; world.step(); accumulator = Math.max(0, accumulator - fixedDt); api.elapsed = ++ticks * fixedDt;
+         for (const binding of bindings) {
+           const { body } = binding;
+           if (!binding.settle || !body.isDynamic()) continue;
+@@ -105,7 +114,7 @@
+             });
+             if (binding.grounded) {
+               supported.add(body.handle);
+-              body.setLinearDamping(glassSettling ? 3 : 2.5); body.setAngularDamping(5); break;
++              body.setLinearDamping(glassSettling ? 3 : 2.5); body.setAngularDamping(glassSettling ? 1 : 5); break;
+             }
+           }
+           const v = body.linvel(), w = body.angvel();
+diff -ru verify/run-n/before/src/lib/release.ts src/lib/release.ts
+--- verify/run-n/before/src/lib/release.ts	2026-09-16 13:49:33
++++ src/lib/release.ts	2026-09-16 14:21:15
+@@ -1,4 +1,4 @@
+-import { Mesh, Quaternion, Vector3, type Material } from 'three/webgpu';
++import { Float32BufferAttribute, Mesh, Quaternion, Vector3, type Material } from 'three/webgpu';
+ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+ import { buildShardGeometry, groupAdjacentCells, insetCell, type ShatterCell } from './shatter';
+ import { polygonCentroid } from './triangulate';
+@@ -6,7 +6,7 @@
+ 
+ /** Both aquarium and Lab use the same conditioned thin-glass solver and native sleep. */
+ export const createShardWorld = () => createPhysicsWorld(undefined, true);
+-export type ReleasedShard = { mesh: Mesh; body: ReturnType<PhysicsWorld['addShard']>; launch: { speed: number; angularSpeed: number } };
++export type ReleasedShard = { mesh: Mesh; body: ReturnType<PhysicsWorld['addShard']>; launch: { speed: number; angularSpeed: number; radialFraction: number } };
+ export type ReleaseOptions = {
+   cells: ShatterCell[]; world: PhysicsWorld; material: Material;
+   origin: Vector3; rotation: Quaternion; impact: Vector3;
+@@ -27,8 +27,9 @@
+ 
+ /** Build connected compound plates and launch them with one mass-independent velocity profile. */
+ export function releaseShards(options: ReleaseOptions): ReleasedShard[] {
+-  const { cells, world, material, origin, rotation, impact, width, level, budget, minimumArea, floorY, random } = options;
++  const { cells, world, material, origin, rotation, impact, width, level, budget, minimumArea, random } = options;
+   const density = options.density ?? 2500, strength = options.strength ?? 1;
++  world.beginRelease();
+   const groups = groupAdjacentCells(cells, budget, minimumArea), areas = groups.map(g => g.reduce((s, c) => s + areaOf(c), 0));
+   if (!groups.length) return [];
+   const minimumMass = Math.max(0.002 * density, Math.max(...areas) * 0.05 * density / 64);
+@@ -57,28 +58,29 @@
+     const com = new Vector3().copy(body.worldCom()), radial = com.clone().sub(impact).applyQuaternion(rotation.clone().invert());
+     radial.z = 0;
+     const distance = radial.length();
+-    const falloff = level === 3 ? Math.exp(-distance * 1.3) : 1;
+-    const speed = (level === 3 ? Math.min(6.4, 2 + (com.y - floorY) * 0.7 + 3 * falloff) : 2.2) * strength;
+-    // Keep the cone shallow vertically so even the highest fragments land promptly.
+-    const spread = level === 3 ? radial.x * 0.5 / Math.max(speed, 0.001) : 0;
+-    const velocity = new Vector3(spread, 0, 1).normalize().multiplyScalar(speed).applyQuaternion(rotation);
+-    velocity.y = (level === 3 ? 0.15 + 0.2 * falloff : 0) * strength;
++    const falloff = Math.exp(-distance * 3);
++    geometry.setAttribute('impactGlow', new Float32BufferAttribute(new Float32Array(geometry.getAttribute('position').count).fill(level === 3 ? falloff : 0), 1));
++    const speed = (level === 3 ? 1.8 + 5.7 * falloff : 2.2) * strength;
++    const radialDirection = radial.clone().normalize();
++    const velocity = radialDirection.clone().multiplyScalar(level === 3 ? 0.85 : level === 2 ? 0.18 : 0);
++    velocity.z = level === 3 ? 0.55 : 1;
++    if (level === 3) velocity.y += 0.09 * falloff;
++    velocity.normalize().multiplyScalar(speed).applyQuaternion(rotation);
+     world.applyImpulse(body, velocity.clone().multiplyScalar(body.mass()));
+ 
+-    // A quarter turn during the damped ballistic flight presents a broad face at landing.
+-    // A small randomized roll varies the tumble without edge balancing.
+-    const drag = 0.45, angularDrag = 1.2;
+-    let lo = 0, hi = 3;
+-    for (let i = 0; i < 18; i++) {
+-      const t = (lo + hi) / 2;
+-      const y = com.y + (velocity.y + 9.81 / drag) * (1 - Math.exp(-drag * t)) / drag - 9.81 * t / drag;
+-      if (y > floorY + 0.025) lo = t; else hi = t;
++    // Random-axis tumble biased outward to clear surviving pane edges.
++    // Convert the requested angular velocity through the real conditioned inertia.
++    const axis = new Vector3(1, (random() - .5) * 1.0, (random() - .5) * 1.0).normalize();
++    const spin = level === 1 ? 0 : level === 2 ? 4 : Math.min(14, (4 + 10 * falloff * (.7 + .3 * random())) * strength);
++    const omega = axis.multiplyScalar(spin).applyQuaternion(rotation);
++    if (level === 2) {
++      // Mild impact fan with a broad-face landing; L3 keeps the random tumble above.
++      const flight = Math.sqrt(Math.max(.02, com.y - options.floorY) * 2 / 9.81);
++      omega.set(Math.min(14, Math.PI * .6 * 1.2 / (1 - Math.exp(-1.2 * flight))), 0, 0).applyQuaternion(rotation);
+     }
+-    const spin = level === 1 ? 0 : Math.min(12, Math.PI * 0.5 * angularDrag / (1 - Math.exp(-angularDrag * (lo + hi) / 2)));
+-    const omega = new Vector3(spin, 0, level === 3 ? (random() - 0.5) * 0.04 : 0).applyQuaternion(rotation).clampLength(0, 12);
+     angularImpulse(body, omega);
+     const v = body.linvel(), w = body.angvel();
+-    return { mesh, body, launch: { speed: Math.hypot(v.x, v.y, v.z), angularSpeed: Math.hypot(w.x, w.y, w.z) } };
++    return { mesh, body, launch: { speed: Math.hypot(v.x, v.y, v.z), angularSpeed: Math.hypot(w.x, w.y, w.z), radialFraction: Math.abs(new Vector3().copy(v).dot(radialDirection.applyQuaternion(rotation))) / Math.max(1e-8, speed) } };
+   });
+ }
+ 
+@@ -86,5 +88,5 @@
+ export function launchDiagnostics(shards: ReleasedShard[]) {
+   if (!shards.length) return null;
+   const speeds = shards.map(s => s.launch.speed).sort((a, b) => a - b);
+-  return { count: speeds.length, min: speeds[0], median: speeds[Math.floor(speeds.length / 2)], max: speeds[speeds.length - 1], maxAngular: Math.max(...shards.map(s => s.launch.angularSpeed)) };
++  return { radialFraction: shards.reduce((sum, s) => sum + s.launch.radialFraction, 0) / shards.length, count: speeds.length, min: speeds[0], median: speeds[Math.floor(speeds.length / 2)], max: speeds[speeds.length - 1], maxAngular: Math.max(...shards.map(s => s.launch.angularSpeed)) };
+ }
+diff -ru verify/run-n/before/src/lib/terrain.ts src/lib/terrain.ts
+--- verify/run-n/before/src/lib/terrain.ts	2026-09-16 13:49:33
++++ src/lib/terrain.ts	2026-09-16 14:01:46
+@@ -52,8 +52,8 @@
+   }
+   if (island) {
+     const high=Math.max(...heights);
+-    heights.forEach((h,i)=>heights[i]=(h/high)**1.1*3.10);
+-    points.forEach(p=>p[1]*=3.05/4.9);
++    heights.forEach((h,i)=>heights[i]=(h/high)**1.1*2.67);
++    points.forEach(p=>p[1]*=3.5/5.6);
+     // Delaunay connectivity is retained under this affine compression.
+     points.forEach((p,i)=>{(delaunay.points as Float64Array)[i*2]=p[0];(delaunay.points as Float64Array)[i*2+1]=p[1];});
+   }
+@@ -68,7 +68,7 @@
+   }
+   for (const f of faces) {
+     const nearby=[f,...f.adjacent.map(i=>faces[i])];
+-    const h=nearby.reduce((s,v)=>s+v.height,0)/nearby.length/(island?3.10:amplitude);
++    const h=nearby.reduce((s,v)=>s+v.height,0)/nearby.length/(island?2.67:amplitude);
+     const slope=nearby.reduce((s,v)=>s+v.slope,0)/nearby.length;
+     const boundary=noise(f.x/size*2.1+13,f.z/size*2.1-8)*.025;
+     const snow=smooth(island?.84:.75,island?.915:.84,h+boundary);
+@@ -99,6 +99,6 @@
+ }
+ export const ISLAND_SEED = 42;
+ export function generateIslandTerrain(seed=ISLAND_SEED) {
+-  const mask=(x:number,z:number)=>Math.max(0,1-(Math.abs(x/2.45)**4+Math.abs(z/2.45)**4))**.8;
+-  return generateTerrain({level:3,size:4.9,count:1200,seed,amplitude:3.6,mask,warp:.16,erosion:8,island:true});
++  const mask=(x:number,z:number)=>Math.max(0,1-(Math.abs(x/2.8)**4+Math.abs(z/2.8)**4))**.8;
++  return generateTerrain({level:3,size:5.6,count:1200,seed,amplitude:3.1,mask,warp:.16,erosion:8,island:true});
+ }
+diff -ru verify/run-n/before/src/post.ts src/post.ts
+--- verify/run-n/before/src/post.ts	2026-09-16 13:49:33
++++ src/post.ts	2026-09-16 13:54:29
+@@ -6,7 +6,7 @@
+ export function createPost(renderer: WebGPURenderer, scene: Scene, camera: PerspectiveCamera) {
+   const post = new RenderPipeline(renderer), scenePass = pass(scene, camera);
+   const beauty = scenePass.getTextureNode();
+-  const vignette = smoothstep(0.25, 0.76, screenUV.sub(0.5).length()).mul(-0.075).add(1);
++  const vignette = smoothstep(0.25, 0.76, screenUV.sub(0.5).length()).mul(-0.22).add(1);
+   // Bound the bloom source so a sun reflection on one shard stays a small glint.
+   const shadow = smoothstep(0.10, 0, beauty.rgb.max(0).dot(vec3(0.2126, 0.7152, 0.0722)));
+   const reverseCue = rewindProgress.mul(Math.PI).sin().mul(0.14);
+diff -ru verify/run-n/before/src/scene/dust.ts src/scene/dust.ts
+--- verify/run-n/before/src/scene/dust.ts	2026-09-16 13:49:33
++++ src/scene/dust.ts	2026-09-16 13:53:16
+@@ -5,7 +5,7 @@
+ 
+ export function createDust(scene: Scene) {
+   const count = 440, rng = random(171), data = new Float32Array(count * 3), sizes = new Float32Array(count);
+-  const seeds = Array.from({ length: count }, () => ({ x: (rng() - 0.5) * 5.65, fraction: Math.pow(rng(), 1.4), z: (rng() - 0.5) * 3.1, size: 1.3 + rng() * 2.1 }));
++  const seeds = Array.from({ length: count }, () => ({ x: (rng() - 0.5) * (TANK.width - .35), fraction: Math.pow(rng(), 1.4), z: (rng() - 0.5) * (TANK.depth - .4), size: 1.3 + rng() * 2.1 }));
+   const positions = new InstancedBufferAttribute(data, 3).setUsage(DynamicDrawUsage), size = new InstancedBufferAttribute(sizes, 1).setUsage(DynamicDrawUsage);
+   const material = new PointsNodeMaterial({ transparent: true, blending: AdditiveBlending, depthWrite: false, sizeAttenuation: false });
+   material.positionNode = instancedBufferAttribute(positions, 'vec3'); material.sizeNode = instancedBufferAttribute(size, 'float');
+diff -ru verify/run-n/before/src/scene/island.ts src/scene/island.ts
+--- verify/run-n/before/src/scene/island.ts	2026-09-16 13:49:33
++++ src/scene/island.ts	2026-09-16 13:53:16
+@@ -28,7 +28,7 @@
+   const grain = mx_noise_float(positionWorld.mul(38)).mul(0.5).add(0.5);
+   sand.colorNode = underwaterColor(mix(color('#9f9173'), color('#d0b98b'), grain));
+   sand.emissiveNode = causticLight;
+-  const bed = new Mesh(new BoxGeometry(5.87, 0.12, 3.37), sand);
++  const bed = new Mesh(new BoxGeometry(TANK.width - .13, 0.12, TANK.depth - .13), sand);
+   bed.position.y = TANK.floor + 0.06; bed.receiveShadow = true; scene.add(bed);
+   const gravelMaterial = new MeshStandardNodeMaterial({ roughness: 0.85 });
+   gravelMaterial.colorNode = underwaterColor(color('#a19882').rgb); gravelMaterial.emissiveNode = causticLight;
+@@ -36,7 +36,7 @@
+   const rng = random(765), transform = new Object3D();
+   for (let i = 0; i < gravel.count; i++) {
+     const size = 0.025 + rng() ** 3 * 0.16;
+-    transform.position.set((rng() - 0.5) * 5.65, TANK.floor + 0.12 + size * 0.25, (rng() - 0.5) * 3.1);
++    transform.position.set((rng() - 0.5) * (TANK.width - .35), TANK.floor + 0.12 + size * 0.25, (rng() - 0.5) * (TANK.depth - .4));
+     transform.scale.set(size, size * 0.6, size * 0.8); transform.rotation.set(rng(), rng() * 6, rng()); transform.updateMatrix(); gravel.setMatrixAt(i, transform.matrix);
+   }
+   gravel.receiveShadow = true; gravel.castShadow = true; scene.add(gravel);
+@@ -47,10 +47,10 @@
+     const y = [0, 1, 2].map(j => positions.getY(i + j) + peak.position.y);
+     const denominator = (z[1] - z[2]) * (x[0] - x[2]) + (x[2] - x[1]) * (z[0] - z[2]);
+     if (Math.abs(denominator) < 1e-9) continue;
+-    const ix = (v: number) => Math.max(0, Math.min(resolution - 1, Math.floor((v / 6 + 0.5) * resolution)));
+-    const iz = (v: number) => Math.max(0, Math.min(resolution - 1, Math.floor((v / 3.5 + 0.5) * resolution)));
++    const ix = (v: number) => Math.max(0, Math.min(resolution - 1, Math.floor((v / TANK.width + 0.5) * resolution)));
++    const iz = (v: number) => Math.max(0, Math.min(resolution - 1, Math.floor((v / TANK.depth + 0.5) * resolution)));
+     for (let b = iz(Math.min(...z)); b <= iz(Math.max(...z)); b++) for (let a = ix(Math.min(...x)); a <= ix(Math.max(...x)); a++) {
+-      const px = ((a + 0.5) / resolution - 0.5) * 6, pz = ((b + 0.5) / resolution - 0.5) * 3.5;
++      const px = ((a + 0.5) / resolution - 0.5) * TANK.width, pz = ((b + 0.5) / resolution - 0.5) * TANK.depth;
+       const u = ((z[1] - z[2]) * (px - x[2]) + (x[2] - x[1]) * (pz - z[2])) / denominator;
+       const v = ((z[2] - z[0]) * (px - x[2]) + (x[0] - x[2]) * (pz - z[2])) / denominator;
+       if (u >= 0 && v >= 0 && u + v <= 1) heights[b * resolution + a] = Math.max(heights[b * resolution + a], u * y[0] + v * y[1] + (1 - u - v) * y[2]);
+diff -ru verify/run-n/before/src/scene/lighting.ts src/scene/lighting.ts
+--- verify/run-n/before/src/scene/lighting.ts	2026-09-16 13:49:33
++++ src/scene/lighting.ts	2026-09-16 13:56:37
+@@ -1,45 +1,36 @@
+-import { type Node, Color, DirectionalLight, EquirectangularReflectionMapping, HemisphereLight, PMREMGenerator, Scene, Vector3, WebGPURenderer } from 'three/webgpu';
+-import { Fn, float, texture, color, mix, normalWorldGeometry, positionWorld, smoothstep, vec2, vec3 } from 'three/tsl';
+-import { gerstnerField, WATER_SCALE } from '../lib/waves';
++import { type Node, Mesh, MeshStandardNodeMaterial, MeshBasicNodeMaterial, CylinderGeometry, TubeGeometry, CubicBezierCurve3, Color, DirectionalLight, EquirectangularReflectionMapping, HemisphereLight, PMREMGenerator, Scene, Vector3, WebGPURenderer } from 'three/webgpu';
++import { Fn, float, texture, color, mix, normalWorldGeometry, positionWorld, shadow, smoothstep, vec2, vec3 } from 'three/tsl';
++import { causticsField, createCausticsUniforms } from '../lib/worley';
+ import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+-import { simTime, sunDirection, sunElevation, waterHeight, waterNormal, waterAgitation, waterChoppiness, TANK } from '../state';
++import { simTime, sunDirection, sunElevation, waterHeight, waterNormal, TANK } from '../state';
+ 
++const lampLight = new DirectionalLight('#fff2df', 2.5);
+ export const signedWaterDistance = positionWorld.sub(vec3(0, waterHeight, 0)).dot(waterNormal);
+ export const waterDepth = signedWaterDistance.negate().max(0);
+ export const submerged = smoothstep(0, 0.09, waterDepth);
+ // Project a world-space point back along the sun ray onto a horizontal reference plane.
+ export const sunProjection = positionWorld.xz.sub(sunDirection.xz.mul(positionWorld.y.div(sunDirection.y.max(0.2))));
+-// Inverse projected ray footprint: Snell's small-slope approximation maps a surface
+-// Hessian into convergence of the refracted sun rays. Same spectrum/time as the mesh,
+-// bounded focusing rather than a singular caustic (no Worley on the main page).
++// Exactly the Lab level-3 two-layer RGB Worley field, in lamp-aligned coordinates.
+ export const causticDirection = sunDirection.xz.negate().div(sunDirection.xz.length().max(.001));
+-// Linearize Snell's law about the mean plane, including oblique incidence.
+-// Its horizontal derivative has a sun-aligned anisotropic term, shared by the floor.
+-const eta = .7502, sy = sunDirection.y.max(.2);
+-const transmittedY = float(1).sub(float(1).sub(sy.mul(sy)).mul(eta*eta)).sqrt();
+-const entryPoint = positionWorld.xz.add(sunDirection.xz.mul(waterDepth.mul(eta).div(transmittedY)));
+-const field = gerstnerField(entryPoint, simTime, waterAgitation.mul(WATER_SCALE.agitationGain).add(1).mul(waterHeight.sub(TANK.floor).div(.18).clamp()), waterChoppiness);
+-const isotropic = transmittedY.sub(sy.mul(eta)).div(transmittedY);
+-const oblique = sy.mul(eta*eta).div(transmittedY).add(eta).mul(eta).div(transmittedY.pow(2));
+-const a = isotropic.add(sunDirection.x.pow(2).mul(oblique)), b = sunDirection.x.mul(sunDirection.z).mul(oblique), d = isotropic.add(sunDirection.z.pow(2).mul(oblique));
+-const h = field.curvature, travel = waterDepth.min(2.5);
+-const j00 = float(1).add(a.mul(h.x).add(b.mul(h.y)).mul(travel));
+-const j01 = a.mul(h.y).add(b.mul(h.z)).mul(travel);
+-const j10 = b.mul(h.x).add(d.mul(h.y)).mul(travel);
+-const j11 = float(1).add(b.mul(h.y).add(d.mul(h.z)).mul(travel));
+-const determinant = j00.mul(j11).sub(j01.mul(j10));
+-const focus = float(1).div(determinant.abs().max(.23)).sub(1).max(0).min(2.8);
+-export const causticLight = vec3(.40,.80,.92).mul(focus).mul(.30).mul(waterDepth.mul(-.30).exp()).mul(smoothstep(TANK.floor,TANK.floor+.2,waterHeight)).mul(submerged);
++export const causticParams = createCausticsUniforms();
++export function causticCoordinates(stretch = 1) {
++  const along = sunProjection.dot(causticDirection).mul(stretch).sub(simTime.mul(.10));
++  const across = sunProjection.dot(vec2(causticDirection.y.negate(), causticDirection.x));
++  return vec2(along, across);
++}
++export const causticDrain = smoothstep(TANK.floor, TANK.floor + .2, waterHeight);
++export const causticLight = causticsField(causticCoordinates(), simTime, { ...causticParams, level: 3, depth: waterDepth })
++  .mul(vec3(.55, .88, 1)).mul(waterDepth.mul(-.30).exp()).mul(causticDrain).mul(submerged).mul(vec3(shadow(lampLight) as unknown as Node<'vec3'>).r);
+ export const rockCaustics = causticLight.mul(normalWorldGeometry.dot(sunDirection).max(0))
+   .mul(smoothstep(0.15, 0.8, normalWorldGeometry.y)).mul(0.24);
+ export function underwaterColor(base: Node<'vec3'>) {
+-  return mix(base, base.mul(color('#439f98')).mul(waterDepth.mul(-0.14).exp()), submerged.mul(0.80));
++  return mix(base, base.mul(color('#c0dbe5')).mul(waterDepth.mul(-0.14).exp()), submerged.mul(0.55));
+ }
+ // Light-space mask for drifting motes.
+ export function lightShaftMask(point: Node<'vec3'>) {
+   const projected = point.xz.sub(sunDirection.xz.mul(point.y.div(sunDirection.y.max(0.2))));
+-  return projected.x.mul(3.5).add(projected.y.mul(1.7)).add(simTime.mul(0.12)).sin().mul(0.5).add(0.5).pow(12);
++  return projected.x.mul(3.5).add(projected.y.mul(1.7)).sin().mul(0.5).add(0.5).pow(12);
+ }
+ export const shaftMask = lightShaftMask(positionWorld);
+ 
+@@ -59,9 +50,9 @@
+     scene.background = new Color('#192b35');
+     room.dispose(); generator.dispose(); environment = 'RoomEnvironment fallback';
+   }
+-  const sun = new DirectionalLight('#eef5ff', 2.5);
++  const sun = lampLight;
+   sun.castShadow = true; sun.shadow.intensity = 0.32; sun.shadow.mapSize.set(2048, 2048);
+-  Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 6, bottom: -6, near: 0.1, far: 35 });
++  Object.assign(sun.shadow.camera, { left: -TANK.width, right: TANK.width, top: TANK.depth+2, bottom: -TANK.depth-2, near: 0.1, far: 35 });
+   sun.shadow.radius = 12;
+   // Fixed 4×4 tent PCF: soft penumbra without per-pixel stochastic rotation.
+   // Hardware bilinear comparison filters each tap; no VSM intermediate targets.
+@@ -74,27 +65,35 @@
+     return result;
+   }); sun.shadow.normalBias = 0.025; sun.shadow.bias = -0.0002;
+   sun.target.position.set(0, 0.7, 0);
+-  scene.add(sun, sun.target, new HemisphereLight('#b8dce1', '#344753', 0.85));
+-  const cold = new Color('#fff3dc'), warm = new Color('#ffc78a');
+-  const direction = new Vector3(), origin = new Vector3();
++  scene.add(sun, sun.target, new HemisphereLight('#8aafff', '#102746', 0.45));
++  const origin = new Vector3();
+   const updateShadow = sun.shadow.updateMatrices.bind(sun.shadow);
+   sun.shadow.updateMatrices = light => {
+     const camera = sun.shadow.camera;
+-    camera.left=-7; camera.right=7; camera.top=6; camera.bottom=-6; camera.updateProjectionMatrix();
++    camera.left=-TANK.width; camera.right=TANK.width; camera.top=TANK.depth+2; camera.bottom=-TANK.depth-2; camera.updateProjectionMatrix();
+     updateShadow(light);
+     origin.set(0,0,0).project(camera);
+-    const dx=(Math.round(origin.x*1024)-origin.x*1024)*14/2048;
+-    const dy=(Math.round(origin.y*1024)-origin.y*1024)*12/2048;
++    const dx=(Math.round(origin.x*1024)-origin.x*1024)*(TANK.width*2)/2048;
++    const dy=(Math.round(origin.y*1024)-origin.y*1024)*((TANK.depth+2)*2)/2048;
+     camera.left-=dx;camera.right-=dx;camera.bottom-=dy;camera.top-=dy;camera.updateProjectionMatrix();
+     updateShadow(light);
+   };
+-  return { environment, sun, update(time: number) {
+-    const phase = time * Math.PI * 2 / 60;
+-    const elevation = 0.65 + Math.sin(phase) * 0.12;
+-    direction.set(Math.cos(phase + 2.3), elevation, Math.sin(phase + 2.3)).normalize();
+-    sunDirection.value.copy(direction); sunElevation.value = direction.y;
+-    sun.position.copy(direction).multiplyScalar(14).add(sun.target.position);
+-    sun.color.copy(warm).lerp(cold, (elevation - 0.53) / 0.24);
+-    sun.intensity = 1.6 + elevation * 0.7;
+-  } };
++  // Fixed arc lamp: target and direction are the source for every optical effect.
++  const head = new Vector3(-2.65, 6.1, -2.3);
++  sun.target.position.set(0, 1.25, 0);
++  sun.position.copy(head);
++  sunDirection.value.copy(head).sub(sun.target.position).normalize();
++  sunElevation.value = sunDirection.value.y;
++  const dark = new MeshStandardNodeMaterial({ color: '#111b28', roughness: .68, metalness: .35 });
++  const foot = new Mesh(new CylinderGeometry(.45, .50, .10, 48), dark);
++  foot.position.set(-4.65, -.37, -3.15); foot.castShadow = true; scene.add(foot);
++  const curve = new CubicBezierCurve3(new Vector3(-4.65,-.32,-3.15), new Vector3(-4.8,7.5,-3.15), new Vector3(-3.15,7.0,-2.6), head);
++  const arc = new Mesh(new TubeGeometry(curve, 80, .037, 8, false), dark); arc.castShadow = true; scene.add(arc);
++  const housing = new Mesh(new CylinderGeometry(.48,.48,.10,64), dark);
++  housing.quaternion.setFromUnitVectors(new Vector3(0,-1,0), sunDirection.value.clone().negate());
++  housing.position.copy(head); scene.add(housing);
++  const diffuser = new Mesh(new CylinderGeometry(.445,.445,.025,64), new MeshBasicNodeMaterial({ color: new Color('#fff0d5').multiplyScalar(5), toneMapped: false }));
++  diffuser.quaternion.copy(housing.quaternion);
++  diffuser.position.copy(head).addScaledVector(sunDirection.value, -.06); scene.add(diffuser);
++  return { environment, sun, lampPosition: head.toArray() };
+ }
+diff -ru verify/run-n/before/src/scene/reef.ts src/scene/reef.ts
+--- verify/run-n/before/src/scene/reef.ts	2026-09-16 13:49:33
++++ src/scene/reef.ts	2026-09-16 13:53:16
+@@ -12,12 +12,12 @@
+     const hit = ray.intersectObject(terrain, false)[0];
+     return hit && hit.point.y > TANK.floor + 0.12 ? { point: hit.point, normal: hit.face!.normal.clone() } : { point: new Vector3(x, TANK.floor + 0.12, z), normal: up.clone() };
+   }
+-  const centers = [[-2.25, 1.12], [-1.3, 1.45], [0.3, 1.42], [1.65, 1.35], [2.55, 0.65], [-2.6, -0.8], [1.9, -1.3], [-0.9, -1.35]];
++  const centers = [[-2.25, 1.12], [-1.3, 1.45], [0.3, 1.42], [1.65, 1.35], [2.55, 0.65], [-2.6, -0.8], [1.9, -1.3], [-0.9, -1.35]].map(([x,z]) => [x * TANK.width / 6, z * TANK.depth / 3.5]);
+   function sites(count: number) {
+     const result = [];
+     for (let tries = 0; result.length < count && tries < count * 100; tries++) {
+       const c = centers[tries % centers.length], x = c[0] + (rng() - 0.5) * 0.7, z = c[1] + (rng() - 0.5) * 0.48;
+-      if (Math.abs(x) > 2.79 || Math.abs(z) > 1.49) continue;
++      if (Math.abs(x) > TANK.width / 2 - .21 || Math.abs(z) > TANK.depth / 2 - .26) continue;
+       const g = ground(x, z);
+       if (g.point.y > 1.3 || g.normal.y < 0.70) continue;
+       result.push(g);
+@@ -73,6 +73,6 @@
+     geometry.setAttribute('reefAnchor', new InstancedBufferAttribute(anchors, 3)); mesh.receiveShadow = true; mesh.name = ['Coral fans', 'Tube coral', 'Brain coral', 'Seagrass'][kind]; scene.add(mesh);
+   });
+   // Two extra vents originate on the lower terrain, along with the tube colonies.
+-  for (const [x, z] of [[-2, 0.65], [2.2, 0.4]]) { const g = ground(x, z); if (g.point.y < 1.7) vents.push(g.point.add(new Vector3(0, 0.07, 0))); }
++  for (const [x, z] of [[-2, 0.65], [2.2, 0.4]]) { const g = ground(x * TANK.width / 6, z * TANK.depth / 3.5); if (g.point.y < TANK.base - .55) vents.push(g.point.add(new Vector3(0, 0.07, 0))); }
+   return { vents };
+ }
+diff -ru verify/run-n/before/src/scene/shafts.ts src/scene/shafts.ts
+--- verify/run-n/before/src/scene/shafts.ts	2026-09-16 13:49:33
++++ src/scene/shafts.ts	2026-09-16 13:53:16
+@@ -1,6 +1,6 @@
+ import { AdditiveBlending, BackSide, BoxGeometry, DataTexture, Mesh, MeshBasicNodeMaterial, Scene } from 'three/webgpu';
+ import { Fn, If, Loop, cameraPosition, cameraProjectionMatrixInverse, color, float, getViewPosition, positionWorld, screenCoordinate, screenUV, smoothstep, texture, vec2, vec3, viewportDepthTexture } from 'three/tsl';
+-import { simTime, sunDirection, sunElevation, TANK, waterHeight, waterNormal } from '../state';
++import { sunDirection, sunElevation, TANK, waterHeight, waterNormal } from '../state';
+ 
+ export function createShafts(scene: Scene, terrain: DataTexture) {
+   const material = new MeshBasicNodeMaterial({ transparent: true, blending: AdditiveBlending, depthWrite: false, depthTest: false, side: BackSide });
+@@ -14,8 +14,8 @@
+     // A vector condition chose the x sign for y/z and erased front-left rays.
+     const safeAxis = (axis: typeof ray.x) => axis.greaterThanEqual(0).select(axis.max(0.00001), axis.min(-0.00001));
+     const safeRay = vec3(safeAxis(ray.x), safeAxis(ray.y), safeAxis(ray.z));
+-    const a = vec3(-2.94, TANK.floor + 0.12, -1.69).sub(cameraPosition).div(safeRay);
+-    const b = vec3(2.94, TANK.top, 1.69).sub(cameraPosition).div(safeRay);
++    const a = vec3(-TANK.width/2+.06, TANK.floor + 0.12, -TANK.depth/2+.06).sub(cameraPosition).div(safeRay);
++    const b = vec3(TANK.width/2-.06, TANK.top, TANK.depth/2-.06).sub(cameraPosition).div(safeRay);
+     const near = a.min(b), far = a.max(b);
+     const entry = near.x.max(near.y).max(near.z).max(0).toVar();
+     const opaqueDistance = getViewPosition(screenUV, depth.r, cameraProjectionMatrixInverse).length();
+@@ -33,13 +33,13 @@
+       const distance = entry.add(float(i).add(jitter).mul(step));
+       const point = cameraPosition.add(ray.mul(distance));
+       const belowSurface = vec3(0, waterHeight, 0).sub(point).dot(waterNormal).max(0);
+-      const wallDistance = float(2.94).sub(point.x.abs()).min(float(1.69).sub(point.z.abs()));
++      const wallDistance = float(TANK.width/2-.06).sub(point.x.abs()).min(float(TANK.depth/2-.06).sub(point.z.abs()));
+       const edge = smoothstep(0, 0.08, wallDistance);
+       const visibility = float(1).toVar();
+       // Two height tests toward the sun soften the island's shadow in the medium.
+       for (const offset of [0.35, 0.9]) {
+         const towardSun = point.add(sunDirection.mul(offset));
+-        const height = texture(terrain, towardSun.xz.div(vec2(6, 3.5)).add(0.5)).level(float(0)).r;
++        const height = texture(terrain, towardSun.xz.div(vec2(TANK.width, TANK.depth)).add(0.5)).level(float(0)).r;
+         visibility.mulAssign(smoothstep(-0.03, 0.08, towardSun.y.sub(height)));
+       }
+       // Five localized light-space apertures; a 1D stripe mask integrates into
+@@ -47,7 +47,7 @@
+       const surfacePoint = point.xz.add(sunDirection.xz.mul(waterHeight.sub(point.y).div(sunDirection.y.max(0.2))));
+       const mask = float(0).toVar();
+       for (const [x, z] of [[-2.65, -0.7], [-2.5, 1.35], [-0.8, 1.4], [1.3, 1.3], [2.4, -0.45]]) {
+-        const delta = surfacePoint.sub(vec2(x, z).add(vec2(simTime.mul(0.12).sin().mul(0.06), 0)));
++        const delta = surfacePoint.sub(vec2(x*TANK.width/6, z*TANK.depth/3.5));
+         mask.addAssign(smoothstep(0.34, 0.08, delta.length()));
+       }
+       const density = belowSurface.mul(-0.85).exp().mul(edge).mul(visibility);
+@@ -55,7 +55,7 @@
+     });
+     return light.mul(sunElevation).mul(0.32).min(0.20);
+   })();
+-  const box = new Mesh(new BoxGeometry(5.88, TANK.top - TANK.floor - 0.12, 3.38), material);
++  const box = new Mesh(new BoxGeometry(TANK.width-.12, TANK.top - TANK.floor - 0.12, TANK.depth-.12), material);
+   box.name = 'Water single scattering'; box.position.y = (TANK.top + TANK.floor + 0.12) / 2;
+   box.renderOrder = 5; scene.add(box);
+   return { update() { box.visible = waterHeight.value > TANK.floor + 0.13; } };
+diff -ru verify/run-n/before/src/scene/spill.ts src/scene/spill.ts
+--- verify/run-n/before/src/scene/spill.ts	2026-09-16 13:49:33
++++ src/scene/spill.ts	2026-09-16 14:21:36
+@@ -1,5 +1,5 @@
+-import { type Node, AdditiveBlending, BoxGeometry, PlaneGeometry, DoubleSide, DynamicDrawUsage, InstancedBufferAttribute, Mesh, MeshPhysicalNodeMaterial, PointsNodeMaterial, Scene, Sprite, Vector3 } from 'three/webgpu';
+-import { atan, bumpMap, mx_noise_float, normalWorld, cameraPosition, positionGeometry, transformNormalToView, cameraViewMatrix, color, float, instancedBufferAttribute, mix, output, positionWorld, smoothstep, uniform, uv, vec2, vec3, vec4 } from 'three/tsl';
++import { type Node, AdditiveBlending, Float32BufferAttribute, BoxGeometry, PlaneGeometry, DoubleSide, DynamicDrawUsage, InstancedBufferAttribute, Mesh, MeshPhysicalNodeMaterial, PointsNodeMaterial, Scene, Sprite, Vector3 } from 'three/webgpu';
++import { attribute, atan, bumpMap, mx_noise_float, normalWorld, cameraPosition, positionGeometry, transformNormalToView, cameraViewMatrix, color, float, instancedBufferAttribute, mix, output, positionWorld, smoothstep, uniform, uv, vec2, vec3, vec4 } from 'three/tsl';
+ import { random, STAGE_Y, simTime, TANK, waterHeight, wetFootprints } from '../state';
+ import { gerstnerField } from '../lib/waves';
+ import { waterOptics } from './water-optics';
+@@ -33,12 +33,12 @@
+   material.rotationNode = atan(viewVelocity.x.negate(), viewVelocity.y.add(0.00001));
+   material.colorNode = color('#b9e4ff').mul(1.35); material.opacityNode = smoothstep(0.5, 0.12, uv().sub(0.5).length()).mul(0.65);
+   const sprites = new Sprite(material); sprites.count = count; sprites.frustumCulled = false; scene.add(sprites);
+-  type Drop = { p: Vector3; v: Vector3; born: number; life: number; size: number; splash: boolean };
++  type Drop = { p: Vector3; v: Vector3; source: Vector3; initialVelocity: Vector3; born: number; life: number; size: number; splash: boolean; emitter?: Emitter; sheetSpeed?: number };
+   const drops: (Drop | undefined)[] = Array(count); let cursor = 0;
+   const sheetMaterial = new MeshPhysicalNodeMaterial({ color: '#000000', transmission: 0, ior: 1.33, roughness: .14, thickness: .04, side: DoubleSide, transparent: true, depthWrite: false, envMapIntensity:.55 });
+   const crossWarp=mx_noise_float(vec3(uv().mul(3),simTime.mul(.3))).mul(.65);
+-  const streak=mx_noise_float(vec3(uv().x.mul(18).add(crossWarp),uv().y.mul(25).sub(simTime.mul(2.6)),simTime.mul(.35))).mul(.5).add(.5);
+-  const fine=mx_noise_float(vec3(uv().x.mul(47).add(4),uv().y.mul(51).sub(simTime.mul(4)),2.7)).mul(.5).add(.5);
++  const streak=mx_noise_float(vec3(uv().x.mul(18).add(crossWarp),attribute('flowTime', 'float').sub(simTime).mul(18),simTime.mul(.35))).mul(.5).add(.5);
++  const fine=mx_noise_float(vec3(uv().x.mul(47).add(4),attribute('flowTime', 'float').sub(simTime).mul(37),2.7)).mul(.5).add(.5);
+   const fresnel=float(1).sub(normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).abs()).clamp().pow(5).mul(.96).add(.04);
+   sheetMaterial.normalNode=bumpMap(streak.add(fine.mul(.25)),float(.010));
+   sheetMaterial.outputNode=vec4(output.rgb.div(output.rgb.div(.9).add(1)),output.a);
+@@ -53,7 +53,7 @@
+   const rim = radiusUV.sub(0.43).div(0.016).abs().pow(2).negate().exp();
+   const puddleEmission = puddleOptics.refracted.mul(float(1).sub(puddleOptics.fresnel)).mul(.90).add(color('#155268').mul(.045)).add(color('#8eb4c7').mul(rim.mul(0.025))); puddleMaterial.emissiveNode = puddleEmission;
+   puddleMaterial.opacityNode = smoothstep(0.5, 0.32, radiusUV).mul(0.42);
+-  type Emitter = { opening: Opening; sheet: Mesh<BoxGeometry, MeshPhysicalNodeMaterial>; puddle: Mesh; volume: number; carry: number; stopped: number; strength: number; wet: boolean; rippleAt: number; started: number; front: { value: number }; flow: { value: number }; impact: { value: Vector3 } };
++  type Emitter = { opening: Opening; sheet: Mesh<BoxGeometry, MeshPhysicalNodeMaterial>; puddle: Mesh; volume: number; carry: number; stopped: number; strength: number; wet: boolean; rippleAt: number; started: number; front: { value: number }; flow: { value: number }; impact: { value: Vector3 }; arcLength: number; landingSpeed: number; scrollRate: number; measuredDrops: { drop: number; streak: number; error: number }[] };
+   const emitters = new Map<number, Emitter>();
+   let lastHeight = waterHeight.value;
+   const at = new Vector3(), tangent = new Vector3();
+@@ -64,6 +64,8 @@
+     const geometry=new BoxGeometry(1,.04,1,16,1,32);
+     const base=Float32Array.from(geometry.getAttribute('position').array);
+     geometry.userData.base=base;
++    geometry.setAttribute('flowTime', new Float32BufferAttribute(new Float32Array(base.length / 3), 1));
++    geometry.userData.tip = Array.from({ length: base.length / 3 }, (_, i) => i).filter(i => Math.abs(base[i*3]) < 1e-5 && geometry.getAttribute('normal').getY(i) > .9).sort((a,b) => base[b*3+2] - base[a*3+2]).slice(0,2);
+     const uvs=geometry.getAttribute('uv');
+     for(let i=0;i<uvs.count;i++)uvs.setXY(i,base[i*3]+.5,base[i*3+2]+.5);
+     const sheet=new Mesh(geometry,sheetMaterial.clone());
+@@ -72,13 +74,13 @@
+     const reach=smoothstep(front.add(.045),front.sub(.045),uv().y);
+     const tip=smoothstep(1,.86,uv().y);
+     const foam=smoothstep(.66,.88,streak.mul(.7).add(fine.mul(.3)).add(uv().y.mul(.12))).mul(flow.mul(.8).add(.2));
+-    const thickness = flow.mul(.075).add(.006).mul(float(1).sub(uv().y.mul(.78)));
++    const thickness = flow.mul(.018).add(.003).mul(float(1).sub(uv().y.mul(.78)));
+     const optics = waterOptics(thickness);
+     const aerated = uv().y.sub(front).div(.065).pow(2).negate().exp().mul(flow).mul(.30);
+-    const froth = foam.mul(.25).add(aerated).min(.85);
+-    const body=streak.mul(.17).add(.32).add(froth.mul(.20));
+-    sheet.material.opacityNode=fresnel.add(body).add(.28).min(.96).mul(edge).mul(reach).mul(tip).mul(flow.min(1));
+-    sheet.material.emissiveNode=mix(optics.refracted.mul(float(1).sub(optics.fresnel)).add(color('#046579').mul(flow).mul(.20)),color('#d9f3fa'),froth);
++    const froth = foam.mul(.08).add(aerated).min(.85);
++    const body=streak.mul(.035).add(.10).add(froth.mul(.15));
++    sheet.material.opacityNode=fresnel.mul(.5).add(body).min(.65).mul(edge).mul(reach).mul(tip).mul(flow.min(1));
++    sheet.material.emissiveNode=mix(optics.refracted.mul(float(1).sub(optics.fresnel)).add(color('#046579').mul(flow).mul(.035)),color('#d9f3fa'),froth);
+     sheet.material.thicknessNode=thickness;
+     sheet.frustumCulled=false;sheet.renderOrder=4;scene.add(sheet);
+     const puddleGeometry=new PlaneGeometry(2,2,48,48);puddleGeometry.rotateX(-Math.PI/2);
+@@ -101,10 +103,10 @@
+     (puddle.material as MeshPhysicalNodeMaterial).normalNode=transformNormalToView(vec3(puddleWave.normal.x.div(puddleWave.normal.y.max(.1)).mul(2).sub(radial.x.mul(ringSlope)),1,puddleWave.normal.z.div(puddleWave.normal.y.max(.1)).mul(2).sub(radial.y.mul(ringSlope))).normalize());
+     (puddle.material as MeshPhysicalNodeMaterial).emissiveNode=puddleEmission.add(color('#86bed7').mul(rings).mul(.025));
+     scene.add(puddle);
+-    emitters.set(opening.wall, { opening, sheet, puddle, volume: 0, carry: 0, stopped: -1, strength: 0, wet: waterHeight.value > opening.bottom, rippleAt: simTime.value, started: simTime.value, front, flow, impact });
++    emitters.set(opening.wall, { opening, sheet, puddle, volume: 0, carry: 0, stopped: -1, strength: 0, wet: waterHeight.value > opening.bottom, rippleAt: simTime.value, started: simTime.value, front, flow, impact, arcLength: 0, landingSpeed: 0, scrollRate: 0, measuredDrops: [] });
+   }
+-  function spawn(p: Vector3, v: Vector3, splash = false) {
+-    drops[cursor++ % count] = { p: p.clone(), v: v.clone(), born: simTime.value, life: splash ? 0.22 + rng() * 0.15 : 2.5, size: splash ? 1.5 + rng() * 2 : rng() < 0.08 ? 5 + rng() * 2 : 2 + rng() * 2, splash };
++  function spawn(p: Vector3, v: Vector3, splash = false, emitter?: Emitter) {
++    drops[cursor++ % count] = { p: p.clone(), v: v.clone(), source: p.clone(), initialVelocity: v.clone(), born: simTime.value, life: splash ? 0.22 + rng() * 0.15 : 2.5, emitter, sheetSpeed: emitter?.landingSpeed, size: splash ? 1.5 + rng() * 2 : rng() < 0.08 ? 5 + rng() * 2 : 2 + rng() * 2, splash };
+   }
+   function update(dt: number) {
+     const active = [...emitters.values()], volumes = distributeSpillVolume(lastHeight, waterHeight.value, active.map(e => e.opening));
+@@ -120,30 +122,45 @@
+       }
+       const speed = Math.sqrt(2 * 9.81 * head) * 0.55;
+       const sourceY = Math.min(o.point.y, Math.max(o.bottom + 0.015, waterHeight.value - 0.03));
+-      const flight = Math.sqrt(Math.max(0.01, sourceY - STAGE_Y) * 2 / 9.81);
++      const flight = Math.sqrt(Math.max(0.01, sourceY - STAGE_Y - .04) * 2 / 9.81);
+       at.copy(o.point).setY(sourceY).addScaledVector(o.normal, 0.08);
+       tangent.set(o.normal.z, 0, -o.normal.x);
++      const arcLengthAt = (t: number) => {
++        const g = 9.81, v = Math.max(.0001, speed);
++        return .5 * (t * Math.hypot(v, g*t) + v*v/g * Math.asinh(g*t/v));
++      };
++      e.arcLength = arcLengthAt(flight); e.landingSpeed = Math.hypot(speed, 9.81 * flight);
++      e.scrollRate = e.landingSpeed / e.arcLength;
++      const width = o.width * Math.min(1, Math.sqrt(head) * 2.2);
+       e.carry += dt * (head > 0.001 ? (o.full ? 1700 : 420) * e.strength : drips * 12);
+-      for (let n = Math.min(150, Math.floor(e.carry)); n > 0; n--) {
+-        e.carry--;
+-        const p = at.clone().addScaledVector(tangent, (rng() - 0.5) * o.width * (o.full ? 0.9 : 0.7));
+-        const v = o.normal.clone().multiplyScalar(speed * (0.8 + rng() * 0.4)); v.y = (rng() - 0.4) * 0.3; v.addScaledVector(tangent, (rng() - 0.5) * 0.22);
+-        spawn(p, v);
+-        if (rng() < 0.08) spawn(p, v.clone().multiplyScalar(0.65).addScaledVector(tangent, (rng() - 0.5) * 1.1).add(new Vector3(0, 0.6, 0)), true);
+-      }
+       const p = e.sheet.geometry.getAttribute('position');
+-      const width = o.width * Math.min(1, Math.sqrt(head) * 2.2);
++      const times = e.sheet.geometry.getAttribute('flowTime'), uvs = e.sheet.geometry.getAttribute('uv');
+       for (let i = 0; i < p.count; i++) {
+         const base=e.sheet.geometry.userData.base as Float32Array;
+         const row=base[i*3+2]+.5, t=row*flight, side=base[i*3]*2, slab=base[i*3+1]/.04;
+         const strand=1+.045*Math.cos(side*7+row*2-simTime.value*1.3);
+         const wobble=Math.sin(row*8-side*4-simTime.value*4)*.0065*row;
+         const point=at.clone().addScaledVector(o.normal,speed*t).addScaledVector(tangent,side*width*.5*(1-row*.25)*strand+wobble);
+-        point.y=sourceY-4.905*t*t+slab*Math.min(.10,head*.25)*(1-row*.8)+Math.sin(row*19+side*6-simTime.value*9)*.0025*row;
+-        p.setXYZ(i,point.x,Math.max(STAGE_Y+.04+slab*.012,point.y),point.z);
++        point.y=sourceY-4.905*t*t+slab*Math.min(.025,head*.06)*(1-row*.65)+Math.sin(row*19+side*6-simTime.value*9)*.0025*row;
++        times.setX(i, t); uvs.setY(i, arcLengthAt(t) / e.arcLength);
++        p.setXYZ(i,point.x,Math.max(STAGE_Y+.026,point.y),point.z);
+       }
+-      e.front.value = Math.min(1.05, (simTime.value - e.started) / flight); e.flow.value = Math.min(1, e.strength * 4);
++      e.front.value = arcLengthAt(Math.min(flight*1.025, Math.max(0, simTime.value - e.started))) / e.arcLength; e.flow.value = Math.min(1, e.strength * 4);
++      times.needsUpdate = uvs.needsUpdate = true;
+       p.needsUpdate = true; e.sheet.geometry.computeVertexNormals(); e.sheet.visible = head > 0.003;
++      // The advected noise phase is flowTime - simTime. Measure its actual world
++      // speed from the final mesh segment, including slab deformation, not a UV constant.
++      const [tipA, tipB] = e.sheet.geometry.userData.tip as number[];
++      e.landingSpeed = Math.hypot(p.getX(tipA)-p.getX(tipB), p.getY(tipA)-p.getY(tipB), p.getZ(tipA)-p.getZ(tipB)) / Math.max(1e-6, Math.abs(times.getX(tipA)-times.getX(tipB)));
++      e.scrollRate = e.landingSpeed / e.arcLength;
++      for (let n = Math.min(150, Math.floor(e.carry)); n > 0; n--) {
++        e.carry--;
++        const p = at.clone().addScaledVector(tangent, (rng() < .5 ? -1 : 1) * width * (.46 + rng() * .04));
++        const v = o.normal.clone().multiplyScalar(speed); v.y = 0;
++        spawn(p, v, false, e);
++        if (rng() < 0.08) spawn(p, v.clone().multiplyScalar(0.65).addScaledVector(tangent, (rng() - 0.5) * 1.1).add(new Vector3(0, 0.6, 0)), true);
++      }
++
+       const landing = at.clone().addScaledVector(o.normal, speed * flight + 0.3); e.impact.value.copy(landing);
+       if (e.volume < 0.02) e.puddle.position.set(landing.x, e.puddle.position.y, landing.z);
+       else { e.puddle.position.x += (landing.x - e.puddle.position.x) * dt * 0.15; e.puddle.position.z += (landing.z - e.puddle.position.z) * dt * 0.15; }
+@@ -156,8 +173,14 @@
+       if (!d) continue;
+       const age = simTime.value - d.born;
+       if (age > d.life) { drops[i] = undefined; continue; }
+-      d.v.y -= 9.81 * dt; d.p.addScaledVector(d.v, dt);
+-      if (d.p.y < STAGE_Y + 0.018) {
++      d.v.copy(d.initialVelocity); d.v.y -= 9.81 * age;
++      d.p.copy(d.source).addScaledVector(d.initialVelocity, age); d.p.y -= 4.905 * age * age;
++      if (d.p.y < STAGE_Y + 0.04) {
++        if (d.emitter && d.sheetSpeed && !d.splash) {
++          const dropSpeed = d.v.length();
++          d.emitter.measuredDrops.push({ drop: dropSpeed, streak: d.sheetSpeed, error: Math.abs(dropSpeed / d.sheetSpeed - 1) });
++          if (d.emitter.measuredDrops.length > 256) d.emitter.measuredDrops.shift();
++        }
+         if (!d.splash) for (let n = 0; n < (d.size > 5 ? 6 : 2); n++) {
+           const angle = n * Math.PI / 3 + rng() * 0.3;
+           spawn(d.p.clone().setY(STAGE_Y + 0.022), new Vector3(Math.cos(angle) * 0.55, rng() * 0.7 + 0.25, Math.sin(angle) * 0.55), true);
+@@ -169,10 +192,11 @@
+     positionAttribute.needsUpdate = sizeAttribute.needsUpdate = velocityAttribute.needsUpdate = true;
+   }
+   function capture() {
+-    return [...emitters].map(([wall, e]) => ({ wall, position: e.puddle.position.toArray(), scale: e.puddle.scale.toArray(), visible: e.puddle.visible, strength: e.strength, sheetVisible: e.sheet.visible, front: e.front.value, impact: e.impact.value.toArray(), sheet: Float32Array.from(e.sheet.geometry.getAttribute('position').array) }));
++    return [...emitters].map(([wall, e]) => ({ wall, position: e.puddle.position.toArray(), scale: e.puddle.scale.toArray(), visible: e.puddle.visible, strength: e.strength, sheetVisible: e.sheet.visible, front: e.front.value, impact: e.impact.value.toArray(), flowTime: Float32Array.from(e.sheet.geometry.getAttribute('flowTime').array), sheetUV: Float32Array.from(e.sheet.geometry.getAttribute('uv').array), sheet: Float32Array.from(e.sheet.geometry.getAttribute('position').array) }));
+   }
+   type Snapshot = ReturnType<typeof capture>;
+   return { add, update, capture,
++    get flowDiagnostics() { return [...emitters.values()].map(e => ({ wall: e.opening.wall, arcLength: e.arcLength, sheetLandingSpeed: e.landingSpeed, uvScrollRateAtLanding: e.scrollRate, measuredLandings: e.measuredDrops.length, meanDropletLandingSpeed: e.measuredDrops.reduce((s,d)=>s+d.drop,0)/Math.max(1,e.measuredDrops.length), meanStreakSpeedForThoseDrops: e.measuredDrops.reduce((s,d)=>s+d.streak,0)/Math.max(1,e.measuredDrops.length), meanRelativeError: e.measuredDrops.reduce((s,d)=>s+d.error,0)/Math.max(1,e.measuredDrops.length) })); },
+     get puddles() { return [...emitters.values()].filter(e=>e.puddle.visible).map(e=>({position:e.puddle.position.toArray(),radius:[e.puddle.scale.x,e.puddle.scale.z],depthWrite:(e.puddle.material as MeshPhysicalNodeMaterial).depthWrite,order:e.puddle.renderOrder})); },
+     clearParticles() { drops.fill(undefined); sizes.fill(0); sizeAttribute.needsUpdate = true; },
+     restore(a: Snapshot, b: Snapshot, t: number) {
+@@ -187,6 +211,11 @@
+         e.sheet.visible = Boolean(ea?.sheetVisible || eb?.sheetVisible);
+         const positions = e.sheet.geometry.getAttribute('position');
+         for (let i = 0; i < positions.array.length; i++) positions.array[i] = ap.sheet[i] * (1 - t) + bp.sheet[i] * t;
++        for (const [name, av, bv] of [['flowTime', ap.flowTime, bp.flowTime], ['uv', ap.sheetUV, bp.sheetUV]] as const) {
++          const attribute = e.sheet.geometry.getAttribute(name);
++          for (let i = 0; i < attribute.array.length; i++) attribute.array[i] = av[i] * (1-t) + bv[i] * t;
++          attribute.needsUpdate = true;
++        }
+         positions.needsUpdate = true; e.sheet.geometry.computeVertexNormals();
+         e.front.value = ap.front * (1 - t) + bp.front * t; e.flow.value = Math.min(1, e.strength * 4);
+         e.impact.value.fromArray(ap.impact).lerp(at.fromArray(bp.impact), t);
+diff -ru verify/run-n/before/src/scene/stage.ts src/scene/stage.ts
+--- verify/run-n/before/src/scene/stage.ts	2026-09-16 13:49:33
++++ src/scene/stage.ts	2026-09-16 14:18:44
+@@ -1,18 +1,19 @@
+ import { type Node, DirectionalLight, BoxGeometry, CanvasTexture, Mesh, MeshBasicNodeMaterial, MeshStandardNodeMaterial, PlaneGeometry, Scene, SRGBColorSpace } from 'three/webgpu';
+ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+ import { Fn, If, mx_noise_float, shadow, color, float, mix, output, positionWorld, screenUV, smoothstep, uniform, vec2, vec3, vec4 } from 'three/tsl';
+-import { causticLight } from './lighting';
+-import { STAGE_Y, TANK, waterHeight, wetFootprints, sunDirection } from '../state';
++import { causticCoordinates, causticParams, causticDrain } from './lighting';
++import { causticsField } from '../lib/worley';
++import { simTime, STAGE_Y, TANK, waterHeight, wetFootprints, sunDirection } from '../state';
+ 
+-export const atmosphere = mix(color('#0f2430'), color('#2c4757'), float(1).sub(screenUV.y));
++export const atmosphere = mix(color('#041b2c'), color('#08324f'), smoothstep(0, .6, screenUV.y));
+ /** One floor fragment owns both the contact shadow and refracted light pool. */
+ export function createStage(scene: Scene, sun: DirectionalLight) {
+   const material = new MeshBasicNodeMaterial(); material.fog = false;
+   const amount = uniform(1);
+-  const distance = positionWorld.xz.abs().sub(vec2(3.2, 1.95)).max(0).length();
++  const distance = positionWorld.xz.abs().sub(vec2(TANK.width / 2 + .2, TANK.depth / 2 + .2)).max(0).length();
+   const pool = smoothstep(3.8, 0, distance).mul(positionWorld.xz.length().mul(-0.055).exp());
+-  const base = mix(atmosphere, color('#1b3944'), positionWorld.xz.length().mul(-0.035).exp().mul(0.8))
+-    .add(color('#6f8180').mul(positionWorld.xz.length().mul(-0.12).exp()).mul(0.035));
++  const floorColour = mix(color('#062e48'), color('#0b4f78'), positionWorld.xz.length().mul(-0.10).exp());
++  const base = mix(floorColour, atmosphere, smoothstep(18, 65, positionWorld.xz.length()));
+   const sandRipple = positionWorld.x.mul(8).add(positionWorld.z.mul(2)).add(mx_noise_float(positionWorld.mul(.7)).mul(2)).sin();
+   // Analytic sand-slope lighting stays subtle and vanishes into the distant field.
+   const rippleNormal = vec3(sandRipple.mul(-.055),1,sandRipple.mul(-.014)).normalize();
+@@ -22,17 +23,17 @@
+     const r=positionWorld.xz.sub(footprint.xy).div(footprint.zw.max(.0001)).length();
+     wet=wet.max(smoothstep(1.2,.72,r).mul(footprint.z.greaterThan(.001).select(1,0)));
+   }
+-  const shadowed = mix(base, color('#08171d'), smoothstep(0.85, 0, distance).mul(0.55));
++  const shadowed = mix(base, color('#041c33'), smoothstep(0.85, 0, distance).mul(0.55));
+   material.colorNode = Fn(() => {
+     const light = vec3(0).toVar();
+-    // Skip wave focusing evaluations outside the finite pool; no screen derivatives here.
+-    If(pool.mul(amount).greaterThan(0.001), () => { light.assign(causticLight.mul(vec3(0.55, 0.88, 1)).mul(pool).mul(amount).mul(0.30).min(0.42)); });
++    // Same Worley technique as the Lab; only its along-light footprint is stretched.
++    If(pool.mul(amount).greaterThan(0.001), () => { light.assign(causticsField(causticCoordinates(.38), simTime, { ...causticParams, level: 3, depth: float(1) }).mul(color('#8fe3ff')).mul(pool).mul(amount).mul(causticDrain).mul(.55)); });
+     const rippleShade = rippleNormal.dot(sunDirection).sub(sunDirection.y).mul(.9).add(mx_noise_float(positionWorld.mul(45)).mul(.025)).mul(positionWorld.xz.length().mul(-.08).exp()).add(1);
+     return shadowed.mul(float(1).sub(wet.mul(.12))).mul(rippleShade).mul(visibility).add(light.mul(visibility));
+   })();
+   const floor = new Mesh(new PlaneGeometry(10000, 10000), material);
+   floor.receiveShadow = true; floor.name = 'Floor with integrated contact shadow and refracted caustics'; floor.rotation.x = -Math.PI / 2; floor.position.y = STAGE_Y; scene.add(floor);
+-  const pedestal = new Mesh(new RoundedBoxGeometry(6.4, -STAGE_Y, 3.9, 2, 0.055), new MeshStandardNodeMaterial({ color: '#142326', roughness: 0.86, metalness: 0.12 }));
++  const pedestal = new Mesh(new RoundedBoxGeometry(TANK.width + .4, -STAGE_Y, TANK.depth + .4, 2, 0.055), new MeshStandardNodeMaterial({ color: '#142326', roughness: 0.86, metalness: 0.12 }));
+   pedestal.position.y = STAGE_Y / 2; pedestal.castShadow = true; pedestal.receiveShadow = true; scene.add(pedestal);
+   const canvas = document.createElement('canvas'); canvas.width = 1536; canvas.height = 320;
+   const ctx = canvas.getContext('2d')!;
+@@ -48,6 +49,6 @@
+   const map = new CanvasTexture(canvas); map.colorSpace = SRGBColorSpace; map.anisotropy = 8;
+   const gold = new MeshStandardNodeMaterial({ map, metalness: 0.9, roughness: 0.3 });
+   gold.outputNode = vec4(output.rgb.div(output.rgb.div(0.8).add(1)), output.a);
+-  const plaque = new Mesh(new BoxGeometry(1.52, 0.30, 0.018), gold); plaque.position.set(0, STAGE_Y / 2, 1.958); scene.add(plaque);
++  const plaque = new Mesh(new RoundedBoxGeometry(1.52, 0.30, 0.024, 3, 0.01), gold); plaque.position.set(0, STAGE_Y / 2, TANK.depth / 2 + .208); scene.add(plaque);
+   return { update() { amount.value = Math.max(0, Math.min(1, (waterHeight.value - TANK.floor) / (TANK.base - TANK.floor))); }, get intensity() { return amount.value; } };
+ }
+diff -ru verify/run-n/before/src/scene/tank.ts src/scene/tank.ts
+--- verify/run-n/before/src/scene/tank.ts	2026-09-16 13:49:33
++++ src/scene/tank.ts	2026-09-16 14:11:23
+@@ -10,7 +10,7 @@
+ export type Opening = { wall: number; point: Vector3; normal: Vector3; bottom: number; width: number; full: boolean };
+ /** Physical glass, with the same material on intact faces and exposed shard edges. */
+ export async function createTank(scene: Scene, camera?: Camera) {
+-  const physics = await createShardWorld(), rng = random(912), height = TANK.top - TANK.floor;
++  const physics = await createShardWorld(), height = TANK.top - TANK.floor;
+   const glass = new MeshPhysicalNodeMaterial({ color: '#f6fffc', transmission: 1, thickness: 0.05, ior: 1.52, roughness: 0.04, attenuationColor: new Color('#cfe8e4'), attenuationDistance: 1.5, dispersion: 0.015, clearcoat: 0, side: DoubleSide, transparent: true, opacity: 0.28, depthWrite: false });
+   const grazing = float(1).sub(normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).abs()).clamp().pow(5);
+   glass.fog = false; // The opaque interior already contains distance fog.
+@@ -18,7 +18,7 @@
+   glass.colorNode = underwaterColor(color('#f6fffc').rgb);
+   glass.emissiveNode = color('#9ebbbd').mul(grazing).mul(0.045);
+   const widths = [TANK.width, TANK.width, TANK.depth, TANK.depth];
+-  const origins = [new Vector3(0, 1.91, 1.75), new Vector3(0, 1.91, -1.75), new Vector3(3, 1.91, 0), new Vector3(-3, 1.91, 0)];
++  const origins = [new Vector3(0, (TANK.top + TANK.floor) / 2, TANK.depth / 2), new Vector3(0, (TANK.top + TANK.floor) / 2, -TANK.depth / 2), new Vector3(TANK.width / 2, (TANK.top + TANK.floor) / 2, 0), new Vector3(-TANK.width / 2, (TANK.top + TANK.floor) / 2, 0)];
+   const rotations = [0, Math.PI, Math.PI / 2, -Math.PI / 2].map(a => new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), a));
+   const panels: Mesh<BufferGeometry, MeshPhysicalNodeMaterial>[] = widths.map((width, wall) => {
+     const panel = new Mesh(new BoxGeometry(width, height, 0.05), glass);
+@@ -27,9 +27,9 @@
+   const staticPane = (wall: number) => physics.addStaticBox(origins[wall], wall < 2 ? { x: widths[wall], y: height, z: 0.05 } : { x: 0.05, y: height, z: widths[wall] });
+   const colliders = widths.map((_, wall) => [staticPane(wall)]);
+   physics.addStaticBox({ x: 0, y: STAGE_Y - 0.12, z: 0 }, { x: 40, y: 0.24, z: 40 });
+-  physics.addStaticBox({ x: 0, y: STAGE_Y / 2, z: 0 }, { x: 6.4, y: -STAGE_Y, z: 3.9 });
+-  physics.addStaticBox({ x: 0, y: 0.08, z: 0 }, { x: 6.18, y: 0.16, z: 3.68 });
+-  const plinth = new Mesh(new BoxGeometry(6.18, 0.16, 3.68), new MeshStandardNodeMaterial({ color: '#273536', metalness: 0.12, roughness: 0.68 }));
++  physics.addStaticBox({ x: 0, y: STAGE_Y / 2, z: 0 }, { x: TANK.width + .4, y: -STAGE_Y, z: TANK.depth + .4 });
++  physics.addStaticBox({ x: 0, y: 0.08, z: 0 }, { x: TANK.width + .18, y: TANK.floor, z: TANK.depth + .18 });
++  const plinth = new Mesh(new BoxGeometry(TANK.width + .18, TANK.floor, TANK.depth + .18), new MeshStandardNodeMaterial({ color: '#273536', metalness: 0.12, roughness: 0.68 }));
+   plinth.position.y = 0.08; plinth.castShadow = true; plinth.receiveShadow = true; scene.add(plinth);
+   const rimMaterial = new MeshPhysicalNodeMaterial({ color: '#b5d6d0', metalness: 0.15, roughness: 0.2, transmission: 0.6, thickness: 0.035 });
+   rimMaterial.emissiveNode = color('#9ebbbd').mul(0.055);
+@@ -52,7 +52,7 @@
+   looseGlass.roughness = 0.18; looseGlass.side = FrontSide;
+   // Smoothly compress glints, rather than clipping a whole sun lobe to white.
+   // The same batch/material is used for physics and rewind playback.
+-  looseGlass.emissiveNode = color('#b9dedb').mul(attribute('shardEdge', 'float').mul(0.12).add(grazing.max(0).sqrt().mul(0.10)));
++  looseGlass.emissiveNode = color('#cbefff').mul(attribute('shardEdge', 'float').mul(.35).add(grazing.max(0).sqrt().mul(.15)).add(attribute('impactGlow', 'float').mul(.65)));
+   looseGlass.outputNode = vec4(output.rgb.div(output.rgb.div(0.55).add(1)), output.a);
+   const loose = new Mesh(new BufferGeometry(), looseGlass); loose.frustumCulled = false; loose.visible = false; scene.add(loose);
+   let offsets: number[] = [], triangleOrder: number[] = []; let depths = new Float32Array();
+@@ -64,20 +64,22 @@
+     loose.geometry.setAttribute('normal', new Float32BufferAttribute(new Float32Array(total * 3), 3));
+     // The extrusion's thin side faces catch light even when a face lies flat.
+     // This static channel survives every transform, including reverse playback.
+-    const edge = new Float32Array(total);
++    const edge = new Float32Array(total), glow = new Float32Array(total);
+     shards.forEach(({ mesh }, j) => {
+       const normals = mesh.geometry.getAttribute('normal');
++      glow.set(mesh.geometry.getAttribute('impactGlow').array, offsets[j]);
+       for (let i = 0; i < normals.count; i++) edge[offsets[j] + i] = Math.abs(normals.getZ(i)) < 0.5 ? 1 : 0;
+     });
+     loose.geometry.setAttribute('shardEdge', new Float32BufferAttribute(edge, 1));
++    loose.geometry.setAttribute('impactGlow', new Float32BufferAttribute(glow, 1));
+     triangleOrder = Array.from({ length: total / 3 }, (_, i) => i); depths = new Float32Array(total / 3);
+     loose.geometry.setIndex(new Uint32BufferAttribute(Uint32Array.from({ length: total }, (_, i) => i), 1));
+     loose.visible = total > 0;
+   }
+   function clearColliders(wall: number) { for (const body of colliders[wall]) physics.removeBody(body); colliders[wall] = []; }
+-  function release(cells: ShatterCell[], wall: number, impact: Vector3, budget: number, full = false, strength = full ? 1 : 0.2) {
++  function release(cells: ShatterCell[], wall: number, impact: Vector3, budget: number, full = false, strength = full ? 1 : 0.55) {
+     const released = releaseShards({ cells, world: physics, material: glass, origin: origins[wall], rotation: rotations[wall], impact,
+-      width: widths[wall], height, level: 3, budget, minimumArea: 0.1, floorY: STAGE_Y, random: rng, strength });
++      width: widths[wall], height, level: 3, budget, minimumArea: full ? 0.1 : 0.01, floorY: STAGE_Y, random: random(912 + wall * 17 + (full ? 1 : 0)), strength });
+     for (const { mesh, body, launch } of released) shards.push({ mesh, body, launch, wall, full, homePosition: mesh.position.clone(), homeRotation: mesh.quaternion.clone() });
+   }
+ 
+@@ -116,14 +118,14 @@
+     (lines.material as LineBasicNodeMaterial).opacityNode = smoothstep(radius.add(0.06), radius, attribute('crackDistance', 'float')).mul(0.72);
+     lines.position.copy(origins[wall]); lines.quaternion.copy(rotations[wall]); scene.add(lines);
+     cracks.set(wall, { cells: remaining, impact: impact.clone(), opening, lines });
+-    release(core, wall, impact, Math.max(1, Math.min(70, 400 - shards.length)), false, fullLaunch ? 1 : 0.2); rebuildBatch(); return opening;
++    release(core, wall, impact, Math.max(1, Math.min(70, 400 - shards.length)), false, fullLaunch ? 1 : 0.55); rebuildBatch(); return opening;
+   }
+   function shatter(impact: Vector3, wall: number) {
+     if (!cracks.size) crack(impact, wall, true);
+     const openings: Opening[] = [], budget = Math.floor((400 - shards.length) / cracks.size);
+     for (const [id, c] of cracks) {
+       clearColliders(id); release(c.cells, id, c.impact, budget, true); c.cells = []; c.lines.visible = false; panels[id].visible = false; rims[id].forEach(r => r.visible = false);
+-      openings.push({ ...c.opening, bottom: TANK.floor, width: widths[id], full: true, point: origins[id].clone().setY(0.5) });
++      openings.push({ ...c.opening, bottom: TANK.floor, width: widths[id], full: true, point: origins[id].clone().setY(TANK.floor + .34) });
+     }
+     rebuildBatch(); return openings;
+   }
+diff -ru verify/run-n/before/src/scene/water.ts src/scene/water.ts
+--- verify/run-n/before/src/scene/water.ts	2026-09-16 13:49:33
++++ src/scene/water.ts	2026-09-16 13:53:16
+@@ -57,7 +57,7 @@
+   const reflection = reflector({ resolutionScale: .25, bounces: false, samples: 0 });
+   reflection.target.rotation.x = -Math.PI/2; reflection.target.position.y = TANK.base; scene.add(reflection.target);
+   const reflectedUV = screenUV.flipX().add(baseNormal.xz.mul(vec2(-.010,.010))).clamp(.002,.998);
+-  const shoreDepth = positionWorld.y.sub(texture(terrain, positionWorld.xz.div(vec2(6,3.5)).add(.5)).r);
++  const shoreDepth = positionWorld.y.sub(texture(terrain, positionWorld.xz.div(vec2(TANK.width,TANK.depth)).add(.5)).r);
+   const wallDistance = min(float(TANK.width/2-.026).sub(positionWorld.x.abs()), float(TANK.depth/2-.026).sub(positionWorld.z.abs()));
+   const foamNoise = mx_noise_float(vec3(positionWorld.xz.mul(17).add(simTime.mul(.15)),simTime.mul(.25))).mul(.5).add(.5);
+   const shoreline = smoothstep(.035,.006,shoreDepth).mul(smoothstep(-.008,.006,shoreDepth)).mul(.24);
+diff -ru verify/run-n/before/src/state.ts src/state.ts
+--- verify/run-n/before/src/state.ts	2026-09-16 13:49:33
++++ src/state.ts	2026-09-16 14:15:08
+@@ -3,10 +3,10 @@
+ import { uniform } from 'three/tsl';
+ 
+ export const STAGE_Y = -0.42;
+-export const TANK = { width: 6, depth: 3.5, floor: 0.16, top: 3.66, base: 2.59 };
++export const TANK = { width: 7.6, depth: 4.4, floor: 0.16, top: 3.0, base: 2.25 };
+ export const state = {
+   timeScale: 1, elapsed: 0, rewinding: false, mode: 'idle' as 'idle' | 'cracked' | 'shattered',
+-  impact: new Vector3(0.6, 2.15, TANK.depth / 2), wall: 0, hasImpact: false,
++  impact: new Vector3(0.6, TANK.base - 0.44, TANK.depth / 2), wall: 0, hasImpact: false,
+   cracks: 0, spilling: false, muted: false, fps: 0, lastSlosh: -100, shatterTime: 0, brokenCount: 0,
+ };
+ // One simulation clock drives every shader; built-in real-time nodes would ignore slow motion.
+@@ -21,6 +21,6 @@
+ // Shared wet footprints: centre x/z and elliptical radii; zero radius means dry.
+ export const wetFootprints = Array.from({length:4},()=>uniform(new Vector4()));
+ 
+-// Shared by displacement and its refracted caustics; included in water rewind snapshots.
++// Water displacement controls, included in rewind snapshots. Caustics use the shared Worley field.
+ export const waterAgitation = uniform(0);
+ export const waterChoppiness = uniform(WATER_SCALE.choppiness);

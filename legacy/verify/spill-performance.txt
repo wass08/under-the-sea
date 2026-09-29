@@ -1,0 +1,2 @@
+{"port":4175,"medianFPS":48,"minFPS":45,"maxFPS":54}
+{"port":4174,"medianFPS":48,"minFPS":46,"maxFPS":49}

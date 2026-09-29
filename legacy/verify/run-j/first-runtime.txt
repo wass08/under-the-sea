@@ -1,0 +1,18 @@
+Idle: {"crackTarget":{"x":905.9616589817159,"y":573.5794598024873},"aboveTarget":{"x":903.9830511412877,"y":419.8376772634748},"wallTargets":[{"x":858.3641808515426,"y":584.5112274732465},{"x":1046.1964212321975,"y":494.28923107566584},{"x":1211.6831270153202,"y":594.9537235374447},{"x":753.2673149592347,"y":487.0147535341143}],"cracks":0,"spilling":false,"rewinding":false,"rewindProgress":0,"historyFrames":0,"shardBodies":0,"awakeShards":0,"physics":{"fixedHz":60,"solverIterations":12,"internalPgs":4,"allowedError":0.00019999999494757503,"prediction":0.004000000189989805,"erp":0,"contactSkinMax":0.003,"inertiaRatioLimit":16,"massRange":null,"fixedFallbacks":0},"audio":{"muted":false,"ready":true,"lastPlay":null,"offsets":{"glass":0.4039583333333333,"bubbles":0.38079166666666664}},"impactFrame":-1,"holeBottom":null,"holes":[],"fps":60,"pixelRatio":1.5,"mode":"idle","timeScale":1,"elapsed":2.130800000071525,"brokenCount":0,"hasImpact":false,"impact":[0.6,2.15,1.75],"wall":0,"height":2.59,"normal":[0,1,0],"renderer":"WebGPU","motes":440,"motesAboveSurface":0,"bubbles":62,"bubblePops":33,"floorCausticIntensity":1,"sunAzimuth":144.56509288051845,"causticAzimuth":-35.43490711948154,"environment":"Poly Haven · CC0","drawCalls":61}
+Run I idle draw calls (Run H baseline 56): {"before":56,"after":61}
+Idle performance: {"medianFPS":60,"drawCalls":61,"pixelRatio":1.5}
+Camera 34 performance: {"medianFPS":60,"drawCalls":61,"pixelRatio":1.5}
+Run I underwater facet contrast: {"lit":0.07459495462426065,"dark":0.08551827473659757,"ratio":0.8722691711686008,"beforeLit":0.0260905,"beforeDark":0.0140336,"litGain":2.859084901564196}
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(contrast.ratio >= 1.8)
+
+    at file:///Users/wawa/Documents/Projects/wawasensei/aquarium/verify/runtime.mjs:62:154 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+Failure state: {"crackTarget":{"x":1078.2797248330935,"y":508.59794927003566},"aboveTarget":{"x":1080.1748936078989,"y":198.6059683205456},"wallTargets":[{"x":960,"y":557.6833200979438},{"x":960,"y":514.4022804582427},{"x":1444.4182951116488,"y":532.0205601194535},{"x":475.58170488835117,"y":532.0205601194535}],"cracks":0,"spilling":false,"rewinding":false,"rewindProgress":0,"historyFrames":0,"shardBodies":0,"awakeShards":0,"physics":{"fixedHz":60,"solverIterations":12,"internalPgs":4,"allowedError":0.00019999999494757503,"prediction":0.004000000189989805,"erp":0,"contactSkinMax":0.003,"inertiaRatioLimit":16,"massRange":null,"fixedFallbacks":0},"audio":{"muted":false,"ready":true,"lastPlay":null,"offsets":{"glass":0.4039583333333333,"bubbles":0.38079166666666664}},"impactFrame":-1,"holeBottom":null,"holes":[],"fps":29,"pixelRatio":1.5,"mode":"idle","timeScale":1,"elapsed":2.3205000000000005,"brokenCount":0,"hasImpact":false,"impact":[0.6,2.15,1.75],"wall":0,"height":2.59,"normal":[0,1,0],"renderer":"WebGPU","motes":440,"motesAboveSurface":0,"bubbles":63,"bubblePops":35,"floorCausticIntensity":1,"sunAzimuth":145.70329288008935,"causticAzimuth":-34.29670711991067,"environment":"Poly Haven · CC0","drawCalls":61}

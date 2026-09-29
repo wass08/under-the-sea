@@ -1,0 +1,5 @@
+84:  sun.position.copy(head);
+85:  sunDirection.value.copy(head).sub(sun.target.position).normalize();
+86:  sunElevation.value = sunDirection.value.y;
+93:  housing.quaternion.setFromUnitVectors(new Vector3(0,-1,0), sunDirection.value.clone().negate());
+97:  diffuser.position.copy(head).addScaledVector(sunDirection.value, -.06); scene.add(diffuser);

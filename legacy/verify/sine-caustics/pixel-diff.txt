@@ -1,0 +1,9 @@
+L2 full PNG (before): changed=73032/1600000, MAE=0.917445417, max=211
+L2 full PNG (baseline-run): changed=71718/1600000, MAE=0.914194583, max=211
+L2 frozen canvas incl. FPS: changed=73/1280000, MAE=0.001504427, max=83
+L2 frozen scene, canvas crop (0,120,1280,950): changed=0/1062400, MAE=0.000000000, max=0
+L3 full PNG (before): changed=88033/1600000, MAE=0.354999375, max=212
+L3 full PNG (baseline-run): changed=86264/1600000, MAE=0.351142708, max=212
+L3 frozen canvas incl. FPS: changed=73/1280000, MAE=0.001504427, max=83
+L3 frozen scene, canvas crop (0,120,1280,950): changed=0/1062400, MAE=0.000000000, max=0
+L1 motion, same scene crop: changed=577719/1062400, MAE=4.595471574, max=75

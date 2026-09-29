@@ -1,0 +1,18 @@
+{
+  "floorCount": 1,
+  "contactPlanes": 0,
+  "receiveShadow": false,
+  "material": "MeshBasicNodeMaterial",
+  "regionCenter": [
+    2097.9404453298457,
+    877.438294708873
+  ],
+  "floorRegion": [
+    2069,
+    849,
+    2125,
+    905
+  ],
+  "meanDifference": 0.017573696145124714,
+  "maxDifference": 1
+}

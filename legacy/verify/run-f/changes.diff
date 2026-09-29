@@ -1,0 +1,1055 @@
+--- before/README.md
++++ README.md
+@@ -16,8 +16,8 @@
+ - **Click a side wall:** crack it once. Dense core fragments pop out, leaving a real hole, exposed glass edges, and fading radial crack lines. Up to four walls can be cracked.
+ - **Space / Shatter:** release the remaining cells on every cracked wall; without a crack, use the default front impact. Water drains fully and the camera pushes in.
+ - **T / Slow motion:** switch between 1× and 0.15× simulation time.
+-- **R / Reset:** restore panes, refill immediately, clear shards/streams/puddles, and ease the camera home. Keep speed and sound preferences.
+-- **M / Sound:** optional glass and looping bubbles. Muted by default, with the choice saved in localStorage. Audio starts only after a gesture and tolerates unavailable devices.
++- **R / Reset:** rewind shards, water, ribbons and puddles over 1.6 seconds, then restore the pristine tank and ease the camera home. Press again to skip. Slow motion also slows rewind; speed and sound preferences persist.
++- **M / Sound:** glass and looping bubbles, on by default unless localStorage stores `aquarium-sound=off`. Files preload into a suspended context; the first gesture resumes it. Playback trims detected leading silence and tolerates unavailable devices.
+ - **Drag / scroll:** orbit / zoom. **Enter the Lab** opens `#/lab/terrain`.
+ 
+ ## Main-page pipeline
+@@ -28,9 +28,13 @@
+ 
+ `scene/water.ts` deforms one bounded plane using a damped tilt spring. Physical transmission/IOR, scrolling micro-normal noise, four decaying ripple uniforms, a wall meniscus, and sun specular make the water readable from both sides. Glass and water use alpha compositing alongside transmission: Three's screen-space transmission buffer cannot recursively refract nested transparent objects.
+ 
+-`scene/tank.ts` merges the remaining extruded fracture cells into one pane with a real hole. Remaining cells get fixed convex colliders. Core shards and later full shards use one Rapier world, fixed 1/120-second substeps, CCD, gravity, floor/base/pane collisions, and sleeping. All loose glass is transformed into one render batch. Released shards use 0.12 roughness and an HDR output cap of 1.1 to keep sun glints below the bloom threshold. At most 400 dynamic bodies are used; larger multi-wall breaks combine edge-adjacent cells into compound fragments with a separate convex collider per cell.
++`scene/tank.ts` merges the remaining extruded fracture cells into one pane with a real hole. Remaining cells get fixed convex colliders. Core shards and later full shards use one Rapier world, fixed 1/120-second substeps, CCD, gravity, floor/base/pane collisions, and sleeping. Released hulls are inset, with corner clearance and reduced thickness. Floor contact increases damping, CCD ends after one second, quiet bodies sleep, and six-second-old shards become fixed so the pile cannot jitter. These settling rules are opt-in for the main page. All loose glass is transformed into one render batch. Released shards use 0.12 roughness and an HDR output cap of 1.1 to keep sun glints below the bloom threshold. At most 400 dynamic bodies are used; larger multi-wall breaks combine edge-adjacent cells into compound fragments with a separate convex collider per cell.
+ 
+ `scene/spill.ts` gives each hole a ballistic particle emitter, a refractive parabola ribbon, and a growing reflective puddle. The level integrates Torricelli's square-root head rate analytically to stop exactly at the lowest hole sill. Dry holes emit nothing; wet holes finish with two seconds of drips. Full break widens the streams and drains quickly. Particles (2,600 slots), physics, camera motion, caustics, ripples, and sunlight all use simulation time.
++
++`scene/shafts.ts` performs a 16-step, jittered single-scattering raymarch through the water volume. The ray intersects the tank and tilted water plane, stops at opaque scene depth, fades near the glass, and samples a height field of the actual island toward the sun. `scene/stage.ts` evaluates the contact shadow inside the floor material, eliminating the separate near-coplanar shadow plane.
++
++`rewind.ts` stores 30 Hz snapshots in a 20-second ring with a pristine landing keyframe and shard slot poses. Reverse playback interpolates positions, quaternions, water, ribbons and puddles. Particles clear at the start; crack lines fade instead of geometrically retracting. Reverse glass audio accompanies the return. The visual clock continues smoothly after rewind while the physics clock pauses during playback.
+ 
+ `post.ts` uses bloom (0.24 strength, 0.4 radius, 1.3 threshold) and a subtle vignette. No depth of field. Pixel ratio is capped at 1.5. `window.aquarium` exposes read-only mode, cracks, sill heights, spilling, elapsed time, body count, FPS, draw calls, and projected verification targets.
+ 
+@@ -51,7 +55,7 @@
+ node verify/library.mjs
+ ```
+ 
+-The main runtime script requires real WebGPU rendering at 1920×1080, pixel ratio 1.5. It captures idle, crack (~0.6 s), spill (~3 s), shatter (~1.5 s), settled shatter (~5 s), reset, plus early airborne shards and a 900px layout. It checks the exact settled sill, no spilling afterward, full break, body cap, measured 0.15× time, reset, sound toggle, drag discrimination, branding, and the missing-WebGPU guard. `edges.mjs` also checks dry cracks and a four-wall break. Logs and captures are in `verify/`.
++The main runtime script requires real WebGPU rendering at 1920×1080, pixel ratio 1.5. It captures idle, crack (~0.6 s), spill (~3 s), shatter (~1.5 s), settled shatter (10 s), reset, plus early airborne shards, halfway rewind, four camera presets, and responsive layouts. It checks the exact settled sill, no spilling afterward, full break, body cap, measured 0.15× time, exact pristine reset, 8–10-second shard pose invariance, same-frame audio scheduling and onset offsets, touch/keyboard spoiler reveal, sound toggle, drag discrimination, branding, and the missing-WebGPU guard. `edges.mjs` also checks dry cracks, a four-wall break, and slow-motion rewind/reset during an active spill. Logs and captures are in `verify/`.
+ 
+ ## The Lab: Voronoi / Delaunay
+ 
+--- before/index.html
++++ index.html
+@@ -6,12 +6,12 @@
+     <meta name="theme-color" content="#111e25" />
+     <meta name="description" content="A small world held in glass. An interactive WebGPU aquarium, with sloshing water and refractive glass fragments." />
+     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='12' width='48' height='40' rx='3' fill='%237bbdbb'/%3E%3Cpath d='M12 42L30 20L48 42Z' fill='%23273439'/%3E%3C/svg%3E" />
+-    <title>Aquarium</title>
++    <title>Aquarium · Wawa Sensei</title>
+     <script>document.documentElement.dataset.page = location.hash.startsWith("#/lab") ? "lab" : "aquarium";</script>
+   </head>
+   <body>
+     <main id="app" aria-label="Interactive glass aquarium"></main>
+-    <header class="masthead"><a href="https://wawasensei.dev" target="_blank" rel="noopener noreferrer" aria-label="Wawa Sensei"><img src="/brand/wawasensei-white.png" width="160" alt="Wawa Sensei" /></a><h1>Aquarium</h1><p class="series">You can't prompt what you can't name · Voronoi &amp; Delaunay</p></header>
++    <header class="masthead"><a href="https://wawasensei.dev" target="_blank" rel="noopener noreferrer" aria-label="Wawa Sensei"><img src="/brand/wawasensei-white.png" width="96" alt="Wawa Sensei" /></a><h1>Aquarium</h1><p class="series">You can't prompt what you can't name · <span class="topic-spoiler" tabindex="0" role="button" aria-label="Reveal the topic" aria-expanded="false"><span aria-hidden="true">Voronoi &amp; Delaunay</span></span></p></header>
+     <div id="loading" role="status"><span class="loader"></span>Gathering light…</div>
+     <footer class="caption"><nav class="socials" aria-label="Wawa Sensei social links">
+ <a href="https://x.com/wawasensei" target="_blank" rel="noopener noreferrer" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l8.2-9.4L.8 2h6.5l5.8 7.7L18.9 2ZM17.8 20h1.7L6.4 3.9H4.6L17.8 20Z"/></svg></a>
+--- before/src/aquarium.ts
++++ src/aquarium.ts
+@@ -12,6 +12,7 @@
+ import { createSpill } from './scene/spill';
+ import { createAudio } from './audio';
+ import { createUI } from './ui';
++import { createRewind } from './rewind';
+ 
+ const loading = document.querySelector<HTMLElement>('#loading')!;
+ function fail(message: string, error?: unknown, status = 'error') {
+@@ -21,6 +22,10 @@
+ }
+ async function boot() {
+   if (!('gpu' in navigator)) { fail('WebGPU is unavailable. Open this study in current Chrome or Edge on a WebGPU-capable device (localhost or HTTPS).', undefined, 'unavailable'); return; }
++  let frame = 0;
++  const audio = createAudio(() => frame);
++  addEventListener('pointerdown', () => { void audio.gesture(); }, { capture: true });
++  addEventListener('keydown', () => { void audio.gesture(); }, { capture: true });
+   const renderer = new WebGPURenderer({ antialias: true });
+   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.setSize(innerWidth, innerHeight);
+   renderer.toneMapping = AgXToneMapping; renderer.toneMappingExposure = 1.05;
+@@ -35,26 +40,31 @@
+   scene.background = scene.fog.color;
+   createStage(scene);
+   const tank = await createTank(scene), water = createWater(scene);
+-  createIsland(scene);
+-  const spill = createSpill(scene, water.ripple), audio = createAudio();
++  const island = createIsland(scene);
++  const spill = createSpill(scene, water.ripple);
++  await audio.loading;
+   state.muted = audio.muted;
+-  addEventListener('pointerdown', () => { void audio.gesture(); }, { once: true });
+-  addEventListener('keydown', () => { void audio.gesture(); }, { once: true });
+-  const shafts = createShafts(scene); createDust(scene);
++  const shafts = createShafts(scene, island.heightTexture); createDust(scene);
+   const post = createPost(renderer, scene, rig.camera);
++  let impactFrame = -1;
++  function resetPristine() {
++    state.mode = 'idle'; state.brokenCount = 0; state.cracks = 0; state.spilling = false; state.hasImpact = false;
++    state.wall = 0; state.impact.set(0.6, TANK.base - 0.44, TANK.depth / 2);
++    tank.reset(); water.reset(); spill.reset(); audio.reset(); rig.reset(); rewind.clear();
++  }
++  const rewind = createRewind(tank, water, spill, resetPristine);
+   const actions = {
+     shatter() {
+-      if (state.mode === 'shattered') return;
++      if (state.mode === 'shattered' || state.rewinding) return;
++      rewind.beforeBreak();
+       const openings = tank.shatter(state.impact, state.wall);
+       state.mode = 'shattered'; state.shatterTime = state.elapsed; state.brokenCount = tank.shards.length;
+       state.cracks = tank.cracks;
+       for (const opening of openings) spill.add(opening);
+-      water.drain(TANK.floor, true); water.ripple(state.impact, 2); rig.shatter(state.impact); void audio.play(true);
++      water.drain(TANK.floor, true); water.ripple(state.impact, 2); rig.shatter(state.impact); impactFrame = frame; void audio.play(true); rewind.record(true);
+     },
+     reset() {
+-      state.mode = 'idle'; state.brokenCount = 0; state.cracks = 0; state.spilling = false; state.hasImpact = false;
+-      state.wall = 0; state.impact.set(0.6, TANK.base - 0.44, TANK.depth / 2);
+-      tank.reset(); water.reset(); spill.reset(); audio.reset(); rig.reset();
++      audio.reset(); if (rewind.start()) void audio.rewind();
+     },
+     toggleSound() { audio.toggle(); state.muted = audio.muted; },
+     toggleTime() { state.timeScale = state.timeScale === 1 ? 0.15 : 1; },
+@@ -69,17 +79,18 @@
+   canvas.addEventListener('pointerup', e => {
+     if (!down || down.id !== e.pointerId) return;
+     const click = !down.moved && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6; down = null;
+-    if (!click || state.mode === 'shattered') return;
++    if (!click || state.mode === 'shattered' || state.rewinding) return;
+     const rect = canvas.getBoundingClientRect();
+     pointer.set((e.clientX - rect.left) / rect.width * 2 - 1, -(e.clientY - rect.top) / rect.height * 2 + 1);
+     raycaster.setFromCamera(pointer, rig.camera);
+     const hit = raycaster.intersectObjects(tank.panels, false)[0];
+     if (hit) {
+       state.impact.copy(hit.point); state.wall = hit.object.userData.wall; state.hasImpact = true;
++      rewind.beforeBreak();
+       const opening = tank.crack(hit.point, state.wall);
+       if (opening) {
+         state.mode = 'cracked'; state.cracks = tank.cracks; state.brokenCount = tank.shards.length;
+-        water.ripple(hit.point); water.slosh(hit.point); water.drain(opening.bottom); spill.add(opening); void audio.play(false);
++        water.ripple(hit.point); water.slosh(hit.point); water.drain(opening.bottom); spill.add(opening); impactFrame = frame; void audio.play(false); rewind.record(true);
+       }
+     }
+   });
+@@ -96,7 +107,8 @@
+     crackTarget: screenPoint(new Vector3(0.6, 1.75, TANK.depth / 2 + 0.026)),
+     aboveTarget: screenPoint(new Vector3(0.6, 3.3, TANK.depth / 2 + 0.026)),
+     wallTargets: [new Vector3(0, 1.5, 1.776), new Vector3(0, 1.5, -1.776), new Vector3(3.026, 1.5, 0), new Vector3(-3.026, 1.5, 0)].map(screenPoint),
+-    cracks: state.cracks, spilling: state.spilling,
++    cracks: state.cracks, spilling: state.spilling, rewinding: state.rewinding, rewindProgress: rewind.progress, historyFrames: rewind.count,
++    shardBodies: tank.bodyCount, awakeShards: tank.awakeCount, shardTransforms: Array.from(tank.capture().poses), audio: audio.diagnostics, impactFrame,
+     holeBottom: tank.openings.length ? Math.min(...tank.openings.map(o => o.bottom)) : null,
+     holes: tank.openings.map(o => ({ wall: o.wall, bottom: o.bottom })),
+     fps: state.fps, pixelRatio: renderer.getPixelRatio(), mode: state.mode,
+@@ -109,8 +121,14 @@
+   renderer.setAnimationLoop(() => {
+     const now = performance.now(), realDt = Math.max(0.001, (now - previous) / 1000); previous = now;
+     const dt = Math.min(realDt, 0.05) * state.timeScale;
+-    state.elapsed += dt; simTime.value = state.elapsed;
+-    water.update(dt); tank.update(dt); spill.update(dt); state.spilling = spill.active; audio.update(spill.strength, state.timeScale); lighting.update(state.elapsed); shafts.update(); rig.update(dt); ui.update(realDt);
++    frame++;
++    if (state.rewinding) rewind.update(realDt);
++    else {
++      state.elapsed += dt; simTime.value += dt;
++      water.update(dt); tank.update(dt); spill.update(dt); rewind.record();
++      audio.update(spill.strength, state.timeScale); rig.update(dt);
++    }
++    state.spilling = spill.active; lighting.update(simTime.value); shafts.update(); ui.update(realDt);
+     try {
+       renderer.info.reset(); post.render();
+       if (!rendered) { rendered = true; loading.hidden = true; document.documentElement.dataset.status = 'ready'; }
+--- before/src/audio.ts
++++ src/audio.ts
+@@ -1,50 +1,90 @@
+-/** Optional Web Audio. Decode once after a gesture; unavailable audio is silent. */
+-export function createAudio() {
+-  let muted = true;
+-  try { muted = localStorage.getItem('aquarium-sound') !== 'on'; } catch { /* Storage can be disabled. */ }
++/** Decode while suspended; only a user gesture resumes audible playback. */
++export function audibleRange(buffer: AudioBuffer) {
++  let first = buffer.length, last = 0;
++  for (let c = 0; c < buffer.numberOfChannels; c++) {
++    const samples = buffer.getChannelData(c);
++    for (let i = 0; i < samples.length; i++) if (Math.abs(samples[i]) > 0.01) { first = Math.min(first, i); last = Math.max(last, i); }
++  }
++  return { offset: first === buffer.length ? 0 : Math.max(0, first / buffer.sampleRate - 0.01), end: Math.min(buffer.duration, last / buffer.sampleRate + 0.03) };
++}
++export function createAudio(currentFrame: () => number = () => -1) {
++  let muted = false;
++  try { muted = localStorage.getItem('aquarium-sound') === 'off'; } catch { /* Optional preference. */ }
+   let context: AudioContext | undefined, master: GainNode | undefined, bubblesGain: GainNode | undefined;
+-  let glass: AudioBuffer | undefined, bubbles: AudioBuffer | undefined, loop: AudioBufferSourceNode | undefined;
+-  let loading: Promise<void> | undefined;
++  let glass: AudioBuffer | undefined, bubbles: AudioBuffer | undefined, reversed: AudioBuffer | undefined, loop: AudioBufferSourceNode | undefined;
++  let glassRange = { offset: 0, end: 0 }, bubbleRange = { offset: 0, end: 0 };
++  let generation = 0, ready = false;
++  let lastPlay: { kind: string; at: number; offset: number; gain: number; frame: number } | null = null;
+   const voices = new Set<AudioBufferSourceNode>();
+-  let generation = 0;
+-  async function gesture() {
++  const loading = (async () => {
+     try {
+-      context ??= new AudioContext();
+-      await context.resume();
+-      if (!master) { master = context.createGain(); master.gain.value = muted ? 0 : 0.7; master.connect(context.destination); }
+-      loading ??= (async () => {
+-        const decode = async (name: string) => context!.decodeAudioData(await (await fetch(`${import.meta.env.BASE_URL}sfx/${name}.mp3`)).arrayBuffer());
+-        [glass, bubbles] = await Promise.all([decode('glass-breaking'), decode('bubbles')]);
+-      })().catch(() => {});
+-      await loading;
+-    } catch { /* Web Audio is optional. */ }
++      context = new AudioContext(); void context.suspend().catch(() => {});
++      master = context.createGain(); master.gain.value = muted ? 0 : 1; master.connect(context.destination);
++      const decode = async (name: string) => {
++        const response = await fetch(`${import.meta.env.BASE_URL}sfx/${name}.mp3`);
++        if (!response.ok) throw new Error('Audio unavailable');
++        return context!.decodeAudioData(await response.arrayBuffer());
++      };
++      [glass, bubbles] = await Promise.all([decode('glass-breaking'), decode('bubbles')]);
++      glassRange = audibleRange(glass); bubbleRange = audibleRange(bubbles);
++      const start = Math.floor(glassRange.offset * glass.sampleRate), end = Math.ceil(glassRange.end * glass.sampleRate);
++      reversed = context.createBuffer(glass.numberOfChannels, Math.max(1, end - start), glass.sampleRate);
++      for (let c = 0; c < glass.numberOfChannels; c++) {
++        const source = glass.getChannelData(c), dest = reversed.getChannelData(c);
++        for (let i = 0; i < dest.length; i++) dest[i] = source[end - 1 - i] ?? 0;
++      }
++      ready = true;
++    } catch { /* Optional audio: missing files/device never interrupt the scene. */ }
++  })();
++  function gesture() {
++    // Call resume synchronously from pointerdown, before processing the impact.
++    try { return context?.resume().catch(() => {} ) ?? Promise.resolve(); } catch { return Promise.resolve(); }
+   }
+-  async function play(full: boolean) {
+-    const requestedGeneration = generation;
+-    await gesture(); if (requestedGeneration !== generation || muted || !context || !master || !glass) return;
+-    try {
+-      const source = context.createBufferSource(), gain = context.createGain(); source.buffer = glass;
+-      source.connect(gain); gain.connect(master); gain.gain.value = full ? 0.65 : 0.28;
+-      const duration = full ? glass.duration : Math.min(0.6, glass.duration), now = context.currentTime;
+-      gain.gain.setValueAtTime(gain.gain.value, now); gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+-      source.start(0, 0, duration); voices.add(source); source.onended = () => { voices.delete(source); gain.disconnect(); source.disconnect(); };
+-    } catch { /* Missing/blocked playback must not interrupt simulation. */ }
++  function playKind(kind: 'crack' | 'shatter' | 'rewind'): Promise<void> {
++    const requested = generation;
++    const start = () => {
++      if (requested !== generation || muted || !ready || !context || !master || !glass || !reversed) return;
++      try {
++        const source = context.createBufferSource(), gain = context.createGain(), reverse = kind === 'rewind';
++        source.buffer = reverse ? reversed : glass;
++        const offset = reverse ? 0 : glassRange.offset, peak = reverse ? 0.18 : kind === 'crack' ? 0.9 : 1;
++        const duration = reverse ? reversed.duration : Math.min(glassRange.end - offset, kind === 'crack' ? 0.45 : Infinity);
++        const rate = reverse ? reversed.duration / 1.6 : kind === 'crack' ? 0.95 + Math.random() * 0.15 : 1;
++        source.playbackRate.value = rate; source.connect(gain); gain.connect(master);
++        const now = context.currentTime;
++        gain.gain.setValueAtTime(0.001, now); gain.gain.linearRampToValueAtTime(peak, now + 0.005);
++        gain.gain.exponentialRampToValueAtTime(0.001, now + Math.max(0.01, duration / rate));
++        source.start(now, offset, duration); voices.add(source);
++        lastPlay = { kind, at: performance.now(), offset, gain: peak, frame: currentFrame() };
++        source.onended = () => { voices.delete(source); gain.disconnect(); source.disconnect(); };
++      } catch { /* Playback can fail if the audio device disappears. */ }
++    };
++    // A source can be scheduled while resume is pending. Register it immediately
++    // so the impact frame owns playback and Reset can stop it before the device wakes.
++    if (ready) { void gesture(); start(); return Promise.resolve(); }
++    return Promise.all([gesture(), loading]).then(start);
+   }
+-  return { gesture, play, get muted() { return muted; }, toggle() {
+-    muted = !muted; try { localStorage.setItem('aquarium-sound', muted ? 'off' : 'on'); } catch { /* Optional preference. */ }
+-    void gesture().then(() => { if (context && master) master.gain.setTargetAtTime(muted ? 0 : 0.7, context.currentTime, 0.04); });
+-  }, update(strength: number, timeScale: number) {
+-    if (!context || !master || !bubbles) return;
+-    try {
+-      if (strength > 0 && !loop && !muted) {
+-        loop = context.createBufferSource(); loop.buffer = bubbles; loop.loop = true;
+-        bubblesGain = context.createGain(); bubblesGain.gain.value = 0; loop.connect(bubblesGain); bubblesGain.connect(master); loop.start();
+-      }
+-      if (loop) {
+-        loop.playbackRate.value = timeScale;
+-        bubblesGain!.gain.setTargetAtTime(Math.min(0.4, strength * 0.3), context.currentTime, 0.12);
+-        if (strength === 0) { loop.stop(); loop.disconnect(); loop = undefined; bubblesGain?.disconnect(); }
+-      }
+-    } catch { /* Audio device may disappear. */ }
+-  }, reset() { generation++; for (const voice of voices) { try { voice.stop(); } catch { /* Already ended. */ } } voices.clear(); } };
++  function stopLoop() { try { loop?.stop(); loop?.disconnect(); bubblesGain?.disconnect(); } catch { /* Already stopped. */ } loop = undefined; }
++  return {
++    loading, gesture, play: (full: boolean) => playKind(full ? 'shatter' : 'crack'), rewind: () => playKind('rewind'),
++    get muted() { return muted; }, get diagnostics() { return { muted, ready, lastPlay: lastPlay && { ...lastPlay }, offsets: { glass: glassRange.offset, bubbles: bubbleRange.offset } }; },
++    toggle() {
++      muted = !muted; try { localStorage.setItem('aquarium-sound', muted ? 'off' : 'on'); } catch { /* Optional preference. */ }
++      void gesture(); if (context && master) master.gain.setTargetAtTime(muted ? 0 : 1, context.currentTime, 0.04);
++    },
++    update(strength: number, timeScale: number) {
++      if (!context || !master || !bubbles || context.state !== 'running') return;
++      try {
++        if (strength > 0 && !loop && !muted) {
++          loop = context.createBufferSource(); loop.buffer = bubbles; loop.loop = true; loop.loopStart = bubbleRange.offset; loop.loopEnd = bubbleRange.end;
++          bubblesGain = context.createGain(); bubblesGain.gain.value = 0; loop.connect(bubblesGain); bubblesGain.connect(master); loop.start(0, bubbleRange.offset);
++        }
++        if (loop) {
++          loop.playbackRate.value = timeScale; bubblesGain!.gain.setTargetAtTime(Math.min(0.4, strength * 0.3), context.currentTime, 0.12);
++          if (strength === 0 || muted) stopLoop();
++        }
++      } catch { /* Optional audio device. */ }
++    },
++    reset() { generation++; stopLoop(); for (const voice of voices) { try { voice.stop(); } catch { /* Ended. */ } } voices.clear(); },
++  };
+ }
+--- before/src/camera.ts
++++ src/camera.ts
+@@ -9,6 +9,9 @@
+   controls.target.set(0, 1.6, 0); controls.enableDamping = true; controls.dampingFactor = 0.07;
+   controls.minDistance = 5; controls.maxDistance = 24; controls.maxPolarAngle = Math.PI / 2 - 0.025;
+   controls.autoRotateSpeed = 0.24; controls.enablePan = false;
++  const preset = new URLSearchParams(location.search).get('camera');
++  const presets: Record<string, [number, number, number]> = { '34': [-7, 4.5, 8], front: [0, 2.2, 9.5], low: [-7, 1.25, 8] };
++  if (preset && presets[preset]) { camera.position.set(...presets[preset]); controls.maxPolarAngle = Math.PI * 0.58; }
+   controls.update();
+   let inputAt = -10000, dragging = false, transition: 'none' | 'push' | 'reset' = 'none', progress = 0;
+   const startPosition = new Vector3(), startTarget = new Vector3(), endPosition = new Vector3(), endTarget = new Vector3();
+@@ -34,7 +37,7 @@
+       controls.target.lerpVectors(startTarget, endTarget, ease);
+       if (progress === 1) { transition = 'none'; controls.enabled = true; inputAt = state.elapsed * 1000; }
+     }
+-    controls.autoRotate = transition === 'none' && state.mode === 'idle' && !dragging && state.elapsed * 1000 - inputAt > 4500;
++    controls.autoRotate = !preset && transition === 'none' && state.mode === 'idle' && !dragging && state.elapsed * 1000 - inputAt > 4500;
+     controls.dampingFactor = 1 - Math.exp(-4.35 * dt);
+     controls.update(dt);
+   } };
+--- before/src/lib/physics.ts
++++ src/lib/physics.ts
+@@ -11,13 +11,13 @@
+ /** Independent fixed-step Rapier world, owning its bodies, colliders and mesh bindings. */
+ export async function createPhysicsWorld(gravity: Vec3 = { x: 0, y: -9.81, z: 0 }) {
+   await physicsReady;
+-  const world = new RAPIER.World(gravity), bindings: { mesh: Mesh; body: RAPIER.RigidBody }[] = [];
++  const world = new RAPIER.World(gravity), bindings: { mesh: Mesh; body: RAPIER.RigidBody; settle: boolean; born: number; quiet: number; grounded: boolean }[] = [];
+   liveWorlds.add(world);
+   const fixedDt = 1 / 120; let accumulator = 0;
+   const api = {
+     world, timeScale: 1, frozen: false, elapsed: 0,
+     /** Mesh must be in world space with unit scale; geometry coordinates are local. */
+-    addShard(mesh: Mesh, geometry: BufferGeometry | BufferGeometry[], mass: number) {
++    addShard(mesh: Mesh, geometry: BufferGeometry | BufferGeometry[], mass: number, settle = false) {
+       // Parts share the mesh's local coordinate frame; never hull across the gaps between cells.
+       const parts = Array.isArray(geometry) ? geometry : [geometry];
+       const total = parts.reduce((n, g) => n + g.getAttribute('position').count, 0);
+@@ -26,11 +26,11 @@
+         for (let i = 0; i < position.count; i++) vertices.set([position.getX(i), position.getY(i), position.getZ(i)], i * 3);
+         const collider = RAPIER.ColliderDesc.convexHull(vertices);
+         if (!collider) throw new Error('Shard is not a valid convex hull');
+-        return collider.setMass(mass * position.count / total).setFriction(0.65).setRestitution(0.12);
++        return collider.setMass(mass * position.count / total).setFriction(0.65).setRestitution(settle ? 0.03 : 0.12).setContactSkin(settle ? 0.0005 : 0);
+       });
+       const body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(mesh.position.x, mesh.position.y, mesh.position.z).setRotation(mesh.quaternion).setCcdEnabled(true).setLinearDamping(0.18).setAngularDamping(0.25));
+       for (const collider of colliders) world.createCollider(collider, body);
+-      bindings.push({ mesh, body }); return body;
++      bindings.push({ mesh, body, settle, born: api.elapsed, quiet: 0, grounded: false }); return body;
+     },
+     /** Create a fixed box with full dimensions, centred at position. */
+     addStaticBox(position: Vec3, size: Vec3) {
+@@ -46,7 +46,27 @@
+     step(dt: number) {
+       if (api.frozen) return;
+       accumulator += Math.min(Math.max(dt, 0), 0.1) * api.timeScale;
+-      while (accumulator >= fixedDt) { world.timestep = fixedDt; world.step(); accumulator -= fixedDt; api.elapsed += fixedDt; }
++      while (accumulator >= fixedDt) {
++        world.timestep = fixedDt; world.step(); accumulator -= fixedDt; api.elapsed += fixedDt;
++        for (const binding of bindings) {
++          const { body } = binding;
++          if (!binding.settle || !body.isDynamic()) continue;
++          const age = api.elapsed - binding.born;
++          if (age > 1 && body.isCcdEnabled()) body.enableCcd(false);
++          // Main aquarium only: give the pile a deterministic end pose, including sleepers that could reawaken.
++          if (age >= 6) { body.setBodyType(RAPIER.RigidBodyType.Fixed, false); continue; }
++          if (!binding.grounded) for (let i = 0; i < body.numColliders(); i++) {
++            world.contactPairsWith(body.collider(i), other => {
++              const parent = other.parent();
++              if (parent?.isFixed() && parent.translation().y <= 0.08) binding.grounded = true;
++            });
++            if (binding.grounded) { body.setLinearDamping(2.5); body.setAngularDamping(5); break; }
++          }
++          const v = body.linvel(), w = body.angvel();
++          binding.quiet = Math.hypot(v.x, v.y, v.z) < 0.03 && Math.hypot(w.x, w.y, w.z) < 0.2 ? binding.quiet + fixedDt : 0;
++          if (binding.quiet >= 0.6) body.sleep();
++        }
++      }
+     },
+     sync() { for (const { mesh, body } of bindings) { mesh.position.copy(body.translation()); mesh.quaternion.copy(body.rotation()); } },
+     dispose() { bindings.length = 0; world.free(); liveWorlds.delete(world); },
+--- before/src/lib/shatter.ts
++++ src/lib/shatter.ts
+@@ -79,6 +79,24 @@
+   geometry.translate(0, 0, -thickness / 2); geometry.computeBoundingSphere();
+   return { geometry, centroid, offset: centroid };
+ }
++/** Offset the convex cell's edges inward; clamp the inset for tiny impact fragments. */
++export function insetCell(cell: ShatterCell, amount = 0.004): ShatterCell {
++  const p = cell.polygon, center = polygonCentroid(p);
++  const area = p.reduce((sum, a, i) => { const b = p[(i + 1) % p.length]; return sum + a[0] * b[1] - a[1] * b[0]; }, 0);
++  const sign = area >= 0 ? 1 : -1;
++  const lines = p.map((a, i) => {
++    const b = p[(i + 1) % p.length], dx = b[0] - a[0], dy = b[1] - a[1], length = Math.hypot(dx, dy);
++    const nx = -dy / length * sign, ny = dx / length * sign;
++    return { nx, ny, c: nx * a[0] + ny * a[1] };
++  });
++  const inset = Math.min(amount, ...lines.map(l => (l.nx * center[0] + l.ny * center[1] - l.c) * 0.35));
++  const polygon: Point2[] = lines.map((b, i) => {
++    const a = lines[(i + lines.length - 1) % lines.length], det = a.nx * b.ny - b.nx * a.ny;
++    if (Math.abs(det) < 1e-9) return [p[i][0] + b.nx * inset, p[i][1] + b.ny * inset];
++    return [((a.c + inset) * b.ny - (b.c + inset) * a.ny) / det, (a.nx * (b.c + inset) - b.nx * (a.c + inset)) / det];
++  });
++  return { ...cell, polygon };
++}
+ /** Cell edges in pane-local x/y at z=0; suitable for a LineSegments reveal. */
+ export function buildOutlineGeometry(cells: ShatterCell[]) {
+   const vertices: number[] = [];
+--- before/src/rewind.ts
++++ src/rewind.ts
+@@ -0,0 +1,48 @@
++import { MathUtils } from 'three/webgpu';
++import type { createTank } from './scene/tank';
++import type { createWater } from './scene/water';
++import type { createSpill } from './scene/spill';
++import { simTime, state } from './state';
++
++type Tank = Awaited<ReturnType<typeof createTank>>;
++/** A 30 Hz, 20-second circular history, with one pristine keyframe for the landing. */
++export function createRewind(tank: Tank, water: ReturnType<typeof createWater>, spill: ReturnType<typeof createSpill>, finish: () => void) {
++  const capture = () => ({ time: state.elapsed, visualTime: simTime.value, tank: tank.capture(), water: water.capture(), spill: spill.capture() });
++  type Snapshot = ReturnType<typeof capture>;
++  const capacity = 601, ring: (Snapshot | undefined)[] = Array(capacity);
++  let cursor = 0, count = 0, nextRecord = -Infinity, pristine: Snapshot | undefined, playback: Snapshot[] = [], progress = 0;
++  // Slot poses are captured at release; they also provide a landing if a long idle
++  // period has pushed the break out of the circular history.
++  const homes: number[] = [];
++  function record(force = false) {
++    if (!pristine || state.rewinding || (!force && state.elapsed < nextRecord - 1e-6)) return;
++    const snapshot = capture();
++    for (let i = homes.length; i < snapshot.tank.poses.length; i++) homes.push(snapshot.tank.poses[i]);
++    ring[cursor] = snapshot; cursor = (cursor + 1) % capacity; count = Math.min(capacity, count + 1); if (!Number.isFinite(nextRecord)) nextRecord = state.elapsed;
++    if (state.elapsed >= nextRecord - 1e-6) nextRecord += (Math.max(0, Math.floor((state.elapsed - nextRecord + 1e-6) * 30)) + 1) / 30;
++  }
++  return {
++    beforeBreak() { pristine ??= capture(); }, record,
++    get count() { return count; }, get progress() { return progress; },
++    start() {
++      if (state.rewinding) { finish(); return false; }
++      if (!pristine || !count) { finish(); return false; }
++      record(true); playback = Array.from({ length: count }, (_, i) => ring[(cursor - count + i + capacity) % capacity]!);
++      // Retain the return-to-slot pose independently of the ring's moving time window.
++      const first = playback[0];
++      playback.unshift({ ...pristine, time: first.time - 0.3, tank: { ...pristine.tank, poses: Float32Array.from(homes) } });
++      progress = 0; state.rewinding = true; tank.beginRewind(); spill.clearParticles(); return true;
++    },
++    update(realDt: number) {
++      progress = Math.min(1, progress + realDt * state.timeScale / 1.6);
++      const ease = MathUtils.smootherstep(progress, 0, 1), first = playback[0], latest = playback[playback.length - 1];
++      const time = latest.time + (first.time - latest.time) * ease;
++      let lo = 0, hi = playback.length - 1;
++      while (lo + 1 < hi) { const mid = (lo + hi) >> 1; if (playback[mid].time <= time) lo = mid; else hi = mid; }
++      const a = playback[lo], b = playback[hi], t = MathUtils.clamp((time - a.time) / Math.max(1e-6, b.time - a.time), 0, 1);
++      tank.restore(a.tank, b.tank, t); water.restore(a.water, b.water, t); spill.restore(a.spill, b.spill, t); simTime.value = a.visualTime * (1 - t) + b.visualTime * t;
++      if (progress === 1) finish();
++    },
++    clear() { ring.fill(undefined); playback = []; cursor = count = 0; nextRecord = -Infinity; pristine = undefined; homes.length = 0; state.rewinding = false; progress = 0; },
++  };
++}
+--- before/src/scene/island.ts
++++ src/scene/island.ts
+@@ -1,4 +1,4 @@
+-import { BoxGeometry, DodecahedronGeometry, InstancedMesh, Mesh, MeshStandardNodeMaterial, Object3D, Scene } from 'three/webgpu';
++import { DataTexture, FloatType, RedFormat, LinearFilter, BoxGeometry, DodecahedronGeometry, InstancedMesh, Mesh, MeshStandardNodeMaterial, Object3D, Scene } from 'three/webgpu';
+ import { attribute, color, float, mix, mx_noise_float, positionWorld, smoothstep } from 'three/tsl';
+ import { causticLight, rockCaustics, signedWaterDistance, underwaterColor } from './lighting';
+ import { generateTerrain } from '../lib/terrain';
+@@ -53,5 +53,23 @@
+     transform.scale.set(size, size * 0.6, size * 0.8); transform.rotation.set(rng(), rng() * 6, rng()); transform.updateMatrix(); gravel.setMatrixAt(i, transform.matrix);
+   }
+   gravel.receiveShadow = true; gravel.castShadow = true; scene.add(gravel);
+-  return { focus: peak.position.clone().setY(1.95) };
++  // Rasterize the actual triangular terrain into a light-occlusion height field.
++  const resolution = 128, heights = new Float32Array(resolution * resolution).fill(TANK.floor + 0.12);
++  for (let i = 0; i < positions.count; i += 3) {
++    const x = [0, 1, 2].map(j => positions.getX(i + j)), z = [0, 1, 2].map(j => positions.getZ(i + j));
++    const y = [0, 1, 2].map(j => positions.getY(i + j) + peak.position.y);
++    const denominator = (z[1] - z[2]) * (x[0] - x[2]) + (x[2] - x[1]) * (z[0] - z[2]);
++    if (Math.abs(denominator) < 1e-9) continue;
++    const ix = (v: number) => Math.max(0, Math.min(resolution - 1, Math.floor((v / 6 + 0.5) * resolution)));
++    const iz = (v: number) => Math.max(0, Math.min(resolution - 1, Math.floor((v / 3.5 + 0.5) * resolution)));
++    for (let b = iz(Math.min(...z)); b <= iz(Math.max(...z)); b++) for (let a = ix(Math.min(...x)); a <= ix(Math.max(...x)); a++) {
++      const px = ((a + 0.5) / resolution - 0.5) * 6, pz = ((b + 0.5) / resolution - 0.5) * 3.5;
++      const u = ((z[1] - z[2]) * (px - x[2]) + (x[2] - x[1]) * (pz - z[2])) / denominator;
++      const v = ((z[2] - z[0]) * (px - x[2]) + (x[0] - x[2]) * (pz - z[2])) / denominator;
++      if (u >= 0 && v >= 0 && u + v <= 1) heights[b * resolution + a] = Math.max(heights[b * resolution + a], u * y[0] + v * y[1] + (1 - u - v) * y[2]);
++    }
++  }
++  const heightTexture = new DataTexture(heights, resolution, resolution, RedFormat, FloatType);
++  heightTexture.minFilter = heightTexture.magFilter = LinearFilter; heightTexture.needsUpdate = true;
++  return { focus: peak.position.clone().setY(1.95), heightTexture };
+ }
+--- before/src/scene/lighting.ts
++++ src/scene/lighting.ts
+@@ -23,7 +23,11 @@
+   return mix(base, base.mul(color('#529f98')).mul(waterDepth.mul(-0.14).exp()), submerged.mul(0.80));
+ }
+ // Shafts and motes share the same light-space mask.
+-export const shaftMask = sunProjection.x.mul(3.5).add(sunProjection.y.mul(1.7)).add(simTime.mul(0.12)).sin().mul(0.5).add(0.5).pow(12);
++export function lightShaftMask(point: Node<'vec3'>) {
++  const projected = point.xz.sub(sunDirection.xz.mul(point.y.div(sunDirection.y.max(0.2))));
++  return projected.x.mul(3.5).add(projected.y.mul(1.7)).add(simTime.mul(0.12)).sin().mul(0.5).add(0.5).pow(12);
++}
++export const shaftMask = lightShaftMask(positionWorld);
+ 
+ export async function createLighting(scene: Scene, renderer: WebGPURenderer) {
+   let environment = 'Poly Haven · CC0';
+--- before/src/scene/shafts.ts
++++ src/scene/shafts.ts
+@@ -1,29 +1,52 @@
+-import { AdditiveBlending, DoubleSide, Mesh, MeshBasicNodeMaterial, PlaneGeometry, Scene, Vector3 } from 'three/webgpu';
+-import { Discard, Fn, color, mx_noise_float, positionWorld, smoothstep, uv, vec3 } from 'three/tsl';
+-import { shaftMask, signedWaterDistance, waterDepth } from './lighting';
+-import { simTime, sunDirection, sunElevation, TANK } from '../state';
++import { AdditiveBlending, BackSide, BoxGeometry, DataTexture, Mesh, MeshBasicNodeMaterial, Scene } from 'three/webgpu';
++import { Fn, If, Loop, cameraPosition, cameraProjectionMatrixInverse, color, float, getViewPosition, positionWorld, screenCoordinate, screenUV, smoothstep, texture, vec2, vec3, viewportDepthTexture } from 'three/tsl';
++import { lightShaftMask } from './lighting';
++import { sunDirection, sunElevation, TANK, waterHeight, waterNormal } from '../state';
+ 
+-export function createShafts(scene: Scene) {
+-  const material = new MeshBasicNodeMaterial({ transparent: true, blending: AdditiveBlending, depthWrite: false, side: DoubleSide });
+-  material.colorNode = color('#bcf4d1').mul(1.3);
++export function createShafts(scene: Scene, terrain: DataTexture) {
++  const material = new MeshBasicNodeMaterial({ transparent: true, blending: AdditiveBlending, depthWrite: false, depthTest: false, side: BackSide });
++  material.fog = false; material.colorNode = color('#bcf4d1');
++  // Single-scattering raymarch through the water volume. The opaque depth copy
++  // ends the view ray at the island/sand; no transparent surface writes that depth.
++  const depth = viewportDepthTexture();
+   material.opacityNode = Fn(() => {
+-    Discard(signedWaterDistance.greaterThan(0));
+-    Discard(positionWorld.y.lessThan(TANK.floor + 0.12));
+-    Discard(positionWorld.x.abs().greaterThan(2.94));
+-    Discard(positionWorld.z.abs().greaterThan(1.69));
+-    const feather = smoothstep(0, 0.13, uv().x).mul(smoothstep(1, 0.75, uv().x));
+-    const noise = mx_noise_float(positionWorld.mul(2).add(vec3(0, simTime.mul(0.12), 0))).mul(0.3).add(0.7);
+-    return feather.mul(shaftMask.mul(0.8).add(0.015)).mul(noise).mul(sunElevation).mul(waterDepth.mul(-0.3).exp()).mul(0.16);
++    const ray = positionWorld.sub(cameraPosition).normalize().toVar();
++    const safeRay = ray.greaterThanEqual(0).select(ray.max(0.00001), ray.min(-0.00001));
++    const a = vec3(-2.94, TANK.floor + 0.12, -1.69).sub(cameraPosition).div(safeRay);
++    const b = vec3(2.94, TANK.top, 1.69).sub(cameraPosition).div(safeRay);
++    const near = a.min(b), far = a.max(b);
++    const entry = near.x.max(near.y).max(near.z).max(0).toVar();
++    const opaqueDistance = getViewPosition(screenUV, depth.r, cameraProjectionMatrixInverse).length();
++    const exit = far.x.min(far.y).min(far.z).min(opaqueDistance).toVar();
++    const signed = cameraPosition.sub(vec3(0, waterHeight, 0)).dot(waterNormal);
++    const slope = ray.dot(waterNormal);
++    If(slope.abs().greaterThan(0.00001), () => {
++      const crossing = signed.negate().div(slope);
++      If(slope.greaterThan(0), () => { exit.assign(exit.min(crossing)); }).Else(() => { entry.assign(entry.max(crossing)); });
++    }).Else(() => { If(signed.greaterThan(0), () => { exit.assign(entry); }); });
++    const step = exit.sub(entry).max(0).div(16).toVar();
++    const jitter = screenCoordinate.xy.dot(vec2(0.06711056, 0.00583715)).fract().mul(52.9829189).fract();
++    const light = float(0).toVar();
++    Loop(16, ({ i }) => {
++      const distance = entry.add(float(i).add(jitter).mul(step));
++      const point = cameraPosition.add(ray.mul(distance));
++      const belowSurface = vec3(0, waterHeight, 0).sub(point).dot(waterNormal).max(0);
++      const wallDistance = float(2.94).sub(point.x.abs()).min(float(1.69).sub(point.z.abs()));
++      const edge = smoothstep(0, 0.08, wallDistance);
++      const visibility = float(1).toVar();
++      // Two height tests toward the sun soften the island's shadow in the medium.
++      for (const offset of [0.35, 0.9]) {
++        const towardSun = point.add(sunDirection.mul(offset));
++        const height = texture(terrain, towardSun.xz.div(vec2(6, 3.5)).add(0.5)).level(float(0)).r;
++        visibility.mulAssign(smoothstep(-0.03, 0.08, towardSun.y.sub(height)));
++      }
++      const density = belowSurface.mul(-0.85).exp().mul(edge).mul(visibility);
++      light.addAssign(lightShaftMask(point).mul(0.92).add(0.008).mul(density).mul(step).mul(distance.sub(entry).mul(-0.12).exp()));
++    });
++    return light.mul(sunElevation).mul(0.09).min(0.18);
+   })();
+-  // Six differently rotated sheets fill a 3D region, all containing the sun ray.
+-  const slabs: Mesh[] = [];
+-  for (let i = 0; i < 6; i++) {
+-    const slab = new Mesh(new PlaneGeometry(6.5, 7), material);
+-    slab.position.set((i - 2.5) * 0.55, 1.7, Math.sin(i * 2.1) * 0.7);
+-    slab.renderOrder = 5; scene.add(slab); slabs.push(slab);
+-  }
+-  const up = new Vector3(0, 1, 0);
+-  return { update() {
+-    slabs.forEach((slab, i) => { slab.quaternion.setFromUnitVectors(up, sunDirection.value); slab.rotateY(i * Math.PI / 6); });
+-  } };
++  const box = new Mesh(new BoxGeometry(5.88, TANK.top - TANK.floor - 0.12, 3.38), material);
++  box.name = 'Water single scattering'; box.position.y = (TANK.top + TANK.floor + 0.12) / 2;
++  box.renderOrder = 5; scene.add(box);
++  return { update() { box.visible = waterHeight.value > TANK.floor + 0.13; } };
+ }
+--- before/src/scene/spill.ts
++++ src/scene/spill.ts
+@@ -109,7 +109,30 @@
+     }
+     positionAttribute.needsUpdate = sizeAttribute.needsUpdate = true;
+   }
+-  return { add, update, get strength() { return [...emitters.values()].reduce((s, e) => s + e.strength, 0); }, get active() { return [...emitters.values()].some(e => e.strength > 0); }, reset() {
++  function capture() {
++    return [...emitters].map(([wall, e]) => ({ wall, position: e.puddle.position.toArray(), scale: e.puddle.scale.toArray(), visible: e.puddle.visible, strength: e.strength, sheetVisible: e.sheet.visible, sheet: Float32Array.from(e.sheet.geometry.getAttribute('position').array) }));
++  }
++  type Snapshot = ReturnType<typeof capture>;
++  return { add, update, capture,
++    clearParticles() { drops.fill(undefined); sizes.fill(0); sizeAttribute.needsUpdate = true; },
++    restore(a: Snapshot, b: Snapshot, t: number) {
++      for (const [wall, e] of emitters) {
++        const ea = a.find(v => v.wall === wall), eb = b.find(v => v.wall === wall);
++        e.puddle.visible = Boolean(ea?.visible || eb?.visible);
++        const ap = ea ?? eb, bp = eb ?? ea;
++        if (!ap || !bp) { e.sheet.visible = false; continue; }
++        e.puddle.position.fromArray(ap.position).lerp(at.fromArray(bp.position), t);
++        for (let i = 0; i < 3; i++) e.puddle.scale.setComponent(i, (ea?.scale[i] ?? 0) * (1 - t) + (eb?.scale[i] ?? 0) * t);
++        e.strength = (ea?.strength ?? 0) * (1 - t) + (eb?.strength ?? 0) * t;
++        e.sheet.visible = Boolean(ea?.sheetVisible || eb?.sheetVisible);
++        const positions = e.sheet.geometry.getAttribute('position');
++        for (let i = 0; i < positions.array.length; i++) positions.array[i] = ap.sheet[i] * (1 - t) + bp.sheet[i] * t;
++        positions.needsUpdate = true; e.sheet.geometry.computeVertexNormals();
++        e.sheet.material.opacity = 0.44 * ((ea?.sheetVisible ? 1 : 0) * (1 - t) + (eb?.sheetVisible ? 1 : 0) * t);
++      }
++      lastHeight = waterHeight.value;
++    },
++    get strength() { return [...emitters.values()].reduce((s, e) => s + e.strength, 0); }, get active() { return [...emitters.values()].some(e => e.strength > 0); }, reset() {
+     for (const e of emitters.values()) { scene.remove(e.sheet, e.puddle); e.sheet.geometry.dispose(); e.sheet.material.dispose(); e.puddle.geometry.dispose(); }
+     emitters.clear(); lastHeight = waterHeight.value; drops.fill(undefined); sizes.fill(0); sizeAttribute.needsUpdate = true;
+   } };
+--- before/src/scene/stage.ts
++++ src/scene/stage.ts
+@@ -1,14 +1,14 @@
+ import { Mesh, MeshBasicNodeMaterial, PlaneGeometry, Scene } from 'three/webgpu';
+ import { color, mix, positionWorld, smoothstep, vec2 } from 'three/tsl';
+ 
+-/** A neutral cyclorama with a soft contact shadow, independent of the orbiting sun. */
++/** One unlit floor: evaluate its soft contact shadow in the same fragment.
++ * A second plane only 0.003 units above the 10,000-unit floor can compete
++ * for depth at shallow angles. No extra surface or directional shadow is needed. */
+ export function createStage(scene: Scene) {
+-  const floor = new Mesh(new PlaneGeometry(10000, 10000), new MeshBasicNodeMaterial({ color: '#26333e' }));
+-  floor.material.colorNode = mix(color('#26333e'), color('#41515c'), positionWorld.xz.length().mul(-0.035).exp().mul(0.6));
+-  floor.rotation.x = -Math.PI / 2; scene.add(floor);
+-  const shadow = new MeshBasicNodeMaterial({ color: '#0d1c25', transparent: true, depthWrite: false });
++  const material = new MeshBasicNodeMaterial();
++  const base = mix(color('#26333e'), color('#41515c'), positionWorld.xz.length().mul(-0.035).exp().mul(0.6));
+   const distance = positionWorld.xz.abs().sub(vec2(2.9, 1.65)).max(0).length();
+-  shadow.opacityNode = smoothstep(1.1, 0, distance).mul(0.44);
+-  const contact = new Mesh(new PlaneGeometry(9, 6.5), shadow);
+-  contact.rotation.x = -Math.PI / 2; contact.position.y = 0.003; scene.add(contact);
++  material.colorNode = mix(base, color('#0d1c25'), smoothstep(1.1, 0, distance).mul(0.44));
++  const floor = new Mesh(new PlaneGeometry(10000, 10000), material);
++  floor.name = 'Floor with integrated contact shadow'; floor.rotation.x = -Math.PI / 2; scene.add(floor);
+ }
+--- before/src/scene/tank.ts
++++ src/scene/tank.ts
+@@ -2,7 +2,7 @@
+ import { cameraPosition, color, float, normalWorld, output, positionWorld, vec4 } from 'three/tsl';
+ import { underwaterColor } from './lighting';
+ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+-import { buildShardGeometry, generateShatterPattern, groupAdjacentCells, type ShatterCell } from '../lib/shatter';
++import { buildShardGeometry, generateShatterPattern, groupAdjacentCells, insetCell, type ShatterCell } from '../lib/shatter';
+ import { polygonCentroid } from '../lib/triangulate';
+ import { createPhysicsWorld } from '../lib/physics';
+ import { random, TANK } from '../state';
+@@ -13,7 +13,7 @@
+   const physics = await createPhysicsWorld(), rng = random(912), height = TANK.top - TANK.floor;
+   const glass = new MeshPhysicalNodeMaterial({ color: '#f6fffc', transmission: 1, thickness: 0.05, ior: 1.52, roughness: 0.04, attenuationColor: new Color('#cfe8e4'), attenuationDistance: 1.5, dispersion: 0.015, clearcoat: 0, side: DoubleSide, transparent: true, opacity: 0.28, depthWrite: false });
+   const grazing = float(1).sub(normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).abs()).pow(5);
+-  glass.opacityNode = grazing.mul(0.30).add(0.28);
++  glass.opacityNode = grazing.mul(0.24).add(0.16);
+   glass.colorNode = underwaterColor(color('#f6fffc').rgb);
+   glass.emissiveNode = color('#9ebbbd').mul(grazing).mul(0.045);
+   const widths = [TANK.width, TANK.width, TANK.depth, TANK.depth];
+@@ -65,7 +65,15 @@
+       const parts = group.map(cell => { const { geometry, centroid } = buildShardGeometry(cell, 0.05); return geometry.translate(centroid[0] - center[0], centroid[1] - center[1], 0); });
+       const geometry = mergeGeometries(parts, false)!;
+       const mesh = new Mesh(geometry, glass); mesh.position.set(center[0], center[1], 0).applyQuaternion(rotations[wall]).add(origins[wall]); mesh.quaternion.copy(rotations[wall]);
+-      const mass = Math.max(0.008, geometry.getAttribute('position').count * 0.0009), body = physics.addShard(mesh, parts, mass);
++      const collisionParts = group.map(cell => {
++        const { geometry, centroid } = buildShardGeometry(insetCell(cell), 0.045);
++        geometry.translate(centroid[0], centroid[1], 0);
++        // Leave 0.031 units at pane ends so perpendicular walls never overlap at corners.
++        geometry.scale((widths[wall] - 0.062) / widths[wall], 1, 1);
++        return geometry.translate(-center[0], -center[1], 0);
++      });
++      const mass = Math.max(0.008, geometry.getAttribute('position').count * 0.0009), body = physics.addShard(mesh, collisionParts, mass, true);
++      collisionParts.forEach(g => g.dispose());
+       parts.forEach(g => g.dispose());
+       const radial = mesh.position.clone().sub(impact), falloff = Math.exp(-radial.length() * 1.3);
+       const impulse = new Vector3(0, 0, 0.35 + 4.5 * falloff).applyQuaternion(rotations[wall]).addScaledVector(radial.normalize(), 0.6 * falloff);
+@@ -115,20 +123,46 @@
+     }
+     rebuildBatch(); return openings;
+   }
+-  const v = new Vector3();
++  const v = new Vector3(), qa = new Quaternion(), qb = new Quaternion();
++  let rewinding = false;
+   function update(dt: number) {
+-    physics.step(dt); physics.sync();
++    if (!rewinding) { physics.step(dt); physics.sync(); }
+     const position = loose.geometry.getAttribute('position'), normal = loose.geometry.getAttribute('normal');
+     for (let j = 0; j < shards.length; j++) {
+       const { mesh } = shards[j], p = mesh.geometry.getAttribute('position'), n = mesh.geometry.getAttribute('normal');
+       for (let i = 0; i < p.count; i++) {
+-        v.fromBufferAttribute(p, i).applyQuaternion(mesh.quaternion).add(mesh.position); position.setXYZ(offsets[j] + i, v.x, v.y, v.z);
++        v.fromBufferAttribute(p, i).applyQuaternion(mesh.quaternion).add(mesh.position); if (!mesh.visible) v.set(0, -100, 0); position.setXYZ(offsets[j] + i, v.x, v.y, v.z);
+         v.fromBufferAttribute(n, i).applyQuaternion(mesh.quaternion); normal.setXYZ(offsets[j] + i, v.x, v.y, v.z);
+       }
+     }
+     if (position) { position.needsUpdate = true; normal.needsUpdate = true; }
+   }
+-  return { panels, shards, crack, shatter, update, get cracks() { return cracks.size; }, get openings() { return [...cracks.values()].map(c => c.opening); }, reset() {
++  function capture() {
++    return { poses: Float32Array.from(shards.flatMap(s => [...s.mesh.position.toArray(), ...s.mesh.quaternion.toArray()])), panels: panels.map(p => p.visible), cracks: [...cracks].map(([wall, c]) => ({ wall, visible: c.lines.visible, opacity: c.lines.visible ? (c.lines.material as LineBasicNodeMaterial).opacity : 0 })) };
++  }
++  type Snapshot = ReturnType<typeof capture>;
++  return { panels, shards, crack, shatter, update, capture,
++    get bodyCount() { return shards.length; },
++    get awakeCount() { return shards.filter(s => s.body.isDynamic() && !s.body.isSleeping()).length; },
++    beginRewind() { rewinding = true; physics.frozen = true; },
++    restore(a: Snapshot, b: Snapshot, t: number) {
++      shards.forEach((s, i) => {
++        const j = i * 7; s.mesh.visible = j < a.poses.length || j < b.poses.length;
++        if (!s.mesh.visible) return;
++        const ap = j < a.poses.length ? a.poses : b.poses, bp = j < b.poses.length ? b.poses : a.poses;
++        s.mesh.position.fromArray(ap, j); v.fromArray(bp, j); s.mesh.position.lerp(v, t);
++        qa.fromArray(ap, j + 3); qb.fromArray(bp, j + 3); s.mesh.quaternion.copy(qa).slerp(qb, t);
++      });
++      panels.forEach((p, i) => { p.visible = (t < 0.5 ? a : b).panels[i]; rims[i].forEach(r => r.visible = p.visible); });
++      for (const [id, c] of cracks) {
++        const ca = a.cracks.find(c => c.wall === id), cb = b.cracks.find(c => c.wall === id);
++        c.lines.visible = Boolean(ca?.visible || cb?.visible);
++        (c.lines.material as LineBasicNodeMaterial).opacity = (ca?.opacity ?? 0) * (1 - t) + (cb?.opacity ?? 0) * t;
++      }
++      update(0);
++    },
++    get cracks() { return cracks.size; }, get openings() { return [...cracks.values()].map(c => c.opening); }, reset() {
++    rewinding = false; physics.frozen = false;
+     for (const c of cracks.values()) { scene.remove(c.lines); c.lines.geometry.dispose(); (c.lines.material as LineBasicNodeMaterial).dispose(); }
+     cracks.clear();
+     for (const s of shards) { physics.removeBody(s.body); s.mesh.geometry.dispose(); } shards.length = 0; rebuildBatch();
+--- before/src/scene/water.ts
++++ src/scene/water.ts
+@@ -16,10 +16,13 @@
+   }
+   // Schlick Fresnel keeps the overhead view clear and strengthens grazing reflections.
+   const fresnel = float(1).sub(normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).abs()).pow(5);
+-  surfaceMaterial.opacityNode = fresnel.mul(0.35).add(0.62);
++  // Restrain the underside reflection: the waterline must not become a pale sheet
++  // when the camera drops below it. Retain stronger sky reflection from above.
++  surfaceMaterial.opacityNode = cameraPosition.y.lessThan(waterHeight).select(fresnel.mul(0.10).add(0.08), fresnel.mul(0.20).add(0.35));
++  surfaceMaterial.envMapIntensity = 0.65;
+   surfaceMaterial.normalNode = bumpMap(waves, float(0.035));
+-  const wallDistance = min(float(TANK.width / 2 - 0.05).sub(positionWorld.x.abs()), float(TANK.depth / 2 - 0.05).sub(positionWorld.z.abs()));
+-  const meniscus = color('#c9eee7').mul(float(1).sub(smoothstep(0.002, 0.024, wallDistance))).mul(0.7);
++  const wallDistance = min(float(TANK.width / 2 - 0.026).sub(positionWorld.x.abs()), float(TANK.depth / 2 - 0.026).sub(positionWorld.z.abs()));
++  const meniscus = color('#c9eee7').mul(float(1).sub(smoothstep(0.002, 0.014, wallDistance))).mul(0.06);
+   const halfVector = cameraPosition.sub(positionWorld).normalize().add(sunDirection).normalize();
+   surfaceMaterial.emissiveNode = meniscus.add(normalWorld.dot(halfVector).max(0).pow(3200).mul(color('#fff3da')).mul(4));
+   surfaceMaterial.positionNode = Fn(() => {
+@@ -28,14 +31,14 @@
+     const y = waterHeight.sub(waterNormal.x.mul(positionLocal.x).add(waterNormal.z.mul(positionLocal.z)).div(waterNormal.y));
+     return vec3(positionLocal.x, y, positionLocal.z);
+   })();
+-  const geometry = new PlaneGeometry(TANK.width - 0.09, TANK.depth - 0.09, 32, 20);
++  const geometry = new PlaneGeometry(TANK.width - 0.052, TANK.depth - 0.052, 32, 20);
+   geometry.rotateX(-Math.PI / 2);
+   // One conservative bound covers every spring-constrained position of the GPU plane.
+   geometry.boundingSphere = new Sphere(new Vector3(0, (TANK.floor + TANK.top) / 2, 0), Math.hypot(TANK.width / 2, TANK.depth / 2, (TANK.top - TANK.floor) / 2));
+   const surface = new Mesh(geometry, surfaceMaterial);
+   surface.renderOrder = 3; scene.add(surface);
+ 
+-  const volumeMaterial = new MeshPhysicalNodeMaterial({ color: '#bbdfd8', transmission: 1, roughness: 0.04, ior: 1.333, thickness: 0.5, attenuationColor: new Color('#429b91'), attenuationDistance: 1, side: DoubleSide, transparent: true, opacity: 0.30, depthWrite: false });
++  const volumeMaterial = new MeshPhysicalNodeMaterial({ color: '#bbdfd8', transmission: 1, roughness: 0.04, ior: 1.333, thickness: 0.22, attenuationColor: new Color('#429b91'), attenuationDistance: 1, side: DoubleSide, transparent: true, opacity: 0.10, depthWrite: false });
+   volumeMaterial.colorNode = Fn(() => {
+     Discard(signedWaterDistance.greaterThan(0));
+     return color('#89c6bc').rgb.mul(vec3(0.16, 0.025, 0.018).mul(waterDepth).negate().exp());
+@@ -71,7 +74,14 @@
+     waterHeight.value = height; waterNormal.value.set(tilt.x, 1, tilt.z).normalize();
+     surface.visible = volume.visible = height > TANK.floor + 0.015;
+   }
+-  return { surface, slosh, ripple, update, drain(bottom: number, full = false) {
++  return { surface, slosh, ripple, update,
++    capture() { return { height, normal: waterNormal.value.toArray() }; },
++    restore(a: { height: number; normal: number[] }, b: { height: number; normal: number[] }, t: number) {
++      height = a.height * (1 - t) + b.height * t; waterHeight.value = height;
++      waterNormal.value.fromArray(a.normal).lerp(new Vector3().fromArray(b.normal), t).normalize();
++      surface.visible = volume.visible = height > TANK.floor + 0.015;
++    },
++    drain(bottom: number, full = false) {
+     drainHeight = Math.max(TANK.floor, Math.min(drainHeight, bottom)); draining = true; fast = full;
+   }, reset() {
+     height = drainHeight = TANK.base; draining = fast = false;
+--- before/src/state.ts
++++ src/state.ts
+@@ -3,9 +3,9 @@
+ 
+ export const TANK = { width: 6, depth: 3.5, floor: 0.16, top: 3.66, base: 2.59 };
+ export const state = {
+-  timeScale: 1, elapsed: 0, mode: 'idle' as 'idle' | 'cracked' | 'shattered',
++  timeScale: 1, elapsed: 0, rewinding: false, mode: 'idle' as 'idle' | 'cracked' | 'shattered',
+   impact: new Vector3(0.6, 2.15, TANK.depth / 2), wall: 0, hasImpact: false,
+-  cracks: 0, spilling: false, muted: true, fps: 0, lastSlosh: -100, shatterTime: 0, brokenCount: 0,
++  cracks: 0, spilling: false, muted: false, fps: 0, lastSlosh: -100, shatterTime: 0, brokenCount: 0,
+ };
+ // One simulation clock drives every shader; built-in real-time nodes would ignore slow motion.
+ export const simTime = uniform(0);
+--- before/src/style.css
++++ src/style.css
+@@ -231,8 +231,8 @@
+ 
+ /* Main-page identity and controls, readable in a 1080p recording. */
+ .masthead { pointer-events:auto; top:36px; left:42px; }
+-.masthead img { display:block; width:160px; height:auto; }
+-.masthead h1 { font-size:22px; margin-top:18px; letter-spacing:-.035em; }
++.masthead img { display:block; width:96px; height:auto; }
++.masthead h1 { font-size:22px; margin-top:14px; letter-spacing:-.035em; }
+ .series { color:#9aadaf; font-size:11px; letter-spacing:.035em; margin-top:10px; }
+ .enter-lab { top:38px; right:42px; bottom:auto; display:flex; align-items:center; gap:10px; padding:12px 19px; border-radius:30px; font-size:12px; }
+ .enter-lab svg { width:17px; height:17px; }
+@@ -249,7 +249,13 @@
+ .socials svg { display:block; width:19px; height:19px; fill:currentColor; }
+ .socials a[aria-label="Instagram"] svg { fill:none; }
+ a:focus-visible { outline:2px solid #99d6c5; outline-offset:5px; }
+-@media(max-width:1000px) { .masthead { left:26px; top:26px; } .enter-lab { right:26px; top:28px; } .controls { left:24px; bottom:24px; width:465px; padding:16px; } .caption { right:26px; bottom:28px; } .caption span { font-size:9px; } .series { max-width:360px; font-size:10px; } }
+-@media(max-width:650px) { .controls { left:16px; right:16px; width:auto; } .series { max-width:230px; line-height:1.5; } .masthead img { width:135px; } button { font-size:9px; padding:0 6px; } }
++@media(max-width:1000px) { .masthead img { width:80px; } .masthead { left:26px; top:26px; } .enter-lab { right:26px; top:28px; } .controls { left:24px; bottom:24px; width:465px; padding:16px; } .caption { right:26px; bottom:28px; } .caption span { font-size:9px; } .series { max-width:360px; font-size:10px; } }
++@media(max-width:650px) { .controls { left:16px; right:16px; width:auto; } .series { max-width:230px; line-height:1.5; } .masthead img { width:72px; } button { font-size:9px; padding:0 6px; } }
+ 
+ .masthead img { filter:brightness(0) invert(1); }
++
++.topic-spoiler { display:inline-block; filter:blur(5px); opacity:.65; user-select:none; cursor:pointer; transition:filter 250ms,opacity 250ms; }
++.topic-spoiler:focus, .topic-spoiler.revealed { filter:blur(0); opacity:1; }
++.topic-spoiler:focus-visible { outline:1px solid #99d6c5; outline-offset:4px; border-radius:2px; }
++
++@media (hover: hover) { .series:hover .topic-spoiler { filter: blur(0); opacity: 1; } }
+--- before/src/ui.ts
++++ src/ui.ts
+@@ -1,8 +1,22 @@
+ import { state } from './state';
+ import './style.css';
+ export function createUI(actions: { shatter(): void; reset(): void; toggleTime(): void; toggleSound(): void }) {
++  const series = document.querySelector<HTMLElement>('.series')!, spoiler = series.querySelector<HTMLElement>('.topic-spoiler')!;
++  let hovered = false, focused = false, pinned = false;
++  const reveal = () => {
++    const visible = hovered || focused || pinned;
++    spoiler.classList.toggle('revealed', pinned); spoiler.setAttribute('aria-expanded', String(visible));
++    spoiler.setAttribute('aria-label', visible ? 'Topic: Voronoi & Delaunay' : 'Reveal the topic');
++    spoiler.firstElementChild!.setAttribute('aria-hidden', String(!visible));
++  };
++  series.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') { hovered = true; reveal(); } });
++  series.addEventListener('pointerleave', () => { hovered = false; reveal(); });
++  spoiler.addEventListener('focus', () => { focused = true; reveal(); });
++  spoiler.addEventListener('blur', () => { focused = false; reveal(); });
++  spoiler.addEventListener('click', e => { e.stopPropagation(); pinned = !pinned; spoiler.blur(); reveal(); });
++  spoiler.addEventListener('keydown', e => { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); e.stopPropagation(); pinned = !pinned; reveal(); } });
+   const panel = document.createElement('section'); panel.className = 'controls'; panel.setAttribute('aria-label', 'Aquarium controls');
+-  panel.innerHTML = `<div class="control-top"><span id="mode-label"><i></i> In equilibrium</span><span id="fps">— FPS</span></div><p>Click a wall to crack the glass · Space to shatter</p><div class="buttons"><button id="shatter"><span class="button-icon">✳</span> Shatter <kbd>SPACE</kbd></button><button id="slow" aria-pressed="false">Slow motion <kbd>T</kbd></button><button id="reset" aria-label="Reset aquarium">Reset <kbd>R</kbd></button><button id="sound" aria-pressed="false">Sound off <kbd>M</kbd></button></div><span class="sr-only">Click a wall to crack the glass · Space to shatter - Space: shatter - T: slow motion - R: reset</span>`;
++  panel.innerHTML = `<div class="control-top"><span id="mode-label"><i></i> In equilibrium</span><span id="fps">— FPS</span></div><p>Click a wall to crack the glass · Space to shatter</p><div class="buttons"><button id="shatter"><span class="button-icon">✳</span> Shatter <kbd>SPACE</kbd></button><button id="slow" aria-pressed="false">Slow motion <kbd>T</kbd></button><button id="reset" aria-label="Reset aquarium">Reset <kbd>R</kbd></button><button id="sound" aria-pressed="true">Sound on <kbd>M</kbd></button></div><span class="sr-only">Click a wall to crack the glass · Space to shatter - Space: shatter - T: slow motion - R: reset</span>`;
+   document.body.appendChild(panel);
+   const shatter = panel.querySelector<HTMLButtonElement>('#shatter')!;
+   const slow = panel.querySelector<HTMLButtonElement>('#slow')!;
+@@ -25,7 +39,7 @@
+     frames++; total += dt;
+     if (total >= 0.25) { state.fps = Math.round(frames / total); fps.textContent = `${state.fps} FPS`; frames = 0; total = 0; }
+     const broken = state.mode === 'shattered';
+-    const status = `<i class="${broken ? 'broken' : ''}"></i> ${broken ? 'Shattered' : state.cracks ? 'Cracked' : 'Idle'}${state.spilling ? ' · spilling' : ''}`;
++    const status = `<i class="${broken ? 'broken' : ''}"></i> ${state.rewinding ? 'Rewinding' : broken ? 'Shattered' : state.cracks ? 'Cracked' : 'Idle'}${state.spilling ? ' · spilling' : ''}`;
+     if (status !== displayedStatus) { label.innerHTML = status; displayedStatus = status; }
+     sound.setAttribute('aria-pressed', String(!state.muted));
+     const soundText = `Sound ${state.muted ? 'off' : 'on'} <kbd>M</kbd>`;
+--- before/verify/edges.mjs
++++ verify/edges.mjs
+@@ -23,7 +23,21 @@
+   const settled = await state(); assert.ok(settled.height < multi.height); assert.ok(Math.abs(settled.height - lowestSill) < 0.001); assert.equal(settled.spilling, false);
+   results.push(`PASS four cracks: water drained from ${multi.height} to lowest sill ${settled.height}; spilling stopped`);
+   await page.keyboard.press('Space'); await page.waitForTimeout(1800); const full = await state(); assert.equal(full.mode, 'shattered'); assert.ok(full.brokenCount <= 400); results.push(`PASS four-wall full break: ${full.brokenCount} bodies, ${full.drawCalls} draw calls, ${full.fps} FPS`);
+-  await page.keyboard.press('r'); await page.waitForTimeout(200); const reset = await state(); assert.equal(reset.cracks, 0); assert.equal(reset.brokenCount, 0); assert.equal(reset.height, 2.59); assert.equal(reset.spilling, false);
++  await page.keyboard.press('r'); assert.equal((await state()).rewinding, true); await page.waitForFunction(() => !window.aquarium.rewinding); const reset = await state(); assert.equal(reset.cracks, 0); assert.equal(reset.brokenCount, 0); assert.equal(reset.height, 2.59); assert.equal(reset.spilling, false);
++  // Start the independent mid-spill case at the default camera; the four-wall case orbited to the back.
++  await page.goto('http://localhost:4174/'); await page.waitForFunction(() => window.aquarium?.elapsed > 2);
++  await click((await state()).crackTarget); await page.waitForTimeout(600);
++  assert.equal((await state()).spilling, true);
++  await page.keyboard.press('t'); await page.keyboard.press('r');
++  const rewindStart = await state(); assert.equal(rewindStart.rewinding, true); assert.equal(rewindStart.audio.lastPlay.kind, 'rewind');
++  await page.waitForTimeout(600); const reverse = await state();
++  assert.ok(reverse.rewindProgress > 0.035 && reverse.rewindProgress < 0.09, '0.15× also slows the real-time rewind');
++  assert.equal(reverse.elapsed, rewindStart.elapsed, 'Physics clock is frozen during rewind');
++  assert.ok(reverse.height >= rewindStart.height, 'Water rises during reverse spill');
++  await page.keyboard.press('r'); const skipped = await state();
++  assert.equal(skipped.rewinding, false); assert.equal(skipped.shardBodies, 0); assert.equal(skipped.cracks, 0); assert.equal(skipped.height, 2.59);
++  assert.deepEqual(skipped.normal, [0, 1, 0]); await page.keyboard.press('t');
++  results.push('PASS reset mid-spill: reverse audio, water rises, frozen physics, 0.15× rewind, second Reset skips to pristine');
+   assert.deepEqual(errors, []); results.push('PASS reset after four-wall break; zero console errors');
+   console.log(results.join('\n')); await writeFile('verify/edges-summary.txt', results.join('\n') + '\n');
+ } finally { await browser.close(); }
+--- before/verify/lab.mjs
++++ verify/lab.mjs
+@@ -130,7 +130,7 @@
+   assert.equal(await page.evaluate(() => window.aquarium.renderer), 'WebGPU'); assert.equal(await page.locator('h1').textContent(), 'Aquarium');
+   await page.locator('.enter-lab').click(); await ready('terrain', 3);
+   assert.deepEqual(errors, [], 'No console errors, uncaught exceptions or shader errors');
+-  summary.push('PASS aquarium renders unchanged; both page links, Lab navigation and keyboard levels work.');
++  summary.push('PASS aquarium renders; both page links, Lab navigation and keyboard levels work.');
+   summary.push(`Console: ${errors.length} errors; ${logs.filter(x => x.startsWith('[warning]')).length} warnings.`);
+   console.log(summary.slice(-2).join('\n'));
+ } catch (error) { failed = error; console.error(error); await capture('failure').catch(() => {}); }
+--- before/verify/library-entry.ts
++++ verify/library-entry.ts
+@@ -90,24 +90,30 @@
+ // Reproduce both pending-resume and pending-decode reset races without depending on real audio hardware.
+ const originals = ['AudioContext', 'localStorage', 'fetch'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)] as const);
+ try {
+-  for (const stage of ['resume', 'decode']) {
+-    let release!: () => void, started = 0, contexts = 0;
++  for (const stage of ['resume', 'decode', 'preloaded-resume']) {
++    let release!: () => void, started = 0, stopped = 0, contexts = 0, frame = 1;
+     const gate = new Promise<void>(resolve => { release = resolve; });
+     class FakeAudioContext {
+-      currentTime = 0; destination = {};
++      currentTime = 0; destination = {}; state = 'suspended';
++      async suspend() { this.state = 'suspended'; }
++      createBuffer(channels: number, length: number, sampleRate: number) { const data = Array.from({ length: channels }, () => new Float32Array(length)); return { numberOfChannels: channels, length, sampleRate, duration: length / sampleRate, getChannelData: (c: number) => data[c] }; }
+       constructor() { contexts++; }
+-      async resume() { if (stage === 'resume') await gate; }
+-      async decodeAudioData() { if (stage === 'decode') await gate; return { duration: 1 }; }
+-      createGain() { return { gain: { value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect() {}, disconnect() {} }; }
+-      createBufferSource() { return { connect() {}, disconnect() {}, start() { started++; }, stop() {} }; }
++      async resume() { if (stage.endsWith('resume')) await gate; this.state = 'running'; }
++      async decodeAudioData() { if (stage === 'decode') await gate; const buffer = this.createBuffer(1, 48000, 48000); buffer.getChannelData(0).fill(0.1, 20000, 40000); return buffer; }
++      createGain() { return { gain: { value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect() {}, disconnect() {} }; }
++      createBufferSource() { return { playbackRate: { value: 1 }, connect() {}, disconnect() {}, start() { started++; }, stop() { stopped++; } }; }
+     }
+     Object.defineProperty(globalThis, 'AudioContext', { configurable: true, value: FakeAudioContext });
+     Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: { getItem: () => 'on' } });
+-    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: async () => ({ arrayBuffer: async () => new ArrayBuffer(0) }) });
+-    const audio = createAudio(); assert.equal(contexts, 0, 'No AudioContext before gesture');
+-    const pending = audio.play(true); await new Promise(resolve => setTimeout(resolve, 0)); audio.reset(); release(); await pending;
+-    assert.equal(started, 0, `Reset cancels pending ${stage}`);
+-    await audio.play(true); assert.equal(started, 1, 'New playback still works after reset'); audio.reset();
++    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(0) }) });
++    const audio = createAudio(() => frame); assert.equal(contexts, 1, 'Preload into suspended AudioContext');
++    if (stage === 'preloaded-resume') await audio.loading;
++    const pending = audio.play(true);
++    if (stage === 'preloaded-resume') { assert.equal(started, 1, 'Schedule immediately while device resume is pending'); assert.equal(audio.diagnostics.lastPlay?.frame, frame); }
++    frame++;  await new Promise(resolve => setTimeout(resolve, 0)); audio.reset(); release(); await pending;
++    assert.equal(started - stopped, 0, `Reset cancels pending ${stage}`);
++    const previousStarts = started;
++    await audio.play(true); assert.equal(started, previousStarts + 1, 'New playback still works after reset'); audio.reset();
+   }
+ } finally {
+   for (const [key, descriptor] of originals) if (descriptor) Object.defineProperty(globalThis, key, descriptor); else Reflect.deleteProperty(globalThis, key);
+--- before/verify/runtime.mjs
++++ verify/runtime.mjs
+@@ -11,14 +11,14 @@
+ const state = () => page.evaluate(() => window.aquarium);
+ const capture = name => page.screenshot({ path: `verify/${name}.png` });
+ const until = elapsed => page.waitForFunction(t => window.aquarium.elapsed >= t, elapsed, { timeout: 90000 });
+-const report = (label, value) => { const line = `${label}: ${JSON.stringify(value)}`; summary.push(line); console.log(line); };
++const report = (label, value) => { if (value && typeof value === 'object' && 'shardTransforms' in value) { const { shardTransforms, ...rest } = value; value = rest; } const line = `${label}: ${JSON.stringify(value)}`; summary.push(line); console.log(line); };
+ // Sample without CDP screenshot readback stalls contaminating the FPS window.
+-const performanceSample = () => page.evaluate(async () => {
++const performanceSample = async () => { const result = await page.evaluate(async () => {
+   const samples = [];
+   for (let i = 0; i < 90; i++) { await new Promise(requestAnimationFrame); samples.push(window.aquarium.fps); }
+   samples.sort((a, b) => a - b);
+   return { medianFPS: samples[45], drawCalls: window.aquarium.drawCalls, pixelRatio: window.aquarium.pixelRatio };
+-});
++}); assert.ok(result.medianFPS >= 55, `60 FPS target (55 FPS scheduling tolerance): ${result.medianFPS}`); return result; };
+ let failed;
+ try {
+   await page.goto(base);
+@@ -28,9 +28,26 @@
+   const idle = await state(); report('Idle', idle);
+   assert.equal(idle.renderer, 'WebGPU'); assert.equal(idle.pixelRatio, 1.5);
+   report('Idle performance', await performanceSample());
++  assert.equal(await page.title(), 'Aquarium · Wawa Sensei');
++  assert.equal(await page.locator('.masthead img').evaluate(e => e.getBoundingClientRect().width), 96);
++  const spoiler = page.locator('.topic-spoiler');
++  assert.equal(await spoiler.getAttribute('aria-label'), 'Reveal the topic');
++  await spoiler.focus(); assert.equal(await spoiler.getAttribute('aria-expanded'), 'true');
++  await spoiler.evaluate(e => e.blur()); assert.equal(await spoiler.getAttribute('aria-expanded'), 'false');
++  await spoiler.click(); await page.mouse.move(800, 100); assert.equal(await spoiler.getAttribute('aria-expanded'), 'true');
++  await spoiler.click(); await page.mouse.move(800, 100); assert.equal(await spoiler.getAttribute('aria-expanded'), 'false');
++  assert.equal(idle.audio.muted, false); assert.equal(idle.audio.ready, true);
++  assert.ok(Math.abs(idle.audio.offsets.glass - 0.414) < 0.025); assert.ok(Math.abs(idle.audio.offsets.bubbles - 0.39) < 0.025);
++  await capture('pass-default');
++  for (const preset of ['34', 'front', 'low']) {
++    await page.goto(`${base}?camera=${preset}`); await page.waitForFunction(() => window.aquarium?.elapsed > 2);
++    await capture(`pass-${preset}`); report(`Camera ${preset} performance`, await performanceSample());
++  }
++  await page.goto(base); await page.waitForFunction(() => window.aquarium?.elapsed > 2);
+   const target = (await state()).crackTarget;
+   await page.mouse.click(target.x, target.y);
+   const impact = await state(), start = impact.elapsed;
++  assert.equal(impact.audio.lastPlay.kind, 'crack'); assert.equal(impact.audio.lastPlay.frame, impact.impactFrame, 'First crack sound is scheduled in the impact frame'); assert.equal(impact.audio.lastPlay.gain, 0.9);
+   assert.equal(impact.cracks, 1); assert.equal(impact.wall, 0); assert.ok(impact.holeBottom < idle.height);
+   await until(start + 0.6); await capture('crack');
+   const cracked = await state(); assert.ok(cracked.brokenCount > 0); assert.equal(cracked.mode, 'cracked');
+@@ -39,28 +56,52 @@
+   assert.equal(spill.spilling, true); assert.ok(spill.height < idle.height - 0.2);
+   await page.waitForFunction(() => !window.aquarium.spilling && Math.abs(window.aquarium.height - window.aquarium.holeBottom) < 0.05, null, { timeout: 90000 });
+   const settled = await state(); report('Hole settled', settled); assert.ok(Math.abs(settled.height - settled.holeBottom) < 0.05);
+-  await page.keyboard.press('Space'); const fullStart = (await state()).elapsed;
++  await page.keyboard.press('Space'); const fullImpact = await state(), fullStart = fullImpact.elapsed;
++  assert.equal(fullImpact.audio.lastPlay.kind, 'shatter'); assert.equal(fullImpact.audio.lastPlay.frame, fullImpact.impactFrame); assert.equal(fullImpact.audio.lastPlay.gain, 1);
+   await until(fullStart + 0.3); await capture('shatter-airborne');
+   await until(fullStart + 1.5); await capture('shatter');
+   const shattered = await state(); assert.equal(shattered.mode, 'shattered'); assert.ok(shattered.brokenCount > cracked.brokenCount); assert.ok(shattered.brokenCount <= 400);
+   report('Shatter', shattered);
+-  await until(fullStart + 5); await capture('shatter-settled'); report('Shatter settled', await state()); report('Shattered performance', await performanceSample());
++  await until(fullStart + 8); const pose8 = (await state()).shardTransforms;
++  await until(fullStart + 10); const pose10 = (await state()).shardTransforms;
++  assert.equal(pose8.length, pose10.length); assert.ok(pose8.length > 0);
++  let maxDisplacement = 0, maxRotation = 0;
++  for (let i = 0; i < pose8.length; i += 7) {
++    maxDisplacement = Math.max(maxDisplacement, Math.hypot(...pose8.slice(i, i + 3).map((v, j) => v - pose10[i + j])));
++    const a = pose8.slice(i + 3, i + 7), b = pose10.slice(i + 3, i + 7);
++    const dot = a.reduce((s, v, j) => s + v * b[j], 0) / (Math.hypot(...a) * Math.hypot(...b));
++    maxRotation = Math.max(maxRotation, 2 * Math.acos(Math.min(1, Math.abs(dot))));
++  }
++  assert.ok(maxDisplacement < 1e-4); assert.ok(maxRotation < 1e-3); assert.equal((await state()).awakeShards, 0);
++  report('Settling 8–10 seconds', { maxDisplacement, maxRotation, shards: pose8.length / 7 });
++  await capture('shatter-settled'); report('Shatter settled', await state()); report('Shattered performance', await performanceSample());
+   await page.keyboard.press('t'); assert.equal((await state()).timeScale, 0.15);
+   const t0 = await state(), realStart = Date.now(); await page.waitForTimeout(2000); const t1 = await state(), real = (Date.now() - realStart) / 1000;
+   const rate = (t1.elapsed - t0.elapsed) / real; report('Slow motion rate', rate); assert.ok(Math.abs(rate - 0.15) < 0.025);
+   await page.locator('#slow').click(); assert.equal((await state()).timeScale, 1);
+-  await page.keyboard.press('r'); await page.waitForTimeout(4100); await capture('reset');
+-  const reset = await state(); assert.equal(reset.mode, 'idle'); assert.equal(reset.cracks, 0); assert.equal(reset.brokenCount, 0); assert.equal(reset.spilling, false); assert.ok(Math.abs(reset.height - 2.59) < 0.02); report('Reset', reset);
++  await page.keyboard.press('r'); await page.waitForFunction(() => window.aquarium.rewindProgress > 0.45); await capture('rewind-mid'); const mid = await state(); assert.equal(mid.rewinding, true); assert.ok(mid.historyFrames <= 601);
++  assert.ok(mid.shardTransforms.some((v, i) => i % 7 < 3 && Math.abs(v - pose10[i]) > 0.01), 'Rewind visibly moves shards back through their recorded poses');
++  await page.waitForFunction(() => !window.aquarium.rewinding); await page.waitForTimeout(4100); await capture('reset');
++  const reset = await state(); assert.equal(reset.shardBodies, 0); assert.equal(reset.height, 2.59); assert.equal(reset.mode, 'idle'); assert.equal(reset.cracks, 0); assert.equal(reset.brokenCount, 0); assert.equal(reset.spilling, false); assert.ok(Math.abs(reset.height - 2.59) < 0.02); report('Reset', reset);
+   await page.mouse.move(1000, 470); await page.mouse.down(); await page.mouse.move(1100, 470, { steps: 12 }); await page.mouse.up(); assert.equal((await state()).hasImpact, false);
+-  await page.locator('#shatter').click(); assert.equal((await state()).mode, 'shattered'); await page.locator('#reset').click(); assert.equal((await state()).cracks, 0);
+-  await page.keyboard.press('m'); await page.waitForFunction(() => document.querySelector('#sound').getAttribute('aria-pressed') === 'true'); await page.keyboard.press('m');
++  await page.locator('#shatter').click(); assert.equal((await state()).mode, 'shattered'); await page.locator('#reset').click(); assert.equal((await state()).rewinding, true); await page.locator('#reset').click(); assert.equal((await state()).cracks, 0); assert.equal((await state()).shardBodies, 0);
++  await page.keyboard.press('m'); await page.waitForFunction(() => document.querySelector('#sound').getAttribute('aria-pressed') === 'false'); await page.keyboard.press('m');
+   await page.setViewportSize({ width: 900, height: 760 }); await page.waitForTimeout(300); await capture('responsive');
+   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.documentElement.scrollHeight <= innerHeight), true);
++  assert.equal(await page.locator('.masthead img').evaluate(e => e.getBoundingClientRect().width), 80);
++  await page.setViewportSize({ width: 640, height: 760 }); assert.equal(await page.locator('.masthead img').evaluate(e => e.getBoundingClientRect().width), 72);
+   assert.equal(await page.locator('.socials a').count(), 4); assert.equal(await page.locator('.masthead img').getAttribute('alt'), 'Wawa Sensei');
++  const touch = await browser.newPage({ viewport: { width: 640, height: 760 }, hasTouch: true });
++  await touch.goto(base); await touch.waitForFunction(() => window.aquarium?.elapsed > 1);
++  const touchSpoiler = touch.locator('.topic-spoiler');
++  await touchSpoiler.tap(); assert.equal(await touchSpoiler.getAttribute('aria-expanded'), 'true');
++  await touchSpoiler.tap(); await touch.waitForFunction(() => getComputedStyle(document.querySelector('.topic-spoiler')).filter === 'blur(5px)');
++  assert.equal(await touchSpoiler.getAttribute('aria-expanded'), 'false');
++  assert.equal(await touchSpoiler.evaluate(e => getComputedStyle(e).filter), 'blur(5px)'); await touch.close();
+   const fallback = await browser.newPage(); await fallback.addInitScript(() => { delete navigator.gpu; delete Navigator.prototype.gpu; }); await fallback.goto(base);
+   await fallback.waitForFunction(() => document.documentElement.dataset.status === 'unavailable'); assert.match(await fallback.locator('#loading').textContent(), /WebGPU is unavailable/);
+   assert.deepEqual(errors, [], 'No console, shader or uncaught errors');
+-  report('PASS', 'crack, spill, exact sill level, full shatter, physics cap, 0.15× clock, reset, drag, sound, branding, 900px layout, WebGPU guard');
++  report('PASS', 'four camera presets, logo breakpoints, accessible hover/focus/touch spoiler, trimmed same-frame audio, crack/spill/sill, physics cap and 8–10s rest, 0.15× clock, rewind and skip, drag, branding, responsive layout, WebGPU guard');
+ } catch (error) { failed = error; console.error(error); await capture('failure').catch(() => {}); }
+ finally { await writeFile('verify/console.txt', logs.join('\n') + '\n'); await writeFile('verify/summary.txt', summary.join('\n') + '\n'); await browser.close(); }
+ if (failed) process.exitCode = 1;

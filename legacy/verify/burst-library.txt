@@ -1,0 +1,16 @@
+PASS library: deterministic grid/random/Poisson sampling, shared analytic heights, Lab erosion/carving off, grid circumcircles/neighbours/resolution, upward normals, mask, variable-radius spacing, circumcircle, masked Lloyd, fracture coverage/density/rings/centroids, Rapier freeze/slow-motion/settling.
+Terrain samples: 1521 / 1656 / 1777
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, pending audio cancellation.
+PASS Run I regression: inset removes short edges without collider spikes.
+PASS Run I base contact: float rounding cannot bypass grounded damping; native sleep.
+PASS Run J: coherent biome graph, normalized blend weights, deterministic erosion topology and conservation.
+PASS Run K: shared release, 10× density invariance for linear/angular launch, bounded spin, rotated pane normals, level-dependent falloff, disposal.
+Gerstner spectrum: compression bound 0.08043671562845142 minimum Jacobian eigenvalue 0.9195632843715486
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS Run O: active warp/thermal/carve, deterministic channel networks, cliff override, upper snow, coherent biomes, wall clearance; Lab technique unchanged.
+PASS physics cap: glass launch three ticks, generic two, crowded tail one; drop backlog and resume fixed stepping.
+PASS sleeping shard sync: wake-up retains the final cached pose.
+PASS launch phase: bit-identical crowded trajectories, 48-to-4 solver ramp, restored contacts, three-step cap and dropped backlog.
+PASS individual aquarium cells: 220 cells remain 220 independent bodies; connected-compound Run D behavior retained.
+PASS Lab launch fidelity: deterministic 48/12 release window and three-step catch-up without collision grace.
+

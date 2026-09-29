@@ -1,0 +1,7 @@
+{"profile":"economy","idle":0,"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":9,"awake5":0,"pose":{"x":-0.44893795251846313,"y":0.05341902747750282,"z":1.910771131515503}}
+{"profile":"economy","idle":100,"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":3,"awake5":0,"pose":{"x":-0.3957923650741577,"y":0.022106746211647987,"z":1.363529086112976}}
+{"profile":"economy","idle":231,"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":44,"awake5":0,"pose":{"x":-0.8686047196388245,"y":0.02294992469251156,"z":0.7797967195510864}}
+{"profile":"launch","idle":0,"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":9,"awake5":0,"pose":{"x":-0.44893795251846313,"y":0.05341902747750282,"z":1.910771131515503}}
+{"profile":"launch","idle":100,"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":3,"awake5":0,"pose":{"x":-0.3957923650741577,"y":0.022106746211647987,"z":1.363529086112976}}
+{"profile":"launch","idle":231,"count":75,"maxRotation":5.960464477539063e-8,"maxDisplacement":0,"worst":44,"awake5":0,"pose":{"x":-0.8686047196388245,"y":0.02294992469251156,"z":0.7797967195510864}}
+

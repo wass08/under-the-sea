@@ -1,0 +1,69 @@
+{
+  "worst": {
+    "age": 3.530999999999997,
+    "body": {
+      "i": 164,
+      "p": {
+        "x": -2.5680651664733887,
+        "y": -0.33149367570877075,
+        "z": 3.5440778732299805
+      },
+      "v": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "w": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "linearDamping": 8,
+      "angularDamping": 20,
+      "mass": 45.54176330566406,
+      "asleep": true
+    },
+    "reference": [
+      -2.568053722381592,
+      -0.33129584789276123,
+      3.5440447330474854,
+      0.3508109450340271,
+      -0.6061382293701172,
+      -0.6547719836235046,
+      -0.28425663709640503
+    ]
+  },
+  "samples": 60,
+  "maxDisplacement": 0.0002009106361543909,
+  "maxRotation": 0.0015060066582404759,
+  "awake5": 0,
+  "physics": {
+    "profile": "launch",
+    "shardBodyLimit": 880,
+    "lastReleaseTime": 12.779699999928473,
+    "maxCellsPerBody": 1,
+    "individualCells": true,
+    "launch": {
+      "radialFraction": 0.8390419622104307,
+      "count": 220,
+      "min": 2.395735565220589,
+      "median": 3.389545713878792,
+      "max": 5.799390292309975,
+      "maxAngular": 7.2781369033457635
+    },
+    "fixedHz": 60,
+    "solverIterations": 12,
+    "internalPgs": 4,
+    "lengthUnit": 4,
+    "allowedError": 0.00019999999494757503,
+    "prediction": 0.004000000189989805,
+    "erp": 0,
+    "contactSkinMax": 0.003,
+    "inertiaRatioLimit": 4,
+    "massRange": [
+      5,
+      276.39776611328125
+    ],
+    "fixedFallbacks": 0
+  }
+}

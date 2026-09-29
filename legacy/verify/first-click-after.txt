@@ -1,0 +1,8 @@
+after run 1: longest frame gap 22.5 ms, load time 1723.3 ms, handler 17.0 ms, render 10.4 ms, new pipelines 0
+reset run 1: longest frame gap 27.0 ms, new pipelines 0
+after run 2: longest frame gap 22.0 ms, load time 1640.0 ms, handler 16.7 ms, render 9.6 ms, new pipelines 0
+reset run 2: longest frame gap 27.9 ms, new pipelines 0
+after run 3: longest frame gap 22.2 ms, load time 1655.1 ms, handler 17.6 ms, render 10.1 ms, new pipelines 0
+reset run 3: longest frame gap 27.6 ms, new pipelines 0
+Second wall: 2 cracks, new pipelines 0
+Budget: longest first-click gap 22.5 ms (<50), median load delta -122.5 ms (<=300)

@@ -1,0 +1,10 @@
+{
+  "frames": 10,
+  "x": 1208,
+  "y": 1178,
+  "width": 64,
+  "height": 64,
+  "maxChannelDifference": 1,
+  "meanChannelDifference": 0.010091145833333334,
+  "nonzero": 110592
+}

@@ -1,0 +1,2 @@
+Pristine R target: PASS before=[-0.3,1.45,0.15] after=[-0.3,1.45,0.15] cracks=0
+Opposite-wall screenshot: PASS walls=[0,1] verify/spill-two-walls.png

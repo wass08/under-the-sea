@@ -1,0 +1,10 @@
+Lamp switch: PASS (no wall crack; lamp, pool and caustic diagnostics reach zero)
+Keyboard L ramp: PASS (358.1 ms; intermediate values observed)
+idle-default: 60 FPS, 116 draw calls
+floor-wide: 60 FPS, 116 draw calls
+lamp-side-floor: 60 FPS, 116 draw calls
+lamp-base: 60 FPS, 102 draw calls
+shadows: 60 FPS, 116 draw calls
+shadows-closeup: 60 FPS, 116 draw calls
+shadow-debug: 60 FPS, 55 draw calls
+lamp-off: 60 FPS, 116 draw calls

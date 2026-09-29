@@ -1,0 +1,48 @@
+{
+  "samplesPerCase": 3761640,
+  "seconds": 17.95,
+  "resolution": [
+    128,
+    80
+  ],
+  "wavelengths": [
+    1.2,
+    0.94,
+    0.72,
+    0.54,
+    0.4,
+    0.3
+  ],
+  "rest": {
+    "min": -0.012856524878011765,
+    "max": 0.012816222315793201,
+    "peakToTrough": 0.025672747193804968,
+    "maxSimultaneousPeakToTrough": 0.024929770703583667,
+    "maxX": 2.974,
+    "maxZ": 1.724,
+    "edgeMotion": 3.3837253973937975e-32
+  },
+  "maximum": {
+    "min": -0.04114087960963766,
+    "max": 0.04101191141053825,
+    "peakToTrough": 0.0821527910201759,
+    "maxSimultaneousPeakToTrough": 0.07977526625146775,
+    "maxX": 2.974,
+    "maxZ": 1.724,
+    "edgeMotion": 1.40762976531582e-31
+  },
+  "maximumWithImpacts": {
+    "min": -0.04835442151375431,
+    "max": 0.04398813468395337,
+    "peakToTrough": 0.09234255619770768,
+    "maxSimultaneousPeakToTrough": 0.08876593117621265,
+    "maxX": 2.974,
+    "maxZ": 1.724,
+    "edgeMotion": 1.40762976531582e-31
+  },
+  "absoluteVerticalBound": 0.0601,
+  "tiltBound": 0.08593912089380483,
+  "highestPossibleSurface": 2.7360391208938046,
+  "rimClearance": 0.9239608791061955,
+  "compressionBound": 0.08043671562845142
+}

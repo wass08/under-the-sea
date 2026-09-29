@@ -1,0 +1,32 @@
+Root cause: src/lab/shatter.ts passed budget=400 and minimumArea=.1 (L2)/.025 (L3) to releaseShards in src/lib/release.ts, which invokes groupAdjacentCells in src/lib/shatter.ts. This welded cells; Rapier had no body cap.
+Lab now passes budget=actual cell count, minimumArea=0 at every level; Run D grouping remains explicitly opt-in. Drawing is batched; physics bodies remain independent.
+Burst defaults: impulse=1.35 falloff=4.8 forward=.90 spin=1.35. burstVersion=2 migrates old settings once, preserving subsequent edits.
+Lab-only supported linear damping is 8 for L2 and 12 for L3; angular damping 5. Airborne damping is unchanged.
+Histogram bins: 1 / 2 / 3-5 / 6+ cells per body.
+before L1 count=220 cells=228 bodies=228 histogram(1/2/3-5/6+)=228/0/0/0
+after L1 count=220 cells=228 bodies=228 histogram(1/2/3-5/6+)=228/0/0/0
+before L1 count=600 cells=589 bodies=400 histogram(1/2/3-5/6+)=211/189/0/0
+after L1 count=600 cells=589 bodies=589 histogram(1/2/3-5/6+)=589/0/0/0
+before L2 count=220 cells=220 bodies=41 histogram(1/2/3-5/6+)=1/4/17/19
+after L2 count=220 cells=220 bodies=220 histogram(1/2/3-5/6+)=220/0/0/0
+before L2 count=600 cells=600 bodies=42 histogram(1/2/3-5/6+)=0/0/0/42
+after L2 count=600 cells=600 bodies=600 histogram(1/2/3-5/6+)=600/0/0/0
+before L3 count=220 cells=220 bodies=75 histogram(1/2/3-5/6+)=56/5/5/9
+after L3 count=220 cells=220 bodies=220 histogram(1/2/3-5/6+)=220/0/0/0
+before L3 count=600 cells=600 bodies=137 histogram(1/2/3-5/6+)=90/16/13/18
+after L3 count=600 cells=600 bodies=600 histogram(1/2/3-5/6+)=600/0/0/0
+FPS: 1600x1000, DPR=1.5, Chromium Metal WebGPU; median rendered RAF intervals at .1-1.5s airborne and 5-6s settled; 59.88 is nominal 60 Hz cadence.
+FPS L3 220: airborne=59.88 settled=59.88 awake=0
+FPS L3 600: airborne=59.88 settled=59.88 awake=0
+PASS aquarium profile: all 300 steps of positions, rotations and linear/angular velocities are bit-identical to pre-tuning sources.
+PASS Lab profile: deterministic render chunking, density-invariant impulses, bounded tumble, 3-4s rest and native sleep by 5s for L1-L3.
+PASS library: deterministic grid/random/Poisson sampling, shared analytic heights, Lab erosion/carving off, grid circumcircles/neighbours/resolution, upward normals, mask, variable-radius spacing, circumcircle, masked Lloyd, fracture coverage/density/rings/centroids, Rapier freeze/slow-motion/settling.
+PASS Run D regressions: connected shard groups, compound collision gap/mass, world disposal, pending audio cancellation.
+PASS Run K: shared release, 10× density invariance for linear/angular launch, bounded spin, rotated pane normals, level-dependent falloff, disposal.
+PASS Run N: seeded shard trajectories are bit-identical across render-frame chunking and pre-release accumulator phase.
+PASS shatter L1: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L2: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS shatter L3: WebGPU ready, screenshot captured, click / physics / freeze / reset verified
+PASS Lab controls: one-time old-settings migration, new defaults, real Tweakpane edits, next-break application, settings persistence, frozen poses and unchanged L1.
+verify/perf-after/lab-L3-cells-030.png: exact .3s pose, zoomed/cropped to centre cells. Separate convex cells; some overlap in projection, but there are no welded multi-cell bodies.
+TypeScript and Vite build passed.

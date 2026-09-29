@@ -1,0 +1,10 @@
+PASS: logo breakpoints (96/80/72px), shared button/Lab surfaces and 6px corners, Lab hover/focus, spoiler hover/focus/touch, responsive layout (430–1920px), no browser errors.
+Body / panel over white (worst case): 12.07:1
+Secondary / panel over white (worst case): 6.57:1
+Button and Lab / default: 12.55:1
+Button and Lab / hover: 9.66:1
+Active button: 6.62:1
+Shatter / default: 10.81:1
+Shatter / hover: 13.46:1
+Key hints / hover: 8.21:1
+Unbacked secondary / scene floor #0b4f78: 4.84:1

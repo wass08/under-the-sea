@@ -1,0 +1,26 @@
+{
+  "results": [
+    {
+      "mode": "no-reflection",
+      "water": 7.540259000000001,
+      "reflection": 0,
+      "fps": 60,
+      "drawCalls": 61
+    },
+    {
+      "mode": "full",
+      "water": 4.590097,
+      "reflection": 0.490618,
+      "fps": 60,
+      "drawCalls": 101
+    },
+    {
+      "mode": "shattered",
+      "water": 0,
+      "reflection": 0,
+      "fps": 60,
+      "drawCalls": 51
+    }
+  ],
+  "errors": []
+}

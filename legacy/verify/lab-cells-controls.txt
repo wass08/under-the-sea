@@ -1,0 +1,1 @@
+PASS Lab controls: one-time old-settings migration, new defaults, real Tweakpane edits, next-break application, settings persistence, frozen poses and unchanged L1.

@@ -1,0 +1,99 @@
+{
+  "image": "verify/pass-default.png",
+  "size": [
+    2880,
+    1620
+  ],
+  "regions": {
+    "floor": {
+      "rectangle": [
+        1250,
+        1400,
+        2350,
+        1530
+      ],
+      "meanRGB": [
+        3.388293706293706,
+        83.50946153846154,
+        122.79672027972028
+      ],
+      "meanHex": "#03547b"
+    },
+    "background": {
+      "rectangle": [
+        1800,
+        220,
+        2450,
+        460
+      ],
+      "meanRGB": [
+        0.0,
+        40.48932051282051,
+        72.44082692307693
+      ],
+      "meanHex": "#002848"
+    }
+  },
+  "Spill": [
+    {
+      "wall": 0,
+      "arcLength": 2.144815656602071,
+      "sheetLandingSpeed": 6.145081186102828,
+      "uvScrollRateAtLanding": 2.8650859420889283,
+      "measuredLandings": 256,
+      "meanDropletLandingSpeed": 6.372131217857463,
+      "meanStreakSpeedForThoseDrops": 6.172198470903236,
+      "meanRelativeError": 0.03244285890874159
+    }
+  ],
+  "Settling 3\u20134 seconds (all rendered poses)": {
+    "samples": 61,
+    "maxDisplacement": 0,
+    "maxRotation": 5.960464477539063e-08
+  },
+  "Native sleep at five seconds": {
+    "awake": 0,
+    "fixedFallbacks": 0
+  },
+  "Settling 8\u201310 seconds": {
+    "maxDisplacement": 0,
+    "maxRotation": 5.960464477539063e-08,
+    "shards": 78
+  },
+  "Idle performance": {
+    "medianFPS": 60,
+    "drawCalls": 128,
+    "pixelRatio": 1.5
+  },
+  "Shattered performance": {
+    "medianFPS": 60,
+    "drawCalls": 65,
+    "pixelRatio": 1.5
+  },
+  "Run N pristine launch": {
+    "radialFraction": 0.8393413001751414,
+    "count": 78,
+    "min": 1.800073495760472,
+    "median": 2.0480760982254864,
+    "max": 6.641305157745903,
+    "maxAngular": 11.974183505223882
+  },
+  "lamp": {
+    "head": [
+      -2.65,
+      6.1,
+      -2.3
+    ],
+    "target": [
+      0,
+      1.25,
+      0
+    ],
+    "direction": [
+      -0.44268231206203107,
+      0.8101921560380568,
+      -0.38421483688402697
+    ],
+    "elevationDegrees": 54.11470983029048
+  }
+}
