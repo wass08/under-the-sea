@@ -15,9 +15,9 @@ export type EdgeProfile = { t: number; h: number }[];
 export type Edges = [EdgeProfile, EdgeProfile, EdgeProfile, EdgeProfile];
 
 const palette = {
-  sand: new Color('#dcc08a'), sandDark: new Color('#bf9c62'), sandWet: new Color('#b89c6c'), silt: new Color('#a99b7c'),
+  sand: new Color('#d8b477'), sandDark: new Color('#b98c52'), sandWet: new Color('#b89c6c'), silt: new Color('#a99b7c'),
   beach: new Color('#f1dfae'), grassA: new Color('#77a13b'), grassB: new Color('#5b8f35'), grassC: new Color('#8bb046'), grassDark: new Color('#3f7031'),
-  rockA: new Color('#8a8479'), rockB: new Color('#6e685f'), rockC: new Color('#a59c8d'), rockWarm: new Color('#87684d'), rockSand: new Color('#a08260'), algae: new Color('#5d8a63'), algaeDark: new Color('#3f6f5a'), moss: new Color('#66804a'),
+  rockA: new Color('#8a8479'), rockB: new Color('#6e685f'), rockC: new Color('#a59c8d'), rockWarm: new Color('#87684d'), rockSand: new Color('#a08260'), algae: new Color('#7f9563'), algaeDark: new Color('#5f7d54'), moss: new Color('#66804a'),
 };
 
 /** Flat-shaded Poisson/Delaunay terrain (seabed + island) clipped exactly to the square. */

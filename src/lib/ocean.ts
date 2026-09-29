@@ -19,7 +19,7 @@ export const OCEAN_GRAVITY = 9;
 export const oceanAmplitude = uniform(1);
 export const oceanParams = { amplitude: 1 };
 
-export const RIPPLE = { slots: 12, speed: 1.55, wavelength: 0.5, width: 5.5, decay: 0.62, amplitude: 0.045, spread: 2.4 } as const;
+export const RIPPLE = { slots: 12, speed: 1.55, wavelength: 0.5, width: 5.5, decay: 0.62, amplitude: 0.08, spread: 2.0 } as const;
 /** xy = position, z = start time (sim seconds), w = strength. */
 export const rippleUniforms = Array.from({ length: RIPPLE.slots }, () => uniform(new Vector4(0, 0, -1000, 0)));
 const rippleState = Array.from({ length: RIPPLE.slots }, () => ({ x: 0, z: 0, t: -1000, s: 0 }));

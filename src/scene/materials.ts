@@ -8,7 +8,7 @@ import { causticAt, causticStrength, sunVisibilityRef, toSun, waterDepthAt, wate
  * Underwater shading for opaque terrain-like surfaces: depth tint on the albedo and sun caustics that
  * follow the sun through the water surface. Returns the adjusted albedo and the caustic emissive.
  */
-export function underwaterShading(albedo: Node<'vec3'>, normal: Node<'vec3'>, gain = 2.6) {
+export function underwaterShading(albedo: Node<'vec3'>, normal: Node<'vec3'>, gain = 4.5) {
   const depth = waterDepthAt(positionWorld.y);
   const submerged = smoothstep(-0.03, 0.22, depth);
   const tinted = albedo.mul(mix(vec3(1), waterTransmittance(depth).mul(vec3(0.9, 1.0, 1.0)), submerged.mul(0.92)));
@@ -68,8 +68,8 @@ export function createSlabMaterial() {
   const cluster = smoothstep(-0.1, 0.35, mx_noise_float(vec3(uv2.mul(0.55), 3.3)));
   const pebble = smoothstep(0.30, 0.22, w.f1).mul(cluster);
   const pebbleShade = float(1).sub(w.f1.mul(2.2)).max(0).mul(0.5).add(0.62);
-  const pebbleColor = mix(c('#8f8a80'), c('#b19a7c'), smoothstep(-0.2, 0.4, mx_noise_float(vec3(uv2.mul(1.6), 1.7)))).mul(pebbleShade);
-  col = mix(col, pebbleColor, pebble.mul(0.85));
+  const pebbleColor = mix(c('#6d6860'), c('#8f7a5e'), smoothstep(-0.2, 0.4, mx_noise_float(vec3(uv2.mul(1.6), 1.7)))).mul(pebbleShade);
+  col = mix(col, pebbleColor, pebble.mul(0.8));
   col = col.mul(mx_noise_float(p.mul(38)).mul(0.07).add(1));
   // Sandy cap right under the terrain top.
   const topY = attribute('topY', 'float');

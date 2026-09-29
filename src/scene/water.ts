@@ -32,7 +32,7 @@ function toHalf(v: number) {
 }
 
 /** Absorption (per world unit) — red dies first, then green, leaving deep teal-blue. */
-const sigma = vec3(0.14, 0.044, 0.026);
+const sigma = vec3(0.16, 0.048, 0.027);
 
 export function createWater(scene: Scene, camera: PerspectiveCamera, heightTexture: DataTexture, edges: Edges) {
   const box = { lo: vec3(-R, bottomY, -R), hi: vec3(R, WORLD.surface + 0.6, R) };
@@ -87,7 +87,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const shifted = vec4(viewportOpaqueMipTexture(uvR, float(0)) as Node<'vec4'>).rgb;
     const sampleColor = mix(straight, shifted, weight);
     const transmittance = exp(sigma.mul(waterClarity).mul(path).negate());
-    const inscatter = vec3(0.006, 0.11, 0.155).mul(float(1).sub(exp(path.mul(-0.10).mul(waterClarity))));
+    const inscatter = vec3(0.006, 0.10, 0.145).mul(float(1).sub(exp(path.mul(-0.10).mul(waterClarity))));
     const rays = scatterRays(entry, rd, path);
     const phase = float(0.55).add(pow(dot(rd, toSun).max(0), 4).mul(1.6));
     const rayColor = vec3(0.75, 1.0, 0.9).mul(rays).mul(phase).mul(godRayStrength).mul(0.085);
@@ -113,7 +113,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const fineB = mx_noise_float(vec3(positionWorld.xz.mul(15).sub(simTime.mul(0.5)), 7.1));
     const N = normalize(baseNormal.add(vec3(fineA, 0, fineB).mul(0.05))).toVar();
     const body = volume(positionWorld, N);
-    const F = fresnel(N, body.rd);
+    const F = fresnel(N, body.rd).mul(1.7).min(1);
     const R3 = reflect(body.rd, N).toVar();
     const reflUV = screenUV.flipX().add(N.xz.mul(vec2(-0.05, 0.05)).mul(-1)).clamp(0.002, 0.998);
     const planar = reflection.sample(reflUV).rgb;
@@ -130,7 +130,8 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
       .add(smoothstep(0.55, 0.0, depthBelow).mul(0.18).mul(swirl));
     const surfaceLight = vec3(0.95, 0.98, 1.0);
     const base = body.color.mul(float(1).sub(F)).add(reflected.mul(F)).add(vec3(1.0, 0.86, 0.62).mul(glint).mul(F.mul(6).min(1).max(0.25)));
-    return mix(base, surfaceLight.mul(1.1), foam.min(0.9).mul(float(1).sub(F)));
+    const rippleSlope = smoothstep(0.22, 0.65, N.xz.length());
+    return mix(base, surfaceLight.mul(1.1), max(foam.min(0.9), rippleSlope.mul(0.42)).mul(float(1).sub(F)));
   })();
   surfaceMaterial.opacityNode = float(1);
   const geometry = new PlaneGeometry(R * 2, R * 2, 224, 224); geometry.rotateX(-Math.PI / 2);

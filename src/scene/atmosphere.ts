@@ -12,7 +12,7 @@ const zenith = color('#052540'), upper = color('#0f5478'), horizonCool = color('
 export const skyColor = Fn(([dir]: [Node<'vec3'>]) => {
   const y = dir.y.max(0);
   const c = dir.dot(toSun).max(0);
-  const warm = smoothstep(0.55, 0.99, c);
+  const warm = smoothstep(0.25, 0.98, c);
   const horizon = mix(horizonCool, horizonWarm, warm);
   const body = mix(upper, zenith, smoothstep(0.15, 0.85, y));
   const sky = mix(horizon, body, smoothstep(0.0, 0.42, y).pow(0.8));
@@ -34,7 +34,7 @@ export function createAtmosphere(scene: Scene, sunVisibility: Node<'float'>) {
   const patchDist = positionWorld.xz.abs().sub(vec2(WORLD.half + 0.5)).max(0).length();
   const contact = smoothstep(0.0, 5.5, patchDist).mul(0.55).add(0.45);
   const tone = mx_noise_float(vec3(positionWorld.xz.mul(0.35), 0)).mul(0.06).add(1);
-  ground.colorNode = color('#1a4653').mul(contact).mul(tone);
+  ground.colorNode = color('#125064').mul(contact).mul(tone);
 
   // Light that passed through the water block and left through a side face (analytic ray vs water box).
   const rayD = toSun;

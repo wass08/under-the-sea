@@ -58,6 +58,9 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
     ripple(point: Vector3, strength = 1) { emitRipple(point.x, point.z, Math.max(0, Math.min(3, strength))); },
     update(dt: number) {
       bubbles.update(dt);
+      const p = camera.position, inside = Math.abs(p.x) < WORLD.half && Math.abs(p.z) < WORLD.half && p.y > WORLD.bed - 0.6;
+      const depth = world.heightAt(p.x, p.z) - p.y;
+      post.setUnderwater(inside ? Math.max(0, Math.min(1, depth / 0.12)) : 0, Math.max(0, depth));
       heightProbe?.(world);
       reflectTimer -= dt;
       if (reflectTimer <= 0) { reflectTimer = 1; markReflective(); }
@@ -89,7 +92,7 @@ function applyCameraPreset(camera: Ctx['camera']) {
   const cam = new URLSearchParams(location.search).get('cam');
   const presets: Record<string, [number, number, number]> = {
     side: [0, 4.5, 26], top: [0.01, 34, 0.01], close: [7.5, 5.2, 10.5], front: [2, 5, 22], under: [3, 1.8, 9.5],
-    island: [-2, 9, 13], corner: [11, 6, 11], low: [17, 3.4, 20],
+    island: [-2, 9, 13], corner: [11, 6, 11], low: [17, 3.4, 20], grazing: [14, 8.2, 16], inside: [1, 4, 3.5], surf: [7, 9.5, 9.5], seabed: [5, 6, 7],
   };
   if (cam && presets[cam]) camera.position.set(...presets[cam]);
   void WORLD;

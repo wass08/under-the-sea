@@ -8,7 +8,7 @@ import { simTime, sunDirection, waterLevel } from '../state';
 
 /** User-facing sun parameters (degrees). */
 const q = new URLSearchParams(location.search).get('sun')?.split(',').map(Number);
-export const sunParams = { azimuth: q?.[0] ?? 208, elevation: q?.[1] ?? 31, intensity: 5.2 };
+export const sunParams = { azimuth: q?.[0] ?? 182, elevation: q?.[1] ?? 30, intensity: 5.2 };
 export const lookParams = { caustics: 1, godRays: 1, clarity: 1 };
 export const causticStrength = uniform(1);
 export const godRayStrength = uniform(1);
@@ -43,7 +43,7 @@ export async function createLighting(scene: Scene) {
   sun.shadow.mapSize.set(4096, 4096);
   sun.shadow.radius = 4;
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03;
-  const hemi = new HemisphereLight('#bfe2ff', '#9c8763', 0.6);
+  const hemi = new HemisphereLight('#bfe2ff', '#9c8763', 0.5);
   scene.add(sun, sun.target, hemi);
   const sunShadow = shadow(sun);
   sun.shadow.shadowNode = sunShadow;

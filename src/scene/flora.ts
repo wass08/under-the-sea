@@ -1,9 +1,9 @@
-import { BufferGeometry, Color, ConeGeometry, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, Matrix4, Mesh, MeshStandardNodeMaterial, Object3D, Quaternion, Scene, Vector3, CylinderGeometry } from 'three/webgpu';
+import { BufferGeometry, ConeGeometry, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardNodeMaterial, Object3D, Quaternion, Scene, Vector3, CylinderGeometry } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { color, float, hash, instanceIndex, mix, normalWorldGeometry, positionLocal, sin, cos, smoothstep, uv, vec3, mx_noise_float, positionWorld } from 'three/tsl';
 import { WORLD } from '../config';
-import { simTime, waterLevel } from '../state';
+import { simTime } from '../state';
 import { random } from '../lib/random';
 import { BASIN, ISLAND, terrainHeight } from './field';
 import { underwaterShading } from './materials';
@@ -104,7 +104,6 @@ export function createFlora(scene: Scene) {
     const shaded = underwaterShading(base, normalWorldGeometry, 0.9);
     m.colorNode = shaded.albedo;
     m.emissiveNode = shaded.emissive.add(glow.mul(0.25));
-    void depthOfFade;
     return m;
   };
 
@@ -184,8 +183,6 @@ export function createFlora(scene: Scene) {
   });
 
   // ---- Rocks ---------------------------------------------------------------------------------------------------
-  const rockGeometry = mergeGeometries([jitteredRock(0.5, 1, 0.55, 31), jitteredRock(0.5, 1, 0.5, 47, 0.7)].map(g => { g.deleteAttribute('uv'); return g; }))!;
-  void rockGeometry;
   const rockA = jitteredRock(0.5, 1, 0.6, 31, 0.8), rockB = jitteredRock(0.5, 1, 0.5, 47, 0.6);
   const rockMaterial = () => {
     const m = new MeshStandardNodeMaterial({ roughness: 0.92, metalness: 0, flatShading: true });
@@ -220,7 +217,6 @@ export function createFlora(scene: Scene) {
     mesh.castShadow = true; mesh.receiveShadow = true; mesh.frustumCulled = false; mesh.name = 'Rocks'; mesh.layers.enable(1);
     group.add(mesh);
   });
-  void [Color, Matrix4, Mesh, waterLevel, sin, WORLD];
   return { group };
 }
 const smooth01 = (a: number, b: number, x: number) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
