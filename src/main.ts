@@ -1,7 +1,7 @@
 import './style.css';
 import { Raycaster, Scene, Vector2, WebGPURenderer, AgXToneMapping } from 'three/webgpu';
 import { createCamera } from './camera';
-import { createPanel } from './ui';
+import { createDock, createPanel } from './ui';
 import { createWorld } from './scene';
 import { createSchool } from './fish';
 import { createFishing } from './fishing';
@@ -34,6 +34,7 @@ async function boot() {
   const fishing = await createFishing(ctx, world, school);
 
   const panel = createPanel();
+  const dock = createDock(school, fishing);
   school.addControls(panel.folder('School', true));
   fishing.addControls(panel.folder('Fishing'));
   world.addControls(panel.folder('World'));
@@ -66,7 +67,7 @@ async function boot() {
     state.elapsed += dt; simTime.value += dt;
     rig.update();
     world.update(dt); school.update(dt); fishing.update(dt);
-    panel.update(realDt);
+    panel.update(realDt); dock.update();
     try {
       renderer.info.reset();
       world.render();

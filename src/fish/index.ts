@@ -54,7 +54,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   env.millCenter.value.x = homeXZ[0]; env.millCenter.value.z = homeXZ[1]; // circle the island
   // ------------------------------------------------------------------ simulations
   const mainSim = createSim({
-    renderer, env, count: N, seabed, cruise: 1.8, minSpeed: 0.8, maxSpeed: 3.2, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
+    renderer, env, count: N, seabed, cruise: 2.2, minSpeed: 1.0, maxSpeed: 4.0, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
     homeClear: 0, homeStrength: 0, homeXZ: [0, 0], homeRadius: 99, clusters: 3, clusterRadius: 3.0, seed: 1, main: true,
     groupCenters: [0, 1, 2].map(k => [homeXZ[0] + Math.cos(k * 2.094) * 12, 6.4, homeXZ[1] + Math.sin(k * 2.094) * 12] as [number, number, number]),
   });
@@ -112,13 +112,15 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
 
   // ------------------------------------------------------------------ state
   const stats: SchoolStats = { nearLure: 0, biter: 'none', centroid: new Vector3(0, 6, 0), meanFear: 0 };
-  const behaviour = { milling: query.get('fishDemo') === 'milling' || query.get('milling') === '1', fountain: false, angel: true };
+  const behaviour = { millingDirection: 1 as 1 | -1, milling: query.get('fishDemo') === 'milling' || query.get('milling') === '1', fountain: false, angel: true };
   const predator = new Predator(seabed);
   const pend = { strike: 0, land: 0, lure: false, biterSince: -1, biterLocal: 'none' as SchoolStats['biter'], strikeQueued: false };
   const angelOn = () => behaviour.angel;
   let landUntil = 0, panicIdx = 0, statsPending = false, lastStats = 0;
 
+  let panicEnv = 0;
   function panic(origin: Vector3, strength = 1) {
+    panicEnv = Math.max(panicEnv, Math.min(1, strength));
     const k = panicIdx++ % 4;
     env.panicOrigin[k].value.set(origin.x, origin.y, origin.z, env.clock.value);
     const s = env.panicStrength.value; if (k === 0) s.x = strength; else if (k === 1) s.y = strength; else if (k === 2) s.z = strength; else s.w = strength;
@@ -155,7 +157,11 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       const target = behaviour.milling ? 1 : 0;
       env.millBlend.value += (target - env.millBlend.value) * (1 - Math.exp(-dt / 0.9));
       // predator (CPU, single fish)
-      const wantPred = behaviour.fountain;
+      // 'Send predator' with the predator switched off: it appears for one charge, then leaves ~5 s later
+      if (tempPred && predator.chargesDone > tempPredCharges) { tempPredTimer = 5; tempPredCharges = predator.chargesDone; }
+      if (tempPred && tempPredTimer >= 0 && (tempPredTimer -= dt) < 0) tempPred = false;
+      const wantPred = behaviour.fountain || tempPred;
+      updateLureThreat(dt);
       predator.update(dt, stats.centroid, wantPred);
       updateAttractor(dt);
       pU.pos.value.copy(predator.pos); pU.vel.value.copy(predator.dir); pU.phase.value = predator.phase; pU.bank.value = predator.bank; pU.size.value = predator.scale;
@@ -165,7 +171,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       env.hooked.value = stats.biter === 'hooked' ? 1 : 0;
       env.strike.value = pend.strike; env.land.value = pend.land;
       if (!noSim) mainSim.step(pend.strike > 0);
-      lod.update(ctx.camera);
+      lod.update(ctx.camera, insetCamera);
       if (angelOn()) angelSim.step(false);
       if (pend.strike > 0) pend.strike = 0;
       if (pend.land > 0 && --landFrames <= 0) pend.land = 0;
@@ -177,7 +183,16 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       void realDt;
     },
     panic,
-    setInsetCamera() { /* TODO: include the inset view in culling/LOD */ },
+    setInsetCamera(c) { insetCamera = c; },
+    setMilling(on: boolean) { behaviour.milling = on; behaviourFolder?.refresh(); },
+    setMillingDirection(d: 1 | -1) { behaviour.millingDirection = d; env.millDir.value = d; behaviourFolder?.refresh(); },
+    sendPredator() { if (!behaviour.fountain) { tempPred = true; tempPredTimer = -1; tempPredCharges = predator.chargesDone; } predator.send(); },
+    flash(origin?: Vector3) { panic(origin ?? randomInSchool(), 1); },
+    behaviour: {
+      get milling() { return behaviour.milling; },
+      get millingDirection(): 1 | -1 { return env.millDir.value >= 0 ? 1 : -1; },
+      get predator(): 'off' | 'cruising' | 'charging' { return !(behaviour.fountain || tempPred) ? 'off' : predator.mode === 'charge' ? 'charging' : 'cruising'; },
+    },
     setLure(p: Vector3 | null) {
       if (p) { env.lurePos.value.copy(p); env.lureActive.value = 1; } else env.lureActive.value = 0;
     },
@@ -196,15 +211,42 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     addControls(folder: FolderApi) { controls(folder); },
   };
   let landFrames = 0;
+  let tempPred = false, tempPredTimer = -1, tempPredCharges = 0;
+  let behaviourFolder: FolderApi | null = null;
+  // the lure is a threat when dragged fast through the water (velocity derived from the positions setLure receives)
+  const prevLure = new Vector3(); let hadLure = false, lureSpeed = 0;
+  function updateLureThreat(dt: number) {
+    const cur = env.lurePos.value, ok = env.lureActive.value > 0.5 && cur.y < WORLD.surface - 0.4;
+    if (ok && hadLure && dt > 1e-4) {
+      const vx = (cur.x - prevLure.x) / dt, vy = (cur.y - prevLure.y) / dt, vz = (cur.z - prevLure.z) / dt, sp = Math.hypot(vx, vy, vz);
+      lureSpeed += (sp - lureSpeed) * Math.min(1, dt * 8);
+      if (sp > 0.3) { const k = Math.min(1, dt * 10), lv = env.lureVel.value; lv.set(lv.x + (vx / sp - lv.x) * k, lv.y + (vy / sp - lv.y) * k, lv.z + (vz / sp - lv.z) * k); if (lv.lengthSq() < 1e-4) lv.set(1, 0, 0); }
+    } else lureSpeed *= Math.exp(-dt * 6);
+    prevLure.copy(cur); hadLure = ok;
+    const t = Math.min(1, Math.max(0, (lureSpeed - 1.2) / 1.3));
+    env.lureThreat.value = ok ? t * t * (3 - 2 * t) : 0;
+  }
+  let insetCamera: import('three/webgpu').PerspectiveCamera | null = null;
   // slowly wandering attractor the school follows loosely (keeps it off the walls and away from the island)
   let attT = 0;
+  const kick = [0, 0, 0], kickTarget = [0, 0, 0], nextKick = [3, 7, 11];
   function updateAttractor(dt: number) {
     attT += dt;
     const t = attT;
+    panicEnv *= Math.exp(-dt / 3.2);
+    // density breathes; after a panic the school contracts defensively, then relaxes
+    env.axesScale.value = (1 + 0.28 * Math.sin(t * 0.35)) * (1 - 0.5 * panicEnv);
+    env.peel.value = 0.03 + 0.15 * Math.max(0, Math.sin(t * 0.13 + 1));
     // three sub-group attractors: a shared wandering centre plus offsets whose spread breathes, so groups split and merge
     // three sub-schools sail around the island; their angular spread breathes so they separate and merge
+    // leaders occasionally swerve: the group's angular offset jumps and eases toward a new value
+    for (let k = 0; k < 3; k++) {
+      nextKick[k] -= dt;
+      if (nextKick[k] <= 0) { kickTarget[k] = (Math.random() - 0.5) * 1.6; nextKick[k] = 5 + Math.random() * 9; }
+      kick[k] += (kickTarget[k] - kick[k]) * (1 - Math.exp(-dt * 0.6));
+    }
     const lim = WORLD.half - 5, path = (k: number, tt: number, out: number[]) => {
-      const spread = 2.0 * (0.5 + 0.5 * Math.sin(tt * 0.05 + 1.0));
+      const spread = 2.0 * (0.5 + 0.5 * Math.sin(tt * 0.05 + 1.0)) + kick[k];
       const th = tt * 0.11 + 0.7 + (k - 1) * spread + 0.2 * Math.sin(tt * (0.09 + k * 0.03) + k), r = 12 + 2.5 * Math.sin(tt * (0.04 + k * 0.017) + k * 2.0);
       out[0] = Math.max(-lim, Math.min(lim, homeXZ[0] + Math.cos(th) * r)); out[2] = Math.max(-lim, Math.min(lim, homeXZ[1] + Math.sin(th) * r));
       out[1] = 6.4 + 1.2 * Math.sin(tt * (0.11 + k * 0.05) + k * 2.1);
@@ -225,9 +267,10 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
 
   function controls(folder: FolderApi) {
     const b = folder.addFolder({ title: 'Behaviours', expanded: true });
+    behaviourFolder = b;
     b.addBinding(behaviour, 'milling', { label: 'Milling' });
     b.addBinding(behaviour, 'fountain', { label: 'Fountain (predator)' });
-    b.addButton({ title: 'Send predator' }).on('click', () => { behaviour.fountain = true; b.refresh(); predator.send(); });
+    b.addButton({ title: 'Send predator' }).on('click', () => school.sendPredator());
     b.addButton({ title: 'Flash expansion' }).on('click', () => panic(randomInSchool(), 1));
     b.addBinding(behaviour, 'angel', { label: 'Angel fish' });
     b.addBinding({ count: N }, 'count', { readonly: true, label: 'Fish', format: (v: number) => v.toLocaleString() });
@@ -286,7 +329,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   if (demo === 'fountain') { behaviour.fountain = true; setTimeout(() => predator.send(), 2500); }
   if (demo === 'panic') setInterval(() => panic(randomInSchool(), 1), 5000);
   if (demo === 'flash') setInterval(() => panic(randomInSchool(), 1), 6000);
-  (window as any).fishDebug = { school, behaviour, env, tris, visuals, readAux: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.aux.value)), readVel: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.vel.value)), panic: (x: number, y: number, z: number, s = 1) => panic(new Vector3(x, y, z), s) };
+  (window as any).fishDebug = { school, camera: ctx.camera, lodStats, behaviour, env, tris, visuals, readPos: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.pos.value)), readAux: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.aux.value)), readVel: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.vel.value)), panic: (x: number, y: number, z: number, s = 1) => panic(new Vector3(x, y, z), s) };
   void simTime; void Vector4; void SWIM_BOUNDS; void sampleHeight;
 
   return school;

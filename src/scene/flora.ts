@@ -34,7 +34,7 @@ function bladeGeometry(segments: number, taper: number, curl: number) {
 }
 
 /** Smooth, lumpy boulder: welded icosphere pushed around by low-frequency noise (no facets). */
-function smoothRock(radius: number, seed: number, squash = 0.7) {
+export function smoothRock(radius: number, seed: number, squash = 0.7) {
   const rng = random(seed), phase = [rng() * 9, rng() * 9, rng() * 9];
   let g: BufferGeometry = new IcosahedronGeometry(radius, 3);
   g.deleteAttribute('normal'); g.deleteAttribute('uv');

@@ -29,7 +29,7 @@ export function createHud() {
     plus.animate([{ opacity: 0, transform: 'translateY(4px) scale(.7)' }, { opacity: 1, transform: 'translateY(-10px) scale(1)', offset: 0.25 }, { opacity: 0, transform: 'translateY(-26px) scale(1)' }], { duration: 900, easing: 'ease-out' }).onfinish = () => plus.remove();
   }
   return {
-    update(game: Game, anchor?: { x: number; y: number }) {
+    update(game: Game, anchor?: { x: number; y: number }, avoid?: { x: number; y: number; width: number; height: number } | null) {
       if (game.caught !== shownCount) { const up = game.caught > shownCount; shownCount = game.caught; n.textContent = String(shownCount); if (up) pop(); }
       const text = game.hint;
       if (text !== shownStatus) {
@@ -41,7 +41,13 @@ export function createHud() {
       if (on && anchor) {
         const w = prompt.offsetWidth || 170, mx = w / 2 + 12;
         const x = Math.min(innerWidth - mx, Math.max(mx, anchor.x)), y = Math.min(innerHeight - w / 2 - 12, Math.max(w / 2 + 120, anchor.y - w * 0.95));
-        prompt.style.left = x + 'px'; prompt.style.top = y + 'px';
+        let px = x, py = y;
+        // keep clear of the lure-cam inset
+        if (avoid && px + w / 2 > avoid.x - 8 && px - w / 2 < avoid.x + avoid.width + 8 && py + w / 2 > avoid.y - 8 && py - w / 2 < avoid.y + avoid.height + 8) {
+          const above = avoid.y - w / 2 - 10;
+          if (above >= w / 2 + 120) py = above; else px = avoid.x + avoid.width + w / 2 + 10;
+        }
+        prompt.style.left = px + 'px'; prompt.style.top = py + 'px';
       }
       if (on) ring.style.strokeDashoffset = String(100 - game.hookLeft * 100);
       root.classList.toggle('busy', game.phase !== 'idle');

@@ -26,7 +26,7 @@ export interface GameEnv {
   boat: Vector3;
 }
 
-export interface GameEvent { type: 'cast' | 'release' | 'splash' | 'bite' | 'nibble' | 'hook' | 'surface' | 'drop' | 'catch' | 'miss' | 'retrieve'; pos: Vector3 }
+export interface GameEvent { type: 'cast' | 'release' | 'splash' | 'bite' | 'nibble' | 'hook' | 'surface' | 'liftout' | 'drop' | 'catch' | 'miss' | 'retrieve'; pos: Vector3 }
 
 /** Live-tunable settings (Tweakpane + URL). */
 export const settings = {
@@ -44,6 +44,7 @@ export const settings = {
   scaredMax: 3,
 };
 
+const DRAG_SPEED = 3.2;
 const JERK = 0.35, PULL = 0.9, OUT = 0.9, HOLD = 0.9, DROP = 0.35, RETRIEVE = 0.55, MISSED = 1.7;
 const IN_WATER: Phase[] = ['scared', 'calm', 'curious', 'approaching', 'bite', 'missed'];
 
@@ -72,6 +73,7 @@ export class Game {
   private released = false;
   private readonly rel0 = new Vector3(); private readonly bob0 = new Vector3();
   private readonly S = new Vector3(); private readonly H = new Vector3(); private readonly tmp = new Vector3(); private readonly tmp2 = new Vector3();
+  private dragDir = new Vector3(); private dragDur = 0; private dragMax = 0; private lifted = true; private readonly liftFrom = new Vector3(); private readonly liftBob = new Vector3();
   private autoT = 1.4; private autoReact = 0.5; private autoHook = true;
   private rippleT = 0;
 
@@ -158,7 +160,15 @@ export class Game {
     this.queued = next ? next.clone() : null;
     this.rel0.copy(this.lure); this.bob0.copy(this.bobber);
     this.enter('retrieving');
-    this.school.setLure(null); this.school.setCuriosity(0);
+    this.school.setCuriosity(0);
+    // drag the lure underwater toward the boat first (fast: the school splits around it), then lift it out
+    const b = this.env.boat, dx = b.x - this.lure.x, dz = b.z - this.lure.z, d0 = Math.hypot(dx, dz);
+    const underwater = this.inWater && this.lure.y < this.env.heightAt(this.lure.x, this.lure.z) - 0.2;
+    this.dragDir.set(dx / Math.max(d0, 1e-3), 0, dz / Math.max(d0, 1e-3));
+    this.dragDur = underwater ? clamp((d0 - 2.5) / DRAG_SPEED, 0.6, 2.0) : 0;
+    this.dragMax = Math.max(0, d0 - 2.5);
+    this.lifted = this.dragDur === 0;
+    if (this.lifted) this.school.setLure(null);
     this.emit('retrieve', this.lure);
   }
   private hangLure() {
@@ -227,7 +237,7 @@ export class Game {
             if (this.school.strike()) this.enter('approaching'); else this.retry = 0.8;
           }
         }
-        if (settings.auto && this.totalWait > 24) { const p = this.pickSpot(); if (p) this.startRetrieve(p); }
+        if (settings.auto && this.totalWait > 16) { const p = this.pickSpot(); if (p) this.startRetrieve(p); }
         break;
       }
 
@@ -312,16 +322,29 @@ export class Game {
       }
 
       case 'retrieving': {
-        const e = smooth(this.t / RETRIEVE);
-        this.tensionT = 0.35;
         const tip = env.tip;
-        const hb = this.tmp.set(tip.x, tip.y - 0.55 * K, tip.z), hl = this.tmp2.set(tip.x, tip.y - 0.95 * K, tip.z);
-        this.bobber.lerpVectors(this.bob0, hb, e); this.lure.lerpVectors(this.rel0, hl, e); this.lure.y += Math.sin(Math.PI * e) * 0.4;
-        this.inWater = this.lure.y < env.heightAt(this.lure.x, this.lure.z);
-        if (this.t >= RETRIEVE) {
-          this.inWater = false;
-          const q = this.queued; this.queued = null;
-          if (q) this.startCast(q); else { this.enter('idle'); this.autoT = rand(1, 2); }
+        if (this.t < this.dragDur) { // fast underwater drag toward the boat, at lure depth
+          this.tensionT = 0.6;
+          const travel = Math.min(DRAG_SPEED * this.t, this.dragMax);
+          this.lure.set(this.rel0.x + this.dragDir.x * travel, this.rel0.y, this.rel0.z + this.dragDir.z * travel);
+          const h = env.heightAt(this.lure.x, this.lure.z);
+          this.bobber.set(this.lure.x - this.dragDir.x * 0.3, h + 0.02, this.lure.z - this.dragDir.z * 0.3);
+          this.school.setLure(this.lure);
+          this.inWater = true;
+          if (this.t + dt >= this.dragDur) { this.liftFrom.copy(this.lure); this.liftBob.copy(this.bobber); }
+        } else {
+          if (!this.lifted) { this.lifted = true; this.school.setLure(null); this.emit('liftout', this.lure); if (this.liftFrom.lengthSq() === 0) this.liftFrom.copy(this.lure); }
+          const e = smooth((this.t - this.dragDur) / RETRIEVE);
+          this.tensionT = 0.35;
+          const hb = this.tmp.set(tip.x, tip.y - 0.55 * K, tip.z), hl = this.tmp2.set(tip.x, tip.y - 0.95 * K, tip.z);
+          const from = this.dragDur > 0 ? this.liftFrom : this.rel0, fromB = this.dragDur > 0 ? this.liftBob : this.bob0;
+          this.bobber.lerpVectors(fromB, hb, e); this.lure.lerpVectors(from, hl, e); this.lure.y += Math.sin(Math.PI * e) * 0.4;
+          this.inWater = this.lure.y < env.heightAt(this.lure.x, this.lure.z);
+          if (this.t >= this.dragDur + RETRIEVE) {
+            this.inWater = false;
+            const q = this.queued; this.queued = null;
+            if (q) this.startCast(q); else { this.enter('idle'); this.autoT = rand(1, 2); }
+          }
         }
         break;
       }

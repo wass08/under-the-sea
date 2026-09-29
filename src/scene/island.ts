@@ -1,4 +1,4 @@
-import { CanvasTexture, LinearMipmapLinearFilter, SRGBColorSpace, BufferGeometry, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardNodeMaterial, Object3D, Scene, Vector3 } from 'three/webgpu';
+import { BoxGeometry, Mesh, SphereGeometry, CanvasTexture, LinearMipmapLinearFilter, SRGBColorSpace, BufferGeometry, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardNodeMaterial, Object3D, Scene, Vector3 } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
 import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { attribute, color, cos, float, texture, hash, instanceIndex, mix, mx_noise_float, positionLocal, sin, smoothstep, uv, vec3 } from 'three/tsl';
@@ -6,6 +6,7 @@ import { WORLD } from '../config';
 import { simTime } from '../state';
 import { random } from '../lib/random';
 import { ISLAND, terrainHeight } from './field';
+import { smoothRock } from './flora';
 
 const level = WORLD.surface;
 const c = (hex: string) => color(hex) as unknown as Node<'vec3'>;
@@ -167,13 +168,8 @@ export function createIsland(scene: Scene) {
 
   // Placement on the sandy top
   type Spot = { x: number; z: number; y: number; s: number; ry: number };
-  const spots: Spot[] = [];
-  for (let tries = 0; tries < 4000 && spots.length < 6; tries++) {
-    const a = rng() * Math.PI * 2, d = 0.9 + Math.sqrt(rng()) * 3.3, x = ISLAND.x + Math.cos(a) * d, z = ISLAND.z + Math.sin(a) * d;
-    const y = terrainHeight(x, z);
-    if (y < level + 0.4 || spots.some(o => Math.hypot(o.x - x, o.z - z) < 2.4)) continue;
-    spots.push({ x, z, y, s: 0.85 + rng() * 0.4, ry: rng() * 6.28 });
-  }
+  // Two palms: a tall leaning one and a shorter one.
+  const spots: Spot[] = [[-1.0, 1.5, 1.2, 0.4], [2.3, -0.7, 0.72, 2.2]].map(([x, z, sc, ry]) => ({ x, z, y: terrainHeight(x, z), s: sc, ry }));
   const variants = [0, 1, 2].map(i => {
     const trunk = buildTrunk(11 + i * 7), crown = buildCrown(trunk.top, trunk.height, 31 + i * 5), nuts = buildCoconuts(trunk.top, 61 + i);
     return { trunk: trunk.geometry, crown, nuts, list: spots.filter((_, k) => k % 3 === i) };
@@ -187,5 +183,27 @@ export function createIsland(scene: Scene) {
       group.add(mesh);
     }
   }
+
+  // Beach details: a few smooth stones, shells and a washed-up plank.
+  const beach = new Object3D(); beach.name = 'Beach details'; scene.add(beach);
+  const stoneMat = new MeshStandardNodeMaterial({ roughness: 0.9, metalness: 0 });
+  stoneMat.colorNode = mix(c('#8f887c'), c('#b1a48d'), mx_noise_float(positionLocal.mul(3.1)).mul(0.5).add(0.5)).mul(mx_noise_float(positionLocal.mul(11)).mul(0.1).add(0.95));
+  [[4.1, 0.6, 0.42, 3], [4.4, 2.5, 0.3, 4], [3.6, 4.2, 0.5, 5], [4.5, 5.4, 0.25, 6]].forEach(([r, a, s, seed]) => {
+    const x = ISLAND.x + Math.cos(a) * r, z = ISLAND.z + Math.sin(a) * r, m = new Mesh(smoothRock(0.5, seed, 0.65), stoneMat);
+    m.position.set(x, terrainHeight(x, z) + s * 0.06, z); m.scale.setScalar(s * 1.6); m.rotation.y = a * 3; m.castShadow = true; m.receiveShadow = true; m.layers.enable(1); beach.add(m);
+  });
+  const shellGeo = new SphereGeometry(0.1, 12, 8); shellGeo.scale(1, 0.45, 0.8);
+  const shellMat = new MeshStandardNodeMaterial({ roughness: 0.4, metalness: 0 });
+  shellMat.colorNode = mix(c('#f4e6d4'), c('#eab5a8'), hash(float(instanceIndex)));
+  const shells = new InstancedMesh(shellGeo, shellMat, 9);
+  for (let i = 0; i < 9; i++) {
+    const a = rng() * Math.PI * 2, r = 3.6 + rng() * 1.0, x = ISLAND.x + Math.cos(a) * r, z = ISLAND.z + Math.sin(a) * r;
+    dummy.position.set(x, terrainHeight(x, z) + 0.03, z); dummy.rotation.set((rng() - 0.5) * 0.4, rng() * 6.28, (rng() - 0.5) * 0.4); dummy.scale.setScalar(0.8 + rng() * 0.7); dummy.updateMatrix(); shells.setMatrixAt(i, dummy.matrix);
+  }
+  shells.frustumCulled = false; shells.castShadow = true; beach.add(shells);
+  const plankMat = new MeshStandardNodeMaterial({ roughness: 0.85, metalness: 0 });
+  plankMat.colorNode = mix(c('#a89c88'), c('#8d8272'), mx_noise_float(vec3(positionLocal.x.mul(0.5), positionLocal.y.mul(26), positionLocal.z.mul(26))).mul(0.5).add(0.5));
+  const plank = new Mesh(new BoxGeometry(1.7, 0.09, 0.3), plankMat);
+  { const a = 0.9, r = 4.5, x = ISLAND.x + Math.cos(a) * r, z = ISLAND.z + Math.sin(a) * r; plank.position.set(x, terrainHeight(x, z) + 0.08, z); plank.rotation.set(0.05, 0.5, 0.08); plank.castShadow = true; plank.receiveShadow = true; plank.layers.enable(1); beach.add(plank); }
   return { group, palms: spots };
 }

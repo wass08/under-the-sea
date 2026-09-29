@@ -12,7 +12,9 @@ export class Predator {
   pos = new Vector3(12, 6.5, 10); dir = new Vector3(-1, 0, -0.3).normalize();
   speed = 10.0; interval = 22; cruiseSpeed = 3.0;
   phase = 0; bank = 0; scale = 0; active = false;
-  private mode: 'cruise' | 'charge' = 'cruise';
+  mode: 'cruise' | 'charge' = 'cruise';
+  /** Incremented every time a charge finishes. */
+  chargesDone = 0;
   private timer = 6; private chargeTime = 0; private chargeDir = new Vector3(); private orbit = 0; private forced = false;
   private v = new Vector3(); private want = new Vector3(); private target = new Vector3(); private speedNow = 1.5;
 
@@ -50,7 +52,7 @@ export class Predator {
       this.speedNow += (this.speed - this.speedNow) * Math.min(1, dt * 3.5);
       this.steer(dt, 1.0);
       const past = this.v.copy(this.pos).sub(c).dot(this.chargeDir);
-      if (past > 9 || this.chargeTime > 9) { this.mode = 'cruise'; this.timer = this.interval * (0.7 + Math.random() * 0.6); }
+      if (past > 9 || this.chargeTime > 9) { this.mode = 'cruise'; this.chargesDone++; this.timer = this.interval * (0.7 + Math.random() * 0.6); }
     }
     this.phase = (this.phase + dt * (1.1 + this.speedNow * 0.6)) % 1; // fast, sweeping tail beat
     this.avoid();

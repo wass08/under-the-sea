@@ -76,12 +76,23 @@ export interface School {
   /** Resolve a hooked fish: caught → it leaves the school with the line (respawns later); otherwise it escapes in fear. */
   land(caught: boolean): void;
   readonly stats: SchoolStats;
+  /** Behaviour switches driven by the on-screen dock (src/ui.ts). */
+  setMilling(on: boolean): void;
+  setMillingDirection(direction: 1 | -1): void;
+  /** Make the predator charge through the school now (fountain effect). */
+  sendPredator(): void;
+  /** Flash expansion at a point, or at the school centroid when omitted. */
+  flash(origin?: Vector3): void;
+  /** Live behaviour state for the dock. */
+  readonly behaviour: { milling: boolean; millingDirection: 1 | -1; predator: 'off' | 'cruising' | 'charging' };
   /** An extra view (the picture-in-picture camera) that GPU culling/LOD must also serve; null to remove. */
   setInsetCamera(camera: PerspectiveCamera | null): void;
   addControls(folder: FolderApi): void;
 }
 
 export interface Fishing {
+  /** Auto-fish demo mode (casts and hooks by itself). */
+  auto: boolean;
   update(dt: number): void;
   /** A click (not a drag) on the canvas. Return true if consumed. */
   click(raycaster: Raycaster): boolean;

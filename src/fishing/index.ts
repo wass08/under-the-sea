@@ -12,6 +12,7 @@ import type { GameEnv } from './game';
 import { createHud } from './hud';
 import { createMockSchool } from './mock-school';
 import { createRig } from './rig';
+import { createInset } from './inset';
 
 /**
  * Boat + fisherman + rod/line/bobber/lure + splash FX + game state machine + HUD.
@@ -56,11 +57,13 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   const rippleThrottle = { t: 0 };
   const fx = createFx(scene, world, p => { if (rippleThrottle.t <= 0) { rippleThrottle.t = 0.1; world.ripple(p, 0.22); fx.ring(p, 0.22, 0.6, 0.35); } });
   const hud = createHud();
+  const inset = createInset(ctx, world, school, game, boat, (x, z) => env.seabedAt(x, z));
+  if (query.has('insetForce') || query.get('fishingCam') === 'inset') inset.force(true);
 
   // ---- camera override (debug / video framing) ----
   let camOverride: { pos: Vector3; look: Vector3; relative: boolean } | null = null;
   const cam = query.get('fishingCam');
-  if (cam) {
+  if (cam && cam !== 'inset') {
     const off = (query.get('camOff') ?? (cam === 'cast' ? '-4,6.5,11' : cam === 'wide' ? '-6,10,20' : '0.8,2.6,7')).split(',').map(Number);
     const look = (query.get('camLook') ?? (cam === 'cast' ? '4,0,-1' : cam === 'wide' ? '3,0,-4' : '0,1.3,0')).split(',').map(Number);
     camOverride = { pos: new Vector3(off[0], off[1], off[2]), look: new Vector3(look[0], look[1], look[2]), relative: true };
@@ -73,11 +76,12 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
     for (const e of game.events) {
       switch (e.type) {
         case 'release': boat.kick(0.5, 0.25); break;
-        case 'splash': ripple(e.pos, 1.5); fx.splash(surfacePoint(e.pos), 1); boat.kick(-0.15); break;
+        case 'splash': ripple(e.pos, 2.6); fx.splash(surfacePoint(e.pos), 1); boat.kick(-0.15); break;
         case 'nibble': ripple(e.pos, 0.28); fx.ring(surfacePoint(e.pos), 0.3, 0.7, 0.4); break;
         case 'bite': ripple(e.pos, 0.5); fx.ring(surfacePoint(e.pos), 0.5, 0.9, 0.5); break;
         case 'hook': boat.kick(0.8, 0.3); ripple(e.pos, 0.6); break;
         case 'surface': ripple(e.pos, 0.9); fx.smallSplash(surfacePoint(e.pos)); break;
+        case 'liftout': ripple(e.pos, 0.7); fx.smallSplash(surfacePoint(e.pos)); break;
         case 'drop': fx.splash(e.pos, 0.12, false); boat.kick(-0.3); break;
         case 'catch': boat.kick(0.2); break;
         case 'miss': ripple(e.pos, 0.4); break;
@@ -113,7 +117,9 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
     }
     fx.update(dt);
     proj.copy(game.bobber).project(camera);
-    hud.update(game, { x: (proj.x * 0.5 + 0.5) * innerWidth, y: (-proj.y * 0.5 + 0.5) * innerHeight });
+    inset.update(dt);
+    hud.update(game, { x: (proj.x * 0.5 + 0.5) * innerWidth, y: (-proj.y * 0.5 + 0.5) * innerHeight }, inset.rect());
+    if (cam === 'inset') { camera.position.copy(inset.camera.position); camera.quaternion.copy(inset.camera.quaternion); }
     if (camOverride) {
       // relative presets are in the boat frame (x = bow, z = starboard), so they follow the hull's heading
       const o = camOverride.relative ? tmpO.set(boat.state.x, boat.group.position.y, boat.state.z) : tmpO.set(0, 0, 0);
@@ -137,8 +143,9 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
 
   addEventListener('keydown', e => { if (e.code === 'Space' && game.phase === 'bite') { e.preventDefault(); game.hook(); } });
 
+  let autoBinding: { refresh(): void } | null = null;
   function addControls(folder: FolderApi) {
-    folder.addBinding(settings, 'auto', { label: 'auto-fish' });
+    autoBinding = folder.addBinding(settings, 'auto', { label: 'auto-fish' });
     folder.addBinding(settings, 'autoSuccess', { min: 0, max: 1, step: 0.05, label: 'auto hook %' });
     folder.addBinding(settings, 'lureDepth', { min: 0.5, max: 3, step: 0.05, label: 'lure depth' });
     folder.addBinding(settings, 'biteMin', { min: 0.5, max: 12, step: 0.25, label: 'bite min s' });
@@ -166,5 +173,9 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
     }),
   });
 
-  return { update, click, addControls };
+  return {
+    get auto() { return settings.auto; },
+    set auto(v: boolean) { settings.auto = v; autoBinding?.refresh(); },
+    update, click, addControls,
+  };
 }

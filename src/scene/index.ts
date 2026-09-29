@@ -1,6 +1,6 @@
-import { DataTexture, Mesh, Vector3 } from 'three/webgpu';
+import { DataTexture, Mesh, PerspectiveCamera, Vector2, Vector3 } from 'three/webgpu';
 import { Color, InstancedMesh, MeshStandardNodeMaterial, Object3D, SphereGeometry } from 'three/webgpu';
-import type { Ctx, World } from '../contracts';
+import type { Ctx, InsetRect, World } from '../contracts';
 import type { FolderApi } from 'tweakpane';
 import { WORLD } from '../config';
 import { simTime, waterLevel } from '../state';
@@ -14,6 +14,7 @@ import { createHeightTexture, createWater } from './water';
 import { createPost, postParams } from './post';
 import { createFlora } from './flora';
 import { createIsland } from './island';
+import { createFloatingProps } from './props';
 import { createBubbles, createPlankton } from './particles';
 
 const gradient = { gx: 0, gz: 0 };
@@ -42,12 +43,30 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
   if (!OFF.has('flora')) createFlora(scene);
   if (!OFF.has('palms')) createIsland(scene);
   if (!OFF.has('plankton')) createPlankton(scene);
+  const props = OFF.has('props') ? null : createFloatingProps(scene);
   const bubbles = createBubbles(scene);
   if (OFF.has('bubbles')) bubbles.mesh.visible = false;
   if (OFF.has('reflect')) water.reflection.target.visible = false;
   if (new URLSearchParams(location.search).has('testfish')) addTestFish(scene);
   const heightProbe = new URLSearchParams(location.search).has('testheight') ? addHeightProbes(scene) : null;
   const post = createPost(renderer, scene, camera, heightTexture);
+  // One shadow-map render per frame, shared by the main and inset passes.
+  sun.shadow.autoUpdate = false; sun.shadow.needsUpdate = true;
+  let insetCam: PerspectiveCamera | null = null, insetRect: InsetRect | null = null;
+  const size = new Vector2();
+  const applyInset = () => {
+    renderer.getSize(size);
+    if (insetCam && insetRect) { water.prepareCamera(insetCam); post.setInset(insetCam, insetRect, size.x, size.y); } else post.setInset(null, null, size.x, size.y);
+  };
+  const debugInset = new URLSearchParams(location.search).get('inset')?.split(',').map(Number);
+  if (debugInset && debugInset.length >= 3) {
+    // ?inset=x,y,z[,tx,ty,tz]: a test picture-in-picture camera (default target: the school's middle).
+    const cam = new PerspectiveCamera(50, 16 / 9, 0.1, 400);
+    cam.position.set(debugInset[0], debugInset[1], debugInset[2]);
+    cam.lookAt(debugInset[3] ?? 4, debugInset[4] ?? 6, debugInset[5] ?? 4); cam.updateMatrixWorld();
+    insetCam = cam; insetRect = { x: 24, y: innerHeight - 24 - 270, width: 480, height: 270 };
+    queueMicrotask(applyInset);
+  }
   // Let the planar reflection (layer 1) also pick up other modules' boat / fisherman meshes.
   let reflectTimer = 0, boat: import('three/webgpu').Object3D | null = null;
   const markReflective = () => scene.children.forEach(child => {
@@ -65,20 +84,30 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
     ripple(point: Vector3, strength = 1) { emitRipple(point.x, point.z, Math.max(0, Math.min(3, strength))); },
     update(dt: number) {
       if (lookAt) camera.lookAt(lookAt);
-      bubbles.update(dt);
+      bubbles.update(dt); props?.update(dt);
       if (!boat) boat = scene.getObjectByName('Fishing boat') ?? null;
       if (boat) { const k = boat.scale.x; setHullMask(boat.position.x, boat.position.z, 0.8 * k, 0.33 * k, boat.rotation.y); }
       const p = camera.position, inside = Math.abs(p.x) < WORLD.half && Math.abs(p.z) < WORLD.half && p.y > WORLD.bed - 0.6;
       const depth = world.heightAt(p.x, p.z) - p.y;
       const amount = inside ? Math.max(0, Math.min(1, depth / 0.12)) : 0;
-      post.setUnderwater(amount); water.setInside(amount > 0);
+      post.setUnderwater(amount);
+      let insideAny = amount > 0;
+      if (insetCam) {
+        const q = insetCam.position, qi = Math.abs(q.x) < WORLD.half && Math.abs(q.z) < WORLD.half && q.y > WORLD.bed - 0.6;
+        const qa = qi ? Math.max(0, Math.min(1, (world.heightAt(q.x, q.z) - q.y) / 0.12)) : 0;
+        post.setInsetUnderwater(qa); insideAny = insideAny || qa > 0;
+      }
+      water.setInside(insideAny);
       heightProbe?.(world);
       reflectTimer -= dt;
       if (reflectTimer <= 0) { reflectTimer = 1; markReflective(); }
     },
-    render() { post.render(); },
-    setInset() { /* TODO: picture-in-picture */ },
-    resize() {},
+    render() { sun.shadow.needsUpdate = true; post.render(); },
+    setInset(cam, rect) {
+      insetCam = cam; insetRect = rect ?? insetRect;
+      applyInset();
+    },
+    resize() { applyInset(); },
     addControls(folder: FolderApi) {
       const sunFolder = folder.addFolder({ title: 'Sun', expanded: true });
       const refit = () => { applySunAngles(); lighting.fitShadow(); };
@@ -104,7 +133,7 @@ function applyCameraPreset(camera: Ctx['camera']) {
   const cam = new URLSearchParams(location.search).get('cam');
   const presets: Record<string, [number, number, number]> = {
     side: [0, 12, 78], top: [0.01, 96, 0.01], close: [22, 15, 30], front: [6, 14, 64], under: [8, 5, 27], island: [-8, 24, 36],
-    corner: [32, 16, 32], low: [50, 9, 60], inside: [4, 8, 10], deep: [15, 2.8, 8], window: [16.5, 2.4, 2], deep2: [-12, 3.2, 12], closeup: [40, 27, 48], surf: [20, 26, 26], seabed: [15, 14, 20], grazing: [42, 22, 48],
+    corner: [32, 16, 32], low: [50, 9, 60], inside: [4, 8, 10], deep: [15, 2.8, 8], window: [16.5, 2.4, 2], deep2: [-12, 3.2, 12], closeup: [40, 27, 48], props: [-20, 12, 24], propsB: [-6, 10, 26], surf: [20, 26, 26], seabed: [15, 14, 20], grazing: [42, 22, 48],
   };
   if (cam && presets[cam]) camera.position.set(...presets[cam]);
   void WORLD;

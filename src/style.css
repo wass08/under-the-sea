@@ -26,3 +26,32 @@ a:focus-visible { outline:2px solid #8fd3ff; outline-offset:5px; }
 .loader { width:15px; height:15px; border:1px solid #8fd3ff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 @media(max-width:650px) { .masthead { top:22px; left:20px; } .masthead img { width:72px; } .caption { display:none; } .panel { width:auto !important; left:16px !important; right:16px !important; top:auto !important; bottom:16px; max-height:45vh; overflow:auto; } }
+/* Behaviour dock */
+.dock { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); z-index:3; display:flex; align-items:center; gap:6px; padding:7px; background:#0a1a2bcc; border:1px solid #9fe6ff33; border-radius:18px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 10px 40px #0005; }
+.dock-group { display:flex; align-items:center; position:relative; }
+.dock-item { all:unset; box-sizing:border-box; cursor:pointer; position:relative; display:flex; flex-direction:column; align-items:center; gap:5px; width:78px; padding:9px 4px 7px; border-radius:12px; color:#b0c3d6; font:500 11px/1 'DM Sans',sans-serif; letter-spacing:.02em; transition:background .2s,color .2s,transform .12s; }
+.dock-item:hover { background:#9fe6ff14; color:#e6eef5; }
+.dock-item:active { transform:scale(.96); }
+.dock-item:focus-visible, .dock-flip:focus-visible { outline:2px solid #8fd3ff; outline-offset:2px; }
+.dock-item.active { background:linear-gradient(180deg,#8fd3ff2e,#8fd3ff12); color:#fff; box-shadow:inset 0 0 0 1px #8fd3ff55; }
+.dock-icon { width:30px; height:30px; display:block; }
+.dock-icon svg { width:100%; height:100%; display:block; }
+.dock-item kbd { position:absolute; top:5px; right:6px; font:600 8px/1 'DM Sans',sans-serif; color:#8fa6ba; opacity:.7; }
+.dock-sep { width:1px; height:40px; background:#9fe6ff22; margin:0 4px; }
+.dock-flip { all:unset; cursor:pointer; width:22px; height:22px; margin:0 4px 0 -2px; border-radius:50%; display:grid; place-items:center; color:#8fa6ba; transition:color .2s,background .2s,transform .35s; }
+.dock-flip svg { width:14px; height:14px; }
+.dock-flip:hover { color:#fff; background:#9fe6ff1a; }
+.dock.ccw .dock-flip { transform:scaleX(-1); }
+/* Milling: the fish marker orbits while active, in the current direction. */
+#dock-milling .orbit { transform-origin:16px 16px; transform-box:view-box; }
+#dock-milling.active .orbit { animation:dock-orbit 2.4s linear infinite; }
+.dock.ccw #dock-milling.active .orbit { animation-direction:reverse; }
+@keyframes dock-orbit { from { transform:rotate(0); } to { transform:rotate(360deg); } }
+#dock-fountain.charging .dock-icon { animation:dock-dash .7s ease-in-out infinite alternate; }
+@keyframes dock-dash { to { transform:translateX(4px); } }
+.dock-item.fired .dock-icon { animation:dock-fire .55s cubic-bezier(.2,.9,.3,1.3); }
+.dock-flip.fired { animation:dock-fire .45s ease; }
+@keyframes dock-fire { 0% { transform:scale(1); filter:drop-shadow(0 0 0 #8fd3ff); } 35% { transform:scale(1.28); filter:drop-shadow(0 0 8px #bdf0ff); } 100% { transform:scale(1); filter:drop-shadow(0 0 0 #8fd3ff); } }
+#dock-slow.active .dock-icon path { transform-origin:16px 17px; animation:dock-orbit 6s linear infinite; }
+@media(max-width:1400px) { .dock { left:auto; right:24px; transform:none; bottom:96px; } }
+@media(max-width:650px) { .dock { left:12px; right:12px; bottom:auto; top:120px; justify-content:space-between; padding:5px; gap:2px; } .dock-item { width:auto; flex:1; padding:7px 2px 5px; } .dock-label { font-size:9px; } .dock-item kbd, .dock-sep { display:none; } .dock-icon { width:24px; height:24px; } }

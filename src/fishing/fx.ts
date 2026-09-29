@@ -6,7 +6,7 @@ import { RIG_SCALE, rand } from './build';
 /** FX scale relative to the original 1.35 rig. */
 const K = RIG_SCALE / 1.35;
 
-const MAX = 700, GRAVITY = 11, RINGS = 5, DISCS = 4, CROWNS = 3;
+const MAX = 1100, GRAVITY = 11, RINGS = 5, DISCS = 4, CROWNS = 3;
 const UP = new Vector3(0, 1, 0);
 
 /**
@@ -41,12 +41,14 @@ export function createFx(scene: Scene, world: World, onDripHit: (p: Vector3) => 
   });
   const ringGeo = new RingGeometry(0.72, 1, 40); ringGeo.rotateX(-Math.PI / 2);
   const rings = mkPool(RINGS, ringGeo, 2);
+  const shockGeo = new RingGeometry(0.94, 1, 64); shockGeo.rotateX(-Math.PI / 2);
+  const shocks = mkPool(2, shockGeo, 2);
   const discGeo = new CircleGeometry(1, 32); discGeo.rotateX(-Math.PI / 2);
   const discs = mkPool(DISCS, discGeo, 2);
   const crownGeo = new CylinderGeometry(1, 0.55, 1, 28, 1, true); crownGeo.translate(0, 0.5, 0);
   const crowns = mkPool(CROWNS, crownGeo, 3);
-  const cursors = { ring: 0, disc: 0, crown: 0 };
-  const start = (pool: Fade[], key: 'ring' | 'disc' | 'crown', p: Vector3, radius: number, dur: number, peak: number) => {
+  const cursors = { ring: 0, disc: 0, crown: 0, shock: 0 };
+  const start = (pool: Fade[], key: 'ring' | 'disc' | 'crown' | 'shock', p: Vector3, radius: number, dur: number, peak: number) => {
     const r = pool[cursors[key]]; cursors[key] = (cursors[key] + 1) % pool.length;
     r.t = 0; r.dur = dur; r.radius = radius * K; r.peak = peak; r.x = p.x; r.z = p.z; r.y = p.y; r.mesh.visible = true;
   };
@@ -55,12 +57,12 @@ export function createFx(scene: Scene, world: World, onDripHit: (p: Vector3) => 
     /** Lure landing splash: crown sheet + stretched spray + foam disc + slow secondary drops. strength ~ 1 */
     splash(p: Vector3, strength = 1, foam = true) {
       const s = 0.6 + 0.5 * strength;
-      const n = Math.floor(50 + 90 * strength);
+      const n = Math.floor(70 + 150 * strength);
       for (let i = 0; i < n; i++) {
-        const a = Math.random() * Math.PI * 2, r = (0.3 + Math.random() * 1.6) * s, up = (2.6 + Math.random() * 4.2) * (0.5 + 0.5 * strength);
+        const a = Math.random() * Math.PI * 2, r = (0.3 + Math.random() * 1.6) * s, up = (3.2 + Math.random() * 5.2) * (0.5 + 0.5 * strength);
         spawn(p.x + Math.cos(a) * 0.06, p.y + 0.02, p.z + Math.sin(a) * 0.06, Math.cos(a) * r, up, Math.sin(a) * r, rand(0.011, 0.03) * (0.7 + 0.5 * strength), rand(0.5, 1.0));
       }
-      const crown = Math.floor(22 + 14 * strength);
+      const crown = Math.floor(30 + 24 * strength);
       for (let i = 0; i < crown; i++) {
         const a = (i / crown) * Math.PI * 2 + Math.random() * 0.15, r = (1.5 + Math.random() * 0.7) * s;
         spawn(p.x + Math.cos(a) * 0.1, p.y + 0.03, p.z + Math.sin(a) * 0.1, Math.cos(a) * r, 2.2 + Math.random() * 1.6, Math.sin(a) * r, rand(0.012, 0.024), rand(0.45, 0.75));
@@ -71,7 +73,8 @@ export function createFx(scene: Scene, world: World, onDripHit: (p: Vector3) => 
         spawn(p.x, p.y + 0.05, p.z, Math.cos(a) * r, 3.5 + Math.random() * 3, Math.sin(a) * r, rand(0.016, 0.028), rand(1.0, 1.6));
       }
       if (foam) {
-        start(crowns, 'crown', p, 0.55 * s, 0.55, 0.28);
+        start(crowns, 'crown', p, 0.75 * s, 0.6, 0.34);
+        if (strength > 0.6) { start(shocks, 'shock', p, 9 * s, 1.0, 0.55); start(shocks, 'shock', p, 5 * s, 0.7, 0.7); }
         start(discs, 'disc', p, 0.9 * s, 0.7, 0.5);
         start(rings, 'ring', p, 1.5 * s, 1.1, 0.6);
         start(rings, 'ring', p, 0.8 * s, 0.75, 0.7);
@@ -112,6 +115,7 @@ export function createFx(scene: Scene, world: World, onDripHit: (p: Vector3) => 
         apply(1 - Math.pow(1 - r.t, 2.2), Math.pow(1 - r.t, 1.6));
       };
       for (const r of rings) fade(r, (e, o) => { const s = 0.12 + r.radius * e; r.mesh.scale.set(s, 1, s); r.mesh.position.set(r.x, world.heightAt(r.x, r.z) + 0.045, r.z); r.mat.opacity = r.peak * o * Math.min(1, r.t * 12); });
+      for (const r of shocks) fade(r, (e, o) => { const s = 0.3 + r.radius * e; r.mesh.scale.set(s, 1, s); r.mesh.position.set(r.x, world.heightAt(r.x, r.z) + 0.05, r.z); r.mat.opacity = r.peak * o * Math.min(1, r.t * 15); });
       for (const r of discs) fade(r, (e, o) => { const s = 0.1 + r.radius * e; r.mesh.scale.set(s, 1, s); r.mesh.position.set(r.x, world.heightAt(r.x, r.z) + 0.04, r.z); r.mat.opacity = r.peak * o * o * Math.min(1, r.t * 20); });
       for (const r of crowns) fade(r, (e, o) => {
         const s = 0.15 + r.radius * e, hgt = r.radius * 1.3 * Math.sin(Math.min(1, r.t * 1.6) * Math.PI * 0.8) * (1 - r.t * 0.4);

@@ -22,13 +22,13 @@ export function createEnv() {
     // boids
     speed: u(1), sepW: u(3.0), aliW: u(3.0), cohW: u(0.25), sepR: u(0.95), neighR: u(1.2), scanCap: u(4, 'int'),
     // milling
-    millBlend: u(0), millStrength: u(1), millRadius: u(12.5), millHeight: u(2.5), millDir: u(1), millCenter: u(new Vector3(0, 6.4, 0)), attractors: [0, 1, 2].map(() => u(new Vector3(0, 4, 0))), attractDirs: [0, 1, 2].map(() => u(new Vector3(1, 0, 0))), attractW: u(1), schoolAxes: u(new Vector3(8.5, 4.5, 3.0)),
+    millBlend: u(0), millStrength: u(1), millRadius: u(12.5), millHeight: u(2.5), millDir: u(1), millCenter: u(new Vector3(0, 6.4, 0)), attractors: [0, 1, 2].map(() => u(new Vector3(0, 4, 0))), attractDirs: [0, 1, 2].map(() => u(new Vector3(1, 0, 0))), attractW: u(1), schoolAxes: u(new Vector3(8.5, 4.5, 3.0)), axesScale: u(1), peel: u(0.15),
     // predator / fountain
-    predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(3.5), fountain: u(1),
+    predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(4.5), fountain: u(1), lureVel: u(new Vector3(1, 0, 0)), lureThreat: u(0),
     // panic
     panicOrigin: [0, 1, 2, 3].map(() => u(new Vector4(0, 0, 0, -1000))),
     panicStrength: u(new Vector4(0, 0, 0, 0)),
-    panicSpeed: u(8.0), burst: u(13.0), calm: u(0.8), transmission: u(0.8),
+    panicSpeed: u(14.0), burst: u(15.0), calm: u(0.55), transmission: u(0.93),
     // lure
     lurePos: u(new Vector3(0, 5, 0)), lureActive: u(0), curiosity: u(0), curiosityRadius: u(5), inspectors: u(100), hooked: u(0),
     strike: u(0), land: u(0), respawn: u(10),
@@ -258,10 +258,12 @@ export function createSim(o: SimOptions) {
 
       // --- wander
       const tt = clock.mul(0.8);
-      acc.addAssign(vec3(sin(tt.add(rA.mul(50))), sin(tt.mul(1.3).add(rB.mul(50))).mul(0.6), sin(tt.mul(0.9).add(rC.mul(50)))).mul(1.2));
+      acc.addAssign(vec3(sin(tt.add(rA.mul(50))), sin(tt.mul(1.3).add(rB.mul(50))).mul(0.6), sin(tt.mul(0.9).add(rC.mul(50)))).mul(1.1));
 
       // --- cruise speed relaxation (per-fish cruise variation)
-      const cruise = spd.mul(o.cruise).mul(rB.mul(0.4).add(0.8));
+      // speed varies per fish, over time, and as a wave travelling through the school
+      const speedWave = sin(P.x.mul(0.3).add(P.z.mul(0.4)).sub(clock.mul(1.4))).mul(0.3).add(sin(clock.mul(0.45).add(rA.mul(40))).mul(0.15));
+      const cruise = spd.mul(o.cruise).mul(rB.mul(0.5).add(0.75).add(speedWave));
       acc.addAssign(dirV.mul(cruise.sub(speed)).mul(1.6));
 
       // --- species home (angelfish: hover low over the terrain, stay near the island)
@@ -276,12 +278,18 @@ export function createSim(o: SimOptions) {
       if (o.main) {
         // three sub-schools (fish i belongs to group i % 3). Each is confined softly to an elongated ellipsoid that travels along its path,
         // so density fills the volume evenly (separation spreads fish out) instead of collapsing on a point.
-        const grp = instanceIndex.mod(3).toFloat();
+        const grp0 = instanceIndex.mod(3).toFloat();
+        // peelers: a changing fraction of each group follows the next group's attractor (sub-groups split off and rejoin)
+        const grp = grp0.add(step(rnd(41), env.peel)).mod(3);
+        const strag = step(rnd(43), 0.03); // stragglers ignore the school
         const sel = (a: any, b: any, c: any) => select(grp.lessThan(0.5), a, select(grp.lessThan(1.5), b, c));
         const myAtt = sel(env.attractors[0], env.attractors[1], env.attractors[2]), myDir = sel(env.attractDirs[0], env.attractDirs[1], env.attractDirs[2]);
         const rel = P.sub(myAtt), side = vec3(myDir.z.negate(), 0, myDir.x);
-        const e = length(vec3(dot(rel, myDir).div(env.schoolAxes.x), dot(rel, side).div(env.schoolAxes.y), rel.y.div(env.schoolAxes.z)));
-        acc.addAssign(rel.div(max(length(rel), 0.01)).negate().mul(smoothstep(0.8, 1.3, e)).mul(4.0).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(fear.mul(1.5).add(1)));
+        const ax3 = env.schoolAxes.mul(env.axesScale);
+        const e = length(vec3(dot(rel, myDir).div(ax3.x), dot(rel, side).div(ax3.y), rel.y.div(ax3.z)));
+        acc.y.addAssign(sin(dot(rel, myDir).mul(0.55).sub(clock.mul(0.9)).add(grp)).mul(0.9)); // vertical undulation along the school
+        acc.addAssign(side.mul(sin(dot(rel, myDir).mul(0.4).sub(clock.mul(1.1)))).mul(0.8)); // lateral turning wave
+        acc.addAssign(rel.div(max(length(rel), 0.01)).negate().mul(smoothstep(0.55, 1.0, e)).mul(11.0).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(fear.mul(2.5).add(1)).mul(float(1).sub(strag.mul(0.85))));
       }
       acc.addAssign(vec3(sin(P.y.mul(0.6).add(clock.mul(0.6))).add(sin(P.z.mul(0.4).sub(clock.mul(0.4)))), sin(P.x.mul(0.45).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(0.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.3).add(clock.mul(0.3))))).mul(0.55));
 
@@ -306,22 +314,25 @@ export function createSim(o: SimOptions) {
         const C = env.millCenter, r = vec3(P.x.sub(C.x), 0, P.z.sub(C.z)), dist = max(length(r), 0.05), er = r.div(dist);
         const et = vec3(er.z.negate(), 0, er.x).mul(env.millDir);
         const R = env.millRadius.mul(rA.mul(0.3).add(0.85));
-        const swirl = sin(atan(er.z, er.x).mul(2).add(clock.mul(0.7))).mul(0.9).add(sin(atan(er.z, er.x).sub(clock.mul(0.5))).mul(0.45));
+        const swirl = sin(atan(er.z, er.x).mul(2).add(clock.mul(0.7))).mul(1.5).add(sin(atan(er.z, er.x).sub(clock.mul(0.5))).mul(0.8));
         const yMid = C.y.add(rB.sub(0.5).mul(env.millHeight)).add(swirl).sub(r.x.add(r.z).mul(0.035));
-        const want = et.mul(spd.mul(3.2)).add(er.mul(clamp(R.sub(dist).mul(1.6), -4, 4))).add(vec3(0, clamp(yMid.sub(P.y).mul(1.0), -1.2, 1.2), 0));
+        const want = et.mul(spd.mul(4.0)).add(er.mul(clamp(R.sub(dist).mul(1.6), -4, 4))).add(vec3(0, clamp(yMid.sub(P.y).mul(1.0), -1.2, 1.2), 0));
         acc.addAssign(want.sub(V).mul(3.6).mul(env.millStrength).mul(millW).mul(float(1).sub(fear)));
       });
 
-      // --- fountain: flee the predator laterally + backward relative to its heading
-      const dP = P.sub(env.predPos), dl = length(dP), H = normalize(env.predVel), along = dot(dP, H), perp = dP.sub(H.mul(along)), pl = length(perp);
-      const fr = env.fearRadius;
-      // ellipsoidal zone: reaches further ahead of the predator, so the school opens a tunnel before it arrives
-      const dEff = sqrt(pl.mul(pl).add(along.mul(select(along.greaterThan(0), float(0.5), float(1.0))).pow(2)));
-      const zone = env.predActive.mul(smoothstep(fr, fr.mul(0.25), dEff)).mul(smoothstep(fr.mul(-0.6), fr.mul(0.1), along));
-      const lateral = select(pl.greaterThan(0.06), perp.div(pl), cross(H, vec3(0, 1, 0)).mul(rA.sub(0.5).sign()));
-      const flee = lateral.add(H.mul(-0.55)).add(vec3(0, rB.sub(0.5).mul(0.6), 0));
-      acc.addAssign(flee.mul(zone).mul(env.fountain).mul(o.fearSensitivity).mul(40).mul(float(1).add(smoothstep(fr.mul(0.7), 0, dEff).mul(2))));
-      fear.assign(max(fear, zone.mul(0.55).mul(clamp(env.fountain, 0, 1)).mul(o.fearSensitivity)));
+      // --- fountain: flee any fast-moving threat (the predator, or the lure dragged quickly through the water) laterally + backward
+      const fountainFrom = (tPos: any, tVel: any, active: any, fr: any, gain: any) => {
+        const dP = P.sub(tPos), H = normalize(tVel), along = dot(dP, H), perp = dP.sub(H.mul(along)), pl = length(perp);
+        // ellipsoidal zone: reaches further ahead of the threat, so the school opens a tunnel before it arrives
+        const dEff = sqrt(pl.mul(pl).add(along.mul(select(along.greaterThan(0), float(0.5), float(1.0))).pow(2)));
+        const zone = active.mul(smoothstep(fr, fr.mul(0.25), dEff)).mul(smoothstep(fr.mul(-0.6), fr.mul(0.1), along));
+        const lateral = select(pl.greaterThan(0.06), perp.div(pl), cross(H, vec3(0, 1, 0)).mul(rA.sub(0.5).sign()));
+        const flee = lateral.add(H.mul(-0.55)).add(vec3(0, rB.sub(0.5).mul(0.6), 0));
+        acc.addAssign(flee.mul(zone).mul(env.fountain).mul(o.fearSensitivity).mul(gain).mul(float(1).add(smoothstep(fr.mul(0.7), 0, dEff).mul(2))));
+        fear.assign(max(fear, zone.mul(0.55).mul(clamp(env.fountain, 0, 1)).mul(o.fearSensitivity)));
+      };
+      fountainFrom(env.predPos, env.predVel, env.predActive, env.fearRadius, float(75));
+      if (o.main) fountainFrom(env.lurePos, env.lureVel, env.lureThreat, float(2.6), float(60));
 
       // --- lure curiosity
       if (o.lureInfluence > 0) {
@@ -346,11 +357,13 @@ export function createSim(o: SimOptions) {
         const str = k === 0 ? env.panicStrength.x : k === 1 ? env.panicStrength.y : k === 2 ? env.panicStrength.z : env.panicStrength.w;
         const age = clock.sub(oU.w), Rf = age.mul(env.panicSpeed), Rp = Rf.sub(env.panicSpeed.mul(dt));
         const dO = P.sub(oU.xyz), d = length(dO);
-        const hit = step(0, age).mul(step(d, Rf)).mul(step(Rp, d)).mul(step(Rf, str.mul(3.4))).mul(step(0.001, str));
+        const maxR = str.mul(16);
+        const hit = step(0, age).mul(step(d, Rf)).mul(step(Rp, d)).mul(step(Rf, maxR)).mul(step(0.001, str));
+        const near = float(1).sub(clamp(d.div(max(maxR, 0.1)), 0, 1).mul(0.55)); // strongest at the splash
         If(hit.greaterThan(0.5), () => {
           const away = normalize(select(d.greaterThan(0.05), dO.div(max(d, 0.05)), randDir(4)).add(randDir(6).mul(0.25)));
-          V.assign(mix(V, away.mul(env.burst).mul(clamp(str, 0.3, 1.2)).mul(rB.mul(0.3).add(0.85)), 0.9));
-          fear.assign(max(fear, clamp(str, 0.3, 1))); flash.assign(1); hitAny.assign(1);
+          V.assign(mix(V, away.mul(env.burst).mul(clamp(str, 0.3, 1.2)).mul(near).mul(rB.mul(0.3).add(0.85)), 0.92));
+          fear.assign(max(fear, clamp(str.mul(near).mul(1.2), 0.3, 1))); flash.assign(1); hitAny.assign(1);
         });
       });
 
@@ -361,7 +374,7 @@ export function createSim(o: SimOptions) {
       fear.assign(mix(fear, max(fear, target), clamp(dt.mul(9), 0, 1)));
       // instant alarm: a calm fish whose neighbours are terrified bursts away (once; own fear then stays high so it cannot re-trigger)
       // each calm fish reacts after a random delay (~0.2 s per hop), so alarm ripples through the school slower than the spherical front
-      const alarm = step(fear0, 0.25).mul(step(0.55, target)).mul(float(1).sub(hitAny)).mul(step(hash(iF.add(env.frame.mul(7.31))), clamp(dt.mul(5), 0, 1)));
+      const alarm = step(fear0, 0.25).mul(step(0.5, target)).mul(float(1).sub(hitAny)).mul(step(hash(iF.add(env.frame.mul(7.31))), clamp(dt.mul(5), 0, 1)));
       If(alarm.greaterThan(0.5), () => {
         fear.assign(max(fear, target.mul(0.95)));
         const away = normalize(fearDir.add(randDir(7).mul(0.2)).add(dirV.mul(0.5)));
@@ -370,7 +383,7 @@ export function createSim(o: SimOptions) {
       });
 
       // --- integrate (turn rate limited)
-      const accMax = float(10.0).mul(fear.mul(4).add(1)).add(select(millW.greaterThan(0.5), float(3), float(0)));
+      const accMax = float(14.0).mul(fear.mul(4).add(1)).add(select(millW.greaterThan(0.5), float(3), float(0)));
       const al = length(acc);
       acc.mulAssign(min(float(1), accMax.div(max(al, 0.001))));
       V.addAssign(acc.mul(dt));

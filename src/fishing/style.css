@@ -27,3 +27,16 @@
   .fh-n { font-size:20px; }
 }
 @media (prefers-reduced-motion:reduce) { .fh-prompt.on { animation:none; } }
+
+/* Lure cam: picture-in-picture frame over the world's inset render (lower-left). */
+.fi-frame { position:fixed; z-index:2; pointer-events:none; border:1px solid #9fe6ff44; border-radius:8px; box-shadow:0 10px 34px #0a1a2b88, inset 0 0 0 1px #0a1a2b66; opacity:0; font-family:'DM Sans',sans-serif; color:#e6eef5; overflow:hidden; transition:border-color .2s, box-shadow .2s; }
+.fi-frame:not(.on) { display:none; }
+.fi-frame::after { content:''; position:absolute; inset:0; background:linear-gradient(#0a1a2b99 0, #0a1a2b00 26%, #0a1a2b00 100%); }
+.fi-top { position:absolute; z-index:1; left:0; right:0; top:0; display:flex; justify-content:space-between; align-items:center; padding:9px 12px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; }
+.fi-live { display:inline-flex; align-items:center; gap:7px; font-family:Manrope,sans-serif; font-weight:600; color:#e6eef5; }
+.fi-live i { width:7px; height:7px; border-radius:50%; background:#ff5d5d; box-shadow:0 0 8px #ff5d5daa; animation:fi-pulse 1.4s ease-in-out infinite; }
+.fi-state { font-family:Manrope,sans-serif; font-weight:500; color:#9fe6ff; letter-spacing:.08em; }
+.fi-frame.bite { border-color:#ffdf7acc; box-shadow:0 0 0 1px #ffdf7a66, 0 10px 34px #0a1a2b88; }
+.fi-frame.bite .fi-state { color:#ffdf7a; }
+@keyframes fi-pulse { 50% { opacity:.35; } }
+@media (max-width:650px) { .fi-top { padding:6px 8px; font-size:9px; } }

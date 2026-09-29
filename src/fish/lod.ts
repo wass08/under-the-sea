@@ -16,15 +16,22 @@ export function createLod(renderer: WebGPURenderer, sim: Sim, count: number, ind
   const argsAtomic = storage(args, 'uint', 10).toAtomic();
   const list0 = instancedArray(count, 'uint'), list1 = instancedArray(count, 'uint');
   const planes = [0, 1, 2, 3, 4, 5].map(() => uniform(new Vector4()));
-  const camPos = uniform(new Vector3()), dist = uniform(8), r = float(radius);
+  const planes2 = [0, 1, 2, 3, 4, 5].map(() => uniform(new Vector4()));
+  const camPos = uniform(new Vector3()), camPos2 = uniform(new Vector3()), inset = uniform(0), dist = uniform(8), r = float(radius);
 
   const reset = Fn(() => { atomicStore(argsAtomic.element(1), uint(0)); atomicStore(argsAtomic.element(6), uint(0)); })().compute(1).setName('fishLodReset');
   const cull = Fn(() => {
     const i = instanceIndex, p = sim.pos.element(i).xyz, a = sim.aux.element(i);
     const visible = a.w.lessThan(2.5).toVar();
-    planes.forEach((pl: any) => { visible.assign(visible.and(dot(pl.xyz, p).add(pl.w).greaterThan(r.negate()))); });
+    const inMain = a.w.lessThan(2.5).toVar(), inInset = a.w.lessThan(2.5).and(inset.greaterThan(0.5)).toVar();
+    planes.forEach((pl: any) => { inMain.assign(inMain.and(dot(pl.xyz, p).add(pl.w).greaterThan(r.negate()))); });
+    planes2.forEach((pl: any) => { inInset.assign(inInset.and(dot(pl.xyz, p).add(pl.w).greaterThan(r.negate()))); });
+    visible.assign(inMain.or(inInset));
+    // LOD by the nearest of the two cameras (the inset is where close-ups happen)
+    const dMin = float(length(p.sub(camPos))).toVar();
+    If(inset.greaterThan(0.5), () => { dMin.assign(dMin.min(length(p.sub(camPos2)))); });
     If(visible, () => {
-      If(length(p.sub(camPos)).lessThan(dist), () => { list0.element(atomicAdd(argsAtomic.element(1), uint(1))).assign(i); })
+      If(dMin.lessThan(dist), () => { list0.element(atomicAdd(argsAtomic.element(1), uint(1))).assign(i); })
         .Else(() => { list1.element(atomicAdd(argsAtomic.element(6), uint(1))).assign(i); });
     });
   })().compute(count).setName('fishCull');
@@ -34,12 +41,17 @@ export function createLod(renderer: WebGPURenderer, sim: Sim, count: number, ind
     args, dist,
     read: { list0: storage(list0.value, 'uint', count).toReadOnly(), list1: storage(list1.value, 'uint', count).toReadOnly() },
     /** Encode reset + cull for this frame (after the simulation). */
-    update(camera: PerspectiveCamera) {
-      camera.updateMatrixWorld();
-      m.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-      frustum.setFromProjectionMatrix(m, (renderer as any).coordinateSystem);
-      frustum.planes.forEach((pl, k) => planes[k].value.set(pl.normal.x, pl.normal.y, pl.normal.z, pl.constant));
-      camPos.value.setFromMatrixPosition(camera.matrixWorld);
+    update(camera: PerspectiveCamera, insetCamera: PerspectiveCamera | null = null) {
+      const set = (cam: PerspectiveCamera, pls: any[], pos: any) => {
+        cam.updateMatrixWorld();
+        m.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse);
+        frustum.setFromProjectionMatrix(m, (renderer as any).coordinateSystem);
+        frustum.planes.forEach((pl, k) => pls[k].value.set(pl.normal.x, pl.normal.y, pl.normal.z, pl.constant));
+        pos.value.setFromMatrixPosition(cam.matrixWorld);
+      };
+      set(camera, planes, camPos);
+      inset.value = insetCamera ? 1 : 0;
+      if (insetCamera) set(insetCamera, planes2, camPos2);
       renderer.compute(reset); renderer.compute(cull);
     },
     async readCounts(): Promise<[number, number]> {

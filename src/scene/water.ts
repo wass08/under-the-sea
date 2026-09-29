@@ -133,6 +133,10 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const glint = sparkle.mul(140).add(pow(sunDot, 40).mul(0.22)).min(7);
     // Shoreline foam from the depth below the surface.
     const depthBelow = body.path.mul(body.rd.y.abs());
+    // Only shorelines get foam: the thing seen below must be the terrain, not a floating prop or a fish.
+    const hit = cameraPosition.add(body.rd.mul(body.opaque));
+    const terrainY = texture(heightTexture, hit.xz.div(R * 2).add(0.5)).level(float(0)).r;
+    const isTerrain = smoothstep(0.7, 0.25, hit.y.sub(terrainY).abs());
     const swirl = mx_noise_float(vec3(positionWorld.xz.mul(2), simTime.mul(0.35))).mul(0.5).add(0.5);
     const lap = float(0.4).add(sin(simTime.mul(1.1).add(swirl.mul(6))).mul(0.12));
     const foam = smoothstep(lap, lap.mul(0.35), depthBelow).mul(smoothstep(0.35, 0.75, swirl.add(mx_noise_float(positionWorld.mul(4)).mul(0.25)))).mul(0.85)
@@ -140,7 +144,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const surfaceLight = vec3(0.95, 0.98, 1.0);
     const base = body.color.mul(float(1).sub(F)).add(reflected.mul(F)).add(vec3(1.0, 0.86, 0.62).mul(glint).mul(F.mul(6).min(1).max(0.25)));
     const rippleSlope = smoothstep(0.22, 0.65, N.xz.length());
-    return mix(base, surfaceLight.mul(1.1), max(foam.min(0.9), rippleSlope.mul(0.42)).mul(float(1).sub(F)));
+    return mix(base, surfaceLight.mul(1.1), max(foam.mul(isTerrain).min(0.9), rippleSlope.mul(0.42)).mul(float(1).sub(F)));
   })();
   /** Deep-water colour for rays that never reach the surface (total internal reflection): brighter up, darker down. */
   const mediumColor = (y: Node<'float'>) => mix(vec3(0.008, 0.07, 0.2), vec3(0.05, 0.36, 0.46), smoothstep(-0.75, 0.45, y));
@@ -256,5 +260,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
 
   /** While the camera is inside the water the surface must write depth so post-processing fog sees it. */
   const setInside = (inside: boolean) => { if (surfaceMaterial.depthWrite !== inside) { surfaceMaterial.depthWrite = inside; surfaceMaterial.needsUpdate = true; } };
-  return { surface, front, back, reflection, setInside };
+  /** Planar reflection for an extra camera (the inset) must only draw layer 1, like the main one. */
+  const prepareCamera = (cam: PerspectiveCamera) => { (reflection as unknown as { reflector: { getVirtualCamera(c: PerspectiveCamera): PerspectiveCamera } }).reflector.getVirtualCamera(cam).layers.set(1); };
+  return { surface, front, back, reflection, setInside, prepareCamera };
 }
