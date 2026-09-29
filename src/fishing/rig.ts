@@ -22,7 +22,7 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
   const line = new Mesh(geometry, lineMat); line.frustumCulled = false; line.renderOrder = 2; scene.add(line);
 
   // ---- bobber ----
-  const bobber = new Group();
+  const bobber = new Group(); bobber.name = "Fishing bobber";
   const sph = (r: number, ts: number, tl: number) => new SphereGeometry(r, 10, 6, 0, Math.PI * 2, ts, tl);
   const bobberMesh = new Mesh(merge([
     mk(sph(0.08, 0, Math.PI / 2), '#e8433a', [0, 0, 0], [0, 0, 0], [1, 1, 1], 0.03),

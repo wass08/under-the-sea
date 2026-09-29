@@ -26,6 +26,8 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   if (query.has('autofish')) settings.auto = true;
 
   const boat = createBoat(world);
+  // Named so the world's planar water reflection picks it up (layer 1).
+  boat.group.name = 'Fishing boat';
   scene.add(boat.group);
   boat.group.traverse(o => { if ('isMesh' in o) { (o as { castShadow: boolean }).castShadow = true; (o as { receiveShadow: boolean }).receiveShadow = true; } });
 
