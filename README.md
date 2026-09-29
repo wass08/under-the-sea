@@ -2,7 +2,7 @@
 
 *You can't prompt what you can't name*, episode 2: **Boids & GPGPU**.
 
-A floating 36 × 36 block of ocean with a palm island in the middle and thousands of GPU-simulated schooling fish. They show three collective behaviours: **milling**, the **fountain effect** and **flash expansion**. A fisherman in a rowboat casts a line: the splash scatters the school, calm returns, curious fish inspect the lure, one of them bites, and you click to hook it.
+A floating 36 × 36 block of ocean with a palm island in the corner, floating crates and a lifebuoy, and thousands of GPU-simulated schooling fish. They show three collective behaviours: **milling**, the **fountain effect** and **flash expansion**. A fisherman in a rowboat casts a line: the splash scatters the school, calm returns, curious fish inspect the lure, one of them bites, and you click to hook it.
 
 Vite + vanilla TypeScript, three 0.186 WebGPU/TSL (compute shaders + instancing), Tweakpane.
 
@@ -21,11 +21,17 @@ Open current Chrome or Edge with WebGPU and hardware acceleration enabled.
 - **Click / Space while "Click to hook!" shows:** set the hook. The fish is reeled into the boat, and the counter goes up.
 - **Click the water while the line is in:** reel in and recast.
 - **Drag / scroll / right-drag:** orbit / zoom / pan.
-- **Panel:**
-  - **School:** milling, fountain (predator), flash expansion, plus flocking, milling, fountain, panic, lure and look tuning.
-  - **Fishing:** auto-fish for hands-free recording, lure depth, bite timing, hook window.
-  - **World:** sun, waves, caustics, god rays, murk, bloom.
-  - **Global:** a time-scale slider for slow motion. Everything runs on the simulation clock.
+- **Behaviour dock** (bottom):
+  - **Milling** `M`, with a direction flip `D`.
+  - **Fountain** `F`: sends the predator through the school.
+  - **Flash** `X`: flash expansion at the school centre.
+  - **Slow-mo** `T`.
+  - **Auto-fish** `A`: hands-free casting and hooking, for recording.
+- **Lure cam:** a picture-in-picture view in the lower left.
+  - It chases the cast in flight, goes underwater for the scatter and the curious fish, and zooms in tight on the bite and the reel-in.
+  - While it is visible the water reflection falls back to the sky, which keeps the second view cheap.
+- **Fountain from the line:** reeling in or recasting drags the lure fast underwater. The school splits around it, like it does for the predator.
+  - **Tuning** (top right, collapsed): flocking, milling, fountain, panic, lure, look, fishing and world settings. It stays in sync with the dock.
 
 ### URL switches
 
