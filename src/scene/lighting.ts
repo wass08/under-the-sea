@@ -1,8 +1,8 @@
 import { DirectionalLight, EquirectangularReflectionMapping, HemisphereLight, Scene, Vector3, Matrix4 } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
-import { float, vec3, color, shadow, uniform, exp } from 'three/tsl';
-import { causticsField, createCausticsUniforms } from '../lib/worley';
+import { float, vec2, vec3, color, shadow, smoothstep, uniform, exp } from 'three/tsl';
+import { createCausticsUniforms, worley } from '../lib/worley';
 import { WORLD } from '../config';
 import { simTime, sunDirection, waterLevel } from '../state';
 
@@ -30,9 +30,16 @@ causticParams.scaleA.value = 0.42; causticParams.scaleB.value = 0.68; causticPar
 causticParams.sharpness.value = 18; causticParams.intensity.value = 1.35; causticParams.rgbOffset.value = 0.02;
 /** Point on the surface plane from which sunlight reaches `p` (world position node). */
 export const sunSurfacePoint = (p: Node<'vec3'>) => p.xz.sub(sunDirection.xz.mul(p.y.sub(waterLevel).div(sunDirection.y.min(-0.15))));
+/** Two-layer Worley caustics (same field as lib/worley level 3, without the per-channel dispersion: 3x cheaper). */
 export function causticAtSurface(s: Node<'vec2'>, depth: Node<'float'>) {
-  return causticsField(s, simTime, { ...causticParams, level: 3, depth });
+  const p = causticParams, t = simTime.mul(p.speed);
+  const a = worley(s.mul(p.scaleA).add(vec2(t.mul(0.33), t.mul(0.12))), t);
+  const b = worley(s.mul(p.scaleB).sub(vec2(t.mul(0.20), t.mul(0.29))).add(7.3), t.mul(0.83));
+  const edgeA = float(1).sub(a.f2.sub(a.f1).clamp()).pow(p.sharpness), edgeB = float(1).sub(b.f2.sub(b.f1).clamp()).pow(p.sharpness);
+  return vec3(edgeA.mul(edgeB).sqrt().mul(p.intensity).mul(smoothstep(0, 0.15, depth)));
 }
+/** Feature switches for profiling: ?off=plankton,flora,reflect,rays,palms,bubbles */
+export const OFF = new Set((new URLSearchParams(location.search).get('off') ?? '').split(',').filter(Boolean));
 export function causticAt(p: Node<'vec3'>, depth: Node<'float'>) { return causticAtSurface(sunSurfacePoint(p), depth); }
 
 // ---- Sun + environment --------------------------------------------------------------------------------------

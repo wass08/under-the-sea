@@ -20,9 +20,9 @@ export function createEnv() {
   const env = {
     dt: u(0.016), clock: u(0), frame: u(0),
     // boids
-    speed: u(1), sepW: u(3.0), aliW: u(2.4), cohW: u(0.7), sepR: u(0.75), neighR: u(1.1), scanCap: u(4, 'int'),
+    speed: u(1), sepW: u(3.0), aliW: u(3.0), cohW: u(0.25), sepR: u(0.95), neighR: u(1.2), scanCap: u(4, 'int'),
     // milling
-    millBlend: u(0), millStrength: u(1), millRadius: u(12.5), millHeight: u(2.5), millDir: u(1), millCenter: u(new Vector3(0, 6.4, 0)), attractors: [0, 1, 2].map(() => u(new Vector3(0, 4, 0))), attractW: u(1),
+    millBlend: u(0), millStrength: u(1), millRadius: u(12.5), millHeight: u(2.5), millDir: u(1), millCenter: u(new Vector3(0, 6.4, 0)), attractors: [0, 1, 2].map(() => u(new Vector3(0, 4, 0))), attractDirs: [0, 1, 2].map(() => u(new Vector3(1, 0, 0))), attractW: u(1), schoolAxes: u(new Vector3(8.5, 4.5, 3.0)),
     // predator / fountain
     predPos: u(new Vector3(0, -50, 0)), predVel: u(new Vector3(1, 0, 0)), predActive: u(0), fearRadius: u(3.5), fountain: u(1),
     // panic
@@ -51,6 +51,8 @@ export interface SimOptions {
   homeClear: number; homeStrength: number; homeXZ: [number, number]; homeRadius: number;
   /** Initial clusters. */
   clusters: number; clusterRadius: number;
+  /** Optional explicit cluster centres (fish i starts in cluster i % centres.length). */
+  groupCenters?: [number, number, number][];
   seed: number;
   /** Main school only: strike / stats machinery. */
   main: boolean;
@@ -99,7 +101,7 @@ export function createSim(o: SimOptions) {
       centers.push([x, Math.min(y, WORLD.surface - 1.0), z]);
     }
     for (let i = 0; i < N; i++) {
-      const c = centers[Math.floor(rng() * centers.length)], gauss = () => (rng() + rng() + rng() - 1.5) * 1.15;
+      const c = o.groupCenters ? o.groupCenters[i % o.groupCenters.length] : centers[Math.floor(rng() * centers.length)], gauss = () => (rng() + rng() + rng() - 1.5) * 1.15;
       let x = c[0] + gauss() * o.clusterRadius, z = c[2] + gauss() * o.clusterRadius, y = c[1] + gauss() * o.clusterRadius * 0.55;
       x = Math.max(SWIM_BOUNDS.min[0] + 0.3, Math.min(SWIM_BOUNDS.max[0] - 0.3, x)); z = Math.max(SWIM_BOUNDS.min[2] + 0.3, Math.min(SWIM_BOUNDS.max[2] - 0.3, z));
       const h = sampleHeight(seabed, x, z); y = Math.max(h + 0.5, Math.min(SWIM_BOUNDS.max[1] - 0.4, y));
@@ -271,10 +273,17 @@ export function createSim(o: SimOptions) {
       }
 
       // --- large-scale flow: follow the wandering attractor loosely + coherent flow field (density waves, curling edges)
-      const grp = floor(rnd(31).mul(3)), myAtt = select(grp.lessThan(0.5), env.attractors[0], select(grp.lessThan(1.5), env.attractors[1], env.attractors[2]));
-      const ad = myAtt.sub(P), al2 = length(ad);
-      acc.addAssign(ad.div(max(al2, 0.01)).mul(smoothstep(2.5, 6.5, al2)).mul(3.2).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(fear.mul(2.5).add(1)));
-      acc.addAssign(vec3(sin(P.y.mul(0.6).add(clock.mul(0.6))).add(sin(P.z.mul(0.4).sub(clock.mul(0.4)))), sin(P.x.mul(0.45).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(0.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.3).add(clock.mul(0.3))))).mul(1.0));
+      if (o.main) {
+        // three sub-schools (fish i belongs to group i % 3). Each is confined softly to an elongated ellipsoid that travels along its path,
+        // so density fills the volume evenly (separation spreads fish out) instead of collapsing on a point.
+        const grp = instanceIndex.mod(3).toFloat();
+        const sel = (a: any, b: any, c: any) => select(grp.lessThan(0.5), a, select(grp.lessThan(1.5), b, c));
+        const myAtt = sel(env.attractors[0], env.attractors[1], env.attractors[2]), myDir = sel(env.attractDirs[0], env.attractDirs[1], env.attractDirs[2]);
+        const rel = P.sub(myAtt), side = vec3(myDir.z.negate(), 0, myDir.x);
+        const e = length(vec3(dot(rel, myDir).div(env.schoolAxes.x), dot(rel, side).div(env.schoolAxes.y), rel.y.div(env.schoolAxes.z)));
+        acc.addAssign(rel.div(max(length(rel), 0.01)).negate().mul(smoothstep(0.8, 1.3, e)).mul(4.0).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(fear.mul(1.5).add(1)));
+      }
+      acc.addAssign(vec3(sin(P.y.mul(0.6).add(clock.mul(0.6))).add(sin(P.z.mul(0.4).sub(clock.mul(0.4)))), sin(P.x.mul(0.45).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(0.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.3).add(clock.mul(0.3))))).mul(0.55));
 
       // --- bounds (soft walls)
       const m = vec3(5.0, 2.0, 5.0), lo = vec3(SWIM_BOUNDS.min[0], SWIM_BOUNDS.min[1], SWIM_BOUNDS.min[2]), hi = vec3(SWIM_BOUNDS.max[0], waterLevel.sub(0.3), SWIM_BOUNDS.max[2]);

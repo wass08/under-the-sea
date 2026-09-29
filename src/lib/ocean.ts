@@ -19,14 +19,14 @@ export const OCEAN_GRAVITY = 9;
 export const oceanAmplitude = uniform(1);
 export const oceanParams = { amplitude: 1 };
 
-export const RIPPLE = { slots: 12, speed: 2.6, wavelength: 0.9, width: 2.0, decay: 0.5, amplitude: 0.14, spread: 0.8 } as const;
+export const RIPPLE = { slots: 10, speed: 2.6, wavelength: 0.9, width: 2.0, decay: 0.5, amplitude: 0.14, spread: 0.8 } as const;
 /** xy = position, z = start time (sim seconds), w = strength. */
 export const rippleUniforms = Array.from({ length: RIPPLE.slots }, () => uniform(new Vector4(0, 0, -1000, 0)));
 const rippleState = Array.from({ length: RIPPLE.slots }, () => ({ x: 0, z: 0, t: -1000, s: 0 }));
 let rippleIndex = 0, ambientIndex = 0;
 /** Slots 0..7 serve gameplay ripples (lure, boat); 8..11 are reserved for ambient ones (bubbles). */
 export function emitRipple(x: number, z: number, strength: number, ambient = false) {
-  const slot = ambient ? 8 + (ambientIndex++ % 4) : rippleIndex++ % 8, t = simTime.value;
+  const slot = ambient ? 8 + (ambientIndex++ % 2) : rippleIndex++ % 8, t = simTime.value;
   rippleState[slot] = { x, z, t, s: strength };
   rippleUniforms[slot].value.set(x, z, t, strength);
 }

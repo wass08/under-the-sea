@@ -24,6 +24,8 @@ export interface FishLod {
 
 export interface FishAsset {
   lods: FishLod[];
+  /** Unsimplified near LOD (only when requested). */
+  full?: FishLod;
   textures: [Texture, Texture];
   /** Model length along +X in model units (used to normalise to 1). */
   length: number;
@@ -43,6 +45,8 @@ export interface AssetOptions {
   body: number; fins: number; eye: number;
   /** Extra proxy LODs (total triangles), built from the merged mesh. */
   proxies: number[];
+  /** Also build an unsimplified body+fins LOD (near-camera) with this many triangles per eye layer. */
+  full?: { eye: number };
 }
 
 const loader = new GLTFLoader();
@@ -93,7 +97,7 @@ function simplifyMesh(m: Mesh3, tris: number, poses: Float32Array[], scale: numb
     for (let i = 0; i < V; i++) for (let c = 0; c < 3; c++) attrs[i * stride + 2 + p * 3 + c] = (tmp[i * 3 + c] - m.pos[i * 3 + c]) / scale;
   });
   for (let i = 0; i < V; i++) { attrs[i * stride] = m.uv[i * 2]; attrs[i * stride + 1] = m.uv[i * 2 + 1]; }
-  const weights = [0.15, 0.15, ...poses.flatMap(() => [0.6, 0.6, 0.6])];
+  const weights = [2.5, 2.5, ...poses.flatMap(() => [0.6, 0.6, 0.6])]; // strong UV weight: no stretched / stair-stepped textures
   const [idx] = MeshoptSimplifier.simplifyWithAttributes(m.index, m.pos, 3, attrs, stride, weights, null, tris * 3, 0.5, ['Permissive', 'Regularize']);
   return compact({ ...m, index: idx });
 }
@@ -207,5 +211,11 @@ export async function loadFishAsset(url: string, o: AssetOptions): Promise<FishA
     const [idx] = MeshoptSimplifier.simplifyWithAttributes(merged.index, merged.pos, 3, attrs, stride, [0, 0, ...poses.flatMap(() => [0.6, 0.6, 0.6])], null, total * 3, 0.5, ['Permissive']);
     lods.push(makeLod(compact({ ...merged, index: idx }), weights));
   }
-  return { lods, textures: [textured[0], textured[1] ?? textured[0]], length, period: clip.duration, frames: o.frames };
+  let full: FishLod | undefined;
+  if (o.full) {
+    const fp: Mesh3[] = [];
+    for (const r of raw) fp.push(r.kind === 'tex' ? compact(r.mesh) : simplifyMesh(r.mesh, o.full.eye, poses, length));
+    full = makeLod(merge(fp), weights);
+  }
+  return { lods, full, textures: [textured[0], textured[1] ?? textured[0]], length, period: clip.duration, frames: o.frames };
 }

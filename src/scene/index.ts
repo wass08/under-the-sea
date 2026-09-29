@@ -8,7 +8,7 @@ import { setHullMask, emitRipple, oceanHeightCpu, oceanParams, oceanAmplitude } 
 import { sampleGrid } from './field';
 import { buildSlab, buildTerrain } from './terrain';
 import { createSlabMaterial, createTerrainMaterial } from './materials';
-import { applySunAngles, causticStrength, createLighting, godRayStrength, sunParams, waterClarity } from './lighting';
+import { OFF, applySunAngles, causticStrength, createLighting, godRayStrength, sunParams, waterClarity } from './lighting';
 import { createAtmosphere } from './atmosphere';
 import { createHeightTexture, createWater } from './water';
 import { createPost, postParams } from './post';
@@ -36,11 +36,15 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
   const heights = sampleGrid(resolution);
   const heightTexture: DataTexture = createHeightTexture(heights, resolution);
   const water = createWater(scene, camera, heightTexture, terrainData.edges);
-  createFlora(scene); createIsland(scene);
-  createPlankton(scene); const bubbles = createBubbles(scene);
+  if (!OFF.has('flora')) createFlora(scene);
+  if (!OFF.has('palms')) createIsland(scene);
+  if (!OFF.has('plankton')) createPlankton(scene);
+  const bubbles = createBubbles(scene);
+  if (OFF.has('bubbles')) bubbles.mesh.visible = false;
+  if (OFF.has('reflect')) water.reflection.target.visible = false;
   if (new URLSearchParams(location.search).has('testfish')) addTestFish(scene);
   const heightProbe = new URLSearchParams(location.search).has('testheight') ? addHeightProbes(scene) : null;
-  const post = createPost(renderer, scene, camera);
+  const post = createPost(renderer, scene, camera, heightTexture);
   // Let the planar reflection (layer 1) also pick up other modules' boat / fisherman meshes.
   let reflectTimer = 0, boat: import('three/webgpu').Object3D | null = null;
   const markReflective = () => scene.children.forEach(child => {
@@ -62,7 +66,8 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
       if (boat) { const k = boat.scale.x; setHullMask(boat.position.x, boat.position.z, 0.8 * k, 0.33 * k, boat.rotation.y); }
       const p = camera.position, inside = Math.abs(p.x) < WORLD.half && Math.abs(p.z) < WORLD.half && p.y > WORLD.bed - 0.6;
       const depth = world.heightAt(p.x, p.z) - p.y;
-      post.setUnderwater(inside ? Math.max(0, Math.min(1, depth / 0.12)) : 0, Math.max(0, depth));
+      const amount = inside ? Math.max(0, Math.min(1, depth / 0.12)) : 0;
+      post.setUnderwater(amount); water.setInside(amount > 0);
       heightProbe?.(world);
       reflectTimer -= dt;
       if (reflectTimer <= 0) { reflectTimer = 1; markReflective(); }
@@ -94,7 +99,7 @@ function applyCameraPreset(camera: Ctx['camera']) {
   const cam = new URLSearchParams(location.search).get('cam');
   const presets: Record<string, [number, number, number]> = {
     side: [0, 12, 78], top: [0.01, 96, 0.01], close: [22, 15, 30], front: [6, 14, 64], under: [8, 5, 27], island: [-8, 24, 36],
-    corner: [32, 16, 32], low: [50, 9, 60], inside: [4, 8, 10], surf: [20, 26, 26], seabed: [15, 14, 20], grazing: [42, 22, 48],
+    corner: [32, 16, 32], low: [50, 9, 60], inside: [4, 8, 10], deep: [15, 2.8, 8], window: [16.5, 2.4, 2], deep2: [-12, 3.2, 12], closeup: [40, 27, 48], surf: [20, 26, 26], seabed: [15, 14, 20], grazing: [42, 22, 48],
   };
   if (cam && presets[cam]) camera.position.set(...presets[cam]);
   void WORLD;

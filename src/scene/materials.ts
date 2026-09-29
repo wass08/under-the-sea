@@ -1,7 +1,8 @@
 import { MeshStandardNodeMaterial } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
-import { Fn, If, attribute, color, cos, float, floor, hash, mix, mx_noise_float, normalize, normalWorldGeometry, positionWorld, sin, smoothstep, transformNormalToView, vec2, vec3 } from 'three/tsl';
+import { Fn, If, attribute, color, cos, float, floor, hash, mix, mx_noise_float, normalize, normalWorldGeometry, positionWorld, sin, smoothstep, texture, transformNormalToView, vec2, vec3 } from 'three/tsl';
 import { worley } from '../lib/worley';
+import { createSandTexture, SAND_TILE } from './sandtex';
 import { causticAt, causticStrength, sunVisibilityRef, toSun, waterDepthAt, waterTransmittance } from './lighting';
 
 /**
@@ -31,31 +32,24 @@ export function underwaterShading(albedo: Node<'vec3'>, normal: Node<'vec3'>, ga
 
 const c = (hex: string) => color(hex) as unknown as Node<'vec3'>;
 
-/** Smooth sand: analytic normals from the mesh + shader-level ripples, grain and colour variation. */
+/** Smooth sand: analytic normals from the mesh + baked ripple/grain texture, colour patches and speckle. */
 export function createTerrainMaterial() {
   const material = new MeshStandardNodeMaterial({ roughness: 0.96, metalness: 0 });
   const p = positionWorld, n0 = normalWorldGeometry;
   const depth = waterDepthAt(p.y);
   const flat = smoothstep(0.72, 0.93, n0.y);
-  // Sand ripples: two warped wave trains + fine grain, as a height gradient subtracted from the normal.
-  const warp = mx_noise_float(vec3(p.xz.mul(0.07), 1.3)).mul(2.6);
-  const dirA = vec2(0.83, 0.56), dirB = vec2(-0.42, 0.91);
-  const kA = 2 * Math.PI / 1.05, kB = 2 * Math.PI / 0.42;
-  const phaseA = p.xz.dot(dirA).mul(kA).add(warp.mul(kA * 0.55)), phaseB = p.xz.dot(dirB).mul(kB).add(warp.mul(kB * 0.35)).add(mx_noise_float(vec3(p.xz.mul(0.35), 4.0)).mul(2.0));
-  const gradA = dirA.mul(cos(phaseA).mul(0.036 * kA)), gradB = dirB.mul(cos(phaseB).mul(0.011 * kB));
-  const grainN = vec3(mx_noise_float(vec3(p.xz.mul(9), 2.0)), 0, mx_noise_float(vec3(p.xz.mul(9), 7.0))).mul(0.06);
+  const { texture: sandMap, maxSlope } = createSandTexture();
+  const t1 = texture(sandMap, p.xz.div(SAND_TILE)), t2 = texture(sandMap, p.xz.div(SAND_TILE).mul(3.7).add(0.31)), t3 = texture(sandMap, p.xz.div(SAND_TILE * 4.3).add(0.6));
+  const slope = vec2(t1.r.sub(0.5), t1.g.sub(0.5)).add(vec2(t2.r.sub(0.5), t2.g.sub(0.5)).mul(0.55)).mul(2 * maxSlope);
   const drySoften = mix(float(1), float(0.55), smoothstep(0.1, -0.4, depth));
-  const bump = vec3(gradA.x.add(gradB.x), 0, gradA.y.add(gradB.y)).mul(drySoften).add(grainN);
-  const nWorld = normalize(n0.sub(bump.mul(flat)));
+  const nWorld = normalize(n0.sub(vec3(slope.x, 0, slope.y).mul(drySoften).mul(flat)));
   material.normalNode = transformNormalToView(nWorld);
 
   // Colour: golden underwater sand, paler dry beach, darker damp band; broad patches and fine speckle.
-  const patch = mx_noise_float(vec3(p.xz.mul(0.12), 3.1)).mul(0.5).add(0.5);
-  const speck = mx_noise_float(vec3(p.xz.mul(26), 5.0)).mul(0.5).add(0.5);
-  const rippleShade = sin(phaseA).mul(0.5).add(0.5);
+  const patch = t3.b.mul(0.6).add(t1.b.mul(0.4)), speck = t1.a.add(t2.a.mul(0.6)).mul(0.62);
   let sand = mix(c('#dcb97c'), c('#c69f63'), smoothstep(0.3, 0.75, patch));
-  sand = mix(sand, c('#e9d3a2'), smoothstep(0.7, 0.95, mx_noise_float(vec3(p.xz.mul(0.31), 9.0)).mul(0.5).add(0.5)).mul(0.6));
-  sand = sand.mul(float(0.94).add(speck.mul(0.12))).mul(float(0.95).add(rippleShade.mul(0.1).mul(flat)));
+  sand = mix(sand, c('#e9d3a2'), smoothstep(0.55, 0.9, t3.b.mul(0.5).add(t2.b.mul(0.5))).mul(0.55));
+  sand = sand.mul(float(0.94).add(speck.mul(0.12))).mul(float(0.94).add(t1.b.mul(0.14).mul(flat)));
   const dryness = smoothstep(0.0, -0.5, depth);
   sand = mix(sand, c('#f0dfb4').mul(float(0.95).add(speck.mul(0.1))), dryness);
   const shaded = underwaterShading(sand, nWorld);
@@ -87,10 +81,10 @@ export function createSlabMaterial() {
   col = col.mul(bandVariation);
   const w = worley(uv2.mul(vec2(3.4, 3.4)), float(0));
   const cluster = smoothstep(-0.1, 0.35, mx_noise_float(vec3(uv2.mul(0.25), 3.3)));
-  const pebble = smoothstep(0.30, 0.22, w.f1).mul(cluster);
+  const pebble = smoothstep(0.26, 0.2, w.f1).mul(cluster);
   const pebbleShade = float(1).sub(w.f1.mul(2.2)).max(0).mul(0.5).add(0.62);
-  const pebbleColor = mix(c('#6d6860'), c('#8f7a5e'), smoothstep(-0.2, 0.4, mx_noise_float(vec3(uv2.mul(0.9), 1.7)))).mul(pebbleShade);
-  col = mix(col, pebbleColor, pebble.mul(0.55));
+  const pebbleColor = mix(c('#9a9284'), c('#b5a07e'), smoothstep(-0.2, 0.4, mx_noise_float(vec3(uv2.mul(0.9), 1.7)))).mul(pebbleShade);
+  col = mix(col, pebbleColor, pebble.mul(0.4));
   col = col.mul(mx_noise_float(p.mul(20)).mul(0.06).add(1));
   const topY = attribute('topY', 'float');
   const below = topY.sub(p.y);

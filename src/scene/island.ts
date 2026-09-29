@@ -1,7 +1,7 @@
-import { BufferGeometry, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardNodeMaterial, Object3D, Scene, Vector3 } from 'three/webgpu';
+import { CanvasTexture, LinearMipmapLinearFilter, SRGBColorSpace, BufferGeometry, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardNodeMaterial, Object3D, Scene, Vector3 } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
 import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
-import { attribute, color, cos, float, hash, instanceIndex, mix, mx_noise_float, positionLocal, sin, smoothstep, uv, vec3 } from 'three/tsl';
+import { attribute, color, cos, float, texture, hash, instanceIndex, mix, mx_noise_float, positionLocal, sin, smoothstep, uv, vec3 } from 'three/tsl';
 import { WORLD } from '../config';
 import { simTime } from '../state';
 import { random } from '../lib/random';
@@ -58,7 +58,7 @@ function buildCrown(top: Vector3, height: number, seed: number) {
     const horizontal = new Vector3(Math.cos(a), 0, Math.sin(a)), d0 = horizontal.clone().multiplyScalar(Math.cos(elevation)).addScaledVector(up, Math.sin(elevation)).normalize();
     const tn = rng();
     const rachis = (s: number) => top.clone().addScaledVector(d0, length * s).addScaledVector(up, -droop * length * 0.55 * s * s);
-    const segs = 24;
+    const segs = 28;
     // rachis strip
     const rBase = positions.length / 3;
     for (let k = 0; k <= segs; k++) {
@@ -73,10 +73,10 @@ function buildCrown(top: Vector3, height: number, seed: number) {
       const ell = maxLeaflet * Math.pow(Math.sin(Math.PI * Math.pow(s, 0.85)), 0.75) + 0.12;
       for (const sd of [-1, 1]) {
         const dir = sideV.clone().multiplyScalar(sd * 0.92).addScaledVector(tangent, 0.42).addScaledVector(up, -0.22 - old * 0.25 - s * 0.15).normalize();
-        const parts = 4, base = positions.length / 3, width = 0.2 * (0.75 + 0.25 * Math.sin(s * 3));
+        const parts = 4, base = positions.length / 3, width = 0.42 * (0.8 + 0.2 * Math.sin(s * 3));
         for (let m = 0; m <= parts; m++) {
           const t = m / parts, q = p.clone().addScaledVector(dir, ell * t).addScaledVector(up, -0.32 * ell * t * t);
-          const w = width * (1 - Math.pow(t, 1.6) * 0.92) * 0.5, wv = tangent.clone().multiplyScalar(w);
+          const w = width * (1 - t * 0.15) * 0.5, wv = tangent.clone().multiplyScalar(w);
           push(q.clone().add(wv), 0, t, 1, t, tn); push(q.clone().sub(wv), 1, t, 1, t, tn);
           if (m < parts) { const i = base + m * 2; if (sd > 0) indices.push(i, i + 1, i + 2, i + 1, i + 3, i + 2); else indices.push(i, i + 2, i + 1, i + 1, i + 2, i + 3); }
         }
@@ -102,6 +102,26 @@ function buildCoconuts(top: Vector3, seed: number) {
     parts.push(g);
   }
   return mergeGeometries(parts)!;
+}
+
+/** One leaflet drawn on a canvas: lanceolate outline with a serrated edge, midrib and side veins (alpha = shape). */
+function leafTexture() {
+  const w = 96, h = 384, canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+  const g = canvas.getContext('2d')!;
+  g.clearRect(0, 0, w, h);
+  const half = (y: number) => { const t = 1 - y / h; return (w * 0.46) * Math.pow(Math.sin(Math.PI * Math.pow(t, 0.55)), 0.9) * (1 - 0.15 * t); };
+  g.beginPath(); g.moveTo(w / 2, h);
+  const steps = 48;
+  for (let i = 0; i <= steps; i++) { const y = h - (i / steps) * h, jag = (i % 2 ? 1 : 0.82); g.lineTo(w / 2 + half(y) * jag, y); }
+  for (let i = steps; i >= 0; i--) { const y = h - (i / steps) * h, jag = (i % 2 ? 0.82 : 1); g.lineTo(w / 2 - half(y) * jag, y); }
+  g.closePath();
+  const grad = g.createLinearGradient(0, h, 0, 0); grad.addColorStop(0, '#9a9a9a'); grad.addColorStop(0.5, '#e8e8e8'); grad.addColorStop(1, '#c4c4c4');
+  g.fillStyle = grad; g.fill();
+  g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 3; g.beginPath(); g.moveTo(w / 2, h); g.lineTo(w / 2, h * 0.04); g.stroke();
+  g.strokeStyle = 'rgba(70,70,70,0.35)'; g.lineWidth = 1.2;
+  for (let y = h * 0.08; y < h * 0.95; y += 13) for (const s of [-1, 1]) { g.beginPath(); g.moveTo(w / 2, y + 8); g.lineTo(w / 2 + s * half(y - 14) * 0.9, y - 14); g.stroke(); }
+  const t = new CanvasTexture(canvas); t.colorSpace = SRGBColorSpace; t.anisotropy = 8; t.minFilter = LinearMipmapLinearFilter; t.generateMipmaps = true;
+  return t;
 }
 
 export function createIsland(scene: Scene) {
@@ -135,7 +155,10 @@ export function createIsland(scene: Scene) {
     const yellow = mix(base, c('#c9cf62'), smoothstep(0.7, 1.0, v).mul(tintA).mul(0.6));
     const vein = smoothstep(0.08, 0.0, u.sub(0.5).abs()).mul(isLeaf).mul(0.18);
     const shade = yellow.mul(float(0.85).add(mx_noise_float(vec3(u.mul(6), v.mul(5), tintA.mul(9))).mul(0.15))).add(vec3(vein));
-    leafMat.colorNode = mix(c('#c8c98a'), shade, isLeaf);
+    const tex = texture(leafTexture(), uv());
+    leafMat.colorNode = mix(c('#c8c98a'), shade.mul(tex.rgb.mul(0.5).add(0.6)), isLeaf);
+    leafMat.opacityNode = mix(float(1), tex.a, isLeaf);
+    leafMat.alphaTest = 0.5;
     leafMat.emissiveNode = leafMat.colorNode!.mul(0.14);
   }
   const nutMat = new MeshStandardNodeMaterial({ roughness: 0.7, metalness: 0 });

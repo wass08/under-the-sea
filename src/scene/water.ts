@@ -1,7 +1,7 @@
 import { AdditiveBlending, BackSide, BufferGeometry, ClampToEdgeWrapping, DataTexture, DoubleSide, Float32BufferAttribute, HalfFloatType, LinearFilter, Mesh, MeshBasicNodeMaterial, PerspectiveCamera, PlaneGeometry, RedFormat, Scene, Sphere, Vector3 } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
 import {
-  Fn, Loop, float, vec2, vec3, vec4, mix, smoothstep, exp, max, min, pow, refract, reflect, normalize,
+  Fn, If, Loop, float, vec2, vec3, vec4, mix, smoothstep, exp, max, min, pow, refract, reflect, normalize,
   positionGeometry, positionWorld, cameraPosition, cameraProjectionMatrix, cameraViewMatrix, cameraProjectionMatrixInverse,
   screenUV, screenCoordinate, viewportDepthTexture, viewportOpaqueMipTexture, getViewPosition, texture, mx_noise_float, attribute,
   reflector, dot, abs, fract, sin,
@@ -41,7 +41,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   // ---- Volume optics shared by the top surface and the side faces -----------------------------------------
   /** Beams of sunlight inside the water volume (single scattering, raymarched from the entry point). */
   const scatterRays = Fn(([origin, dir, length]: [Node<'vec3'>, Node<'vec3'>, Node<'float'>]) => {
-    const steps = 12;
+    const steps = 10;
     const acc = float(0).toVar();
     const stepLen = length.div(steps);
     const jitter = fract(screenCoordinate.x.mul(0.06711056).add(screenCoordinate.y.mul(0.00583715)).fract().mul(52.9829189));
@@ -52,14 +52,12 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
       const towardSurface = under.div(toSun.y.max(0.15));
       const ps = p.xz.add(toSun.xz.mul(towardSurface));
       const beamA = mx_noise_float(vec3(ps.mul(0.19), simTime.mul(0.16))).mul(0.5).add(0.5);
-      const beamB = mx_noise_float(vec3(ps.mul(0.52).add(11.3), simTime.mul(0.27))).mul(0.5).add(0.5);
-      const beam = smoothstep(0.52, 0.8, beamA.mul(0.6).add(beamB.mul(0.4)));
+      const beam = smoothstep(0.5, 0.78, beamA.mul(0.75).add(sin(ps.x.mul(0.8).add(ps.y.mul(0.6)).add(simTime.mul(0.5))).mul(0.5).add(0.5).mul(0.25)));
       // Terrain (island) shades the beams: two height probes toward the sun.
-      const q1 = p.add(toSun.mul(1.6)), q2 = p.add(toSun.mul(4.5)), q3 = p.add(toSun.mul(9.5));
+      const q1 = p.add(toSun.mul(2.5)), q2 = p.add(toSun.mul(7.5));
       const h1 = texture(heightTexture, q1.xz.div(R * 2).add(0.5)).level(float(0)).r;
       const h2 = texture(heightTexture, q2.xz.div(R * 2).add(0.5)).level(float(0)).r;
-      const h3 = texture(heightTexture, q3.xz.div(R * 2).add(0.5)).level(float(0)).r;
-      const open = smoothstep(-0.05, 0.25, q1.y.sub(h1)).mul(smoothstep(-0.05, 0.25, q2.y.sub(h2))).mul(smoothstep(-0.05, 0.25, q3.y.sub(h3)));
+      const open = smoothstep(-0.05, 0.25, q1.y.sub(h1)).mul(smoothstep(-0.05, 0.25, q2.y.sub(h2)));
       const inside = smoothstep(-0.02, 0.2, under);
       acc.addAssign(beam.mul(open).mul(inside).mul(under.mul(-0.065).exp()).mul(stepLen));
     });
@@ -112,12 +110,12 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   surfaceMaterial.positionNode = vec3(positionGeometry.x, waterLevel.add(field.h), positionGeometry.z);
   const baseNormal = normalize(vec3(field.gx.negate(), 1, field.gz.negate())).toVarying();
 
-  const reflection = reflector({ resolutionScale: 0.5, bounces: false });
+  const reflection = reflector({ resolutionScale: 0.35, bounces: false });
   reflection.target.rotation.x = -Math.PI / 2;
   scene.add(reflection.target);
   (reflection as unknown as { reflector: { getVirtualCamera(c: PerspectiveCamera): PerspectiveCamera } }).reflector.getVirtualCamera(camera).layers.set(1);
 
-  surfaceMaterial.colorNode = Fn(() => {
+  const aboveColor = Fn(() => {
     const fineA = mx_noise_float(vec3(positionWorld.xz.mul(3).add(simTime.mul(0.35)), simTime.mul(0.2)));
     const fineB = mx_noise_float(vec3(positionWorld.xz.mul(7).sub(simTime.mul(0.5)), 7.1));
     const N = normalize(baseNormal.add(vec3(fineA, 0, fineB).mul(0.075))).toVar();
@@ -143,6 +141,31 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
     const base = body.color.mul(float(1).sub(F)).add(reflected.mul(F)).add(vec3(1.0, 0.86, 0.62).mul(glint).mul(F.mul(6).min(1).max(0.25)));
     const rippleSlope = smoothstep(0.22, 0.65, N.xz.length());
     return mix(base, surfaceLight.mul(1.1), max(foam.min(0.9), rippleSlope.mul(0.42)).mul(float(1).sub(F)));
+  })();
+  /** Deep-water colour for rays that never reach the surface (total internal reflection): brighter up, darker down. */
+  const mediumColor = (y: Node<'float'>) => mix(vec3(0.008, 0.07, 0.2), vec3(0.05, 0.36, 0.46), smoothstep(-0.75, 0.45, y));
+  surfaceMaterial.colorNode = Fn(() => {
+    const out = vec3(0).toVar();
+    const fineA = mx_noise_float(vec3(positionWorld.xz.mul(3).add(simTime.mul(0.35)), simTime.mul(0.2)));
+    const fineB = mx_noise_float(vec3(positionWorld.xz.mul(7).sub(simTime.mul(0.5)), 7.1));
+    const N = normalize(baseNormal.add(vec3(fineA, 0, fineB).mul(0.075)));
+    const rdC = normalize(positionWorld.sub(cameraPosition));
+    If(dot(rdC, N).greaterThan(0), () => {
+      // Seen from below: bright Snell's window with the sky above, total internal reflection outside it.
+      const cosI = dot(rdC, N).clamp(0, 1), eta = 1.333;
+      const k = float(1).sub(float(eta * eta).mul(float(1).sub(cosI.mul(cosI))));
+      const windowMask = smoothstep(0.0, 0.12, k);
+      const refr = refract(rdC, N.negate(), float(eta));
+      const clip = cameraProjectionMatrix.mul(cameraViewMatrix.mul(vec4(positionWorld.add(refr.mul(60)), 1)));
+      const uvw = clip.xy.div(clip.w).mul(vec2(0.5, -0.5)).add(0.5).clamp(0.003, 0.997);
+      const seen = vec4(viewportOpaqueMipTexture(uvw, float(0)) as Node<'vec4'>).rgb;
+      const shimmer = mx_noise_float(vec3(positionWorld.xz.mul(1.6).add(simTime.mul(0.5)), simTime.mul(0.7))).mul(0.25).add(1.0);
+      const Fw = float(0.02).add(float(0.98).mul(float(1).sub(cosI).pow(5))).mul(1.0);
+      const windowColor = seen.mul(1.35).add(skyColor(refr).mul(0.5)).mul(shimmer).mul(float(1).sub(Fw));
+      const medium = mediumColor(reflect(rdC, N.negate()).y);
+      out.assign(mix(medium, windowColor.add(medium.mul(Fw)), windowMask));
+    }).Else(() => { out.assign(aboveColor); });
+    return out;
   })();
   surfaceMaterial.opacityNode = float(1);
   surfaceMaterial.maskNode = hullOutside(positionWorld.xz);
@@ -230,5 +253,7 @@ export function createWater(scene: Scene, camera: PerspectiveCamera, heightTextu
   back.name = 'Water far walls'; back.renderOrder = 6; back.frustumCulled = false;
   scene.add(back);
 
-  return { surface, front, back, reflection };
+  /** While the camera is inside the water the surface must write depth so post-processing fog sees it. */
+  const setInside = (inside: boolean) => { if (surfaceMaterial.depthWrite !== inside) { surfaceMaterial.depthWrite = inside; surfaceMaterial.needsUpdate = true; } };
+  return { surface, front, back, reflection, setInside };
 }

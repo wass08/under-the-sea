@@ -11,7 +11,7 @@ import { emitRipple } from '../lib/ocean';
 const R = WORLD.half;
 
 /** Plankton / dust motes drifting in the water, catching the sun beams. Fully GPU-driven. */
-export function createPlankton(scene: Scene, count = 5000) {
+export function createPlankton(scene: Scene, count = 3000) {
   const id = float(instanceIndex);
   const r = (k: number) => hash(id.add(k));
   const phase = r(1).mul(6.283);

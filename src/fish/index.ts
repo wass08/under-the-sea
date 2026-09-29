@@ -10,6 +10,7 @@ import { createEnv, createSim, sampleHeight, CENTROID_OFFSET, CENTROID_SCALE, FE
 import { createFishMesh, instanceFromSim, visuals } from './render';
 import type { InstanceNodes } from './render';
 import { Predator } from './predator';
+import { createLod } from './lod';
 import { simTime } from '../state';
 
 const MAIN_LENGTH = 0.3, ANGEL_LENGTH = 0.6, ANGEL_COUNT = 512, PREDATOR_LENGTH = 1.4;
@@ -19,7 +20,7 @@ const query = new URLSearchParams(location.search);
 export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   const { renderer, scene } = ctx;
   // with the 36-unit world, fish need ~1-2 body lengths of clear space to stay individually readable: default to 16384 unless ?fish= is given
-  const N = query.has('fish') ? QUERY.fish : 16384;
+  const N = query.has('fish') ? QUERY.fish : 12288;
   const env = createEnv();
   // debug: ?fishFakeIsland=1 injects a test island into the height field (and a proxy mesh) to check terrain avoidance on the stub world
   let seabed = world.seabed;
@@ -37,7 +38,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
 
   // ------------------------------------------------------------------ assets
   const [main, angel, big] = await Promise.all([
-    loadFishAsset(`${base}models/fish_01.glb`, { frames: 32, body: 560, fins: 130, eye: 90, proxies: [70] }),
+    loadFishAsset(`${base}models/fish_01.glb`, { frames: 32, body: 280, fins: 90, eye: 20, proxies: [70], full: { eye: 700 } }),
     loadFishAsset(`${base}models/angel_fish.glb`, { frames: 32, body: 520, fins: 0, eye: 24, proxies: [140] }),
     loadFishAsset(`${base}models/fish_02.glb`, { frames: 32, body: 1500, fins: 0, eye: 60, proxies: [] }),
   ]);
@@ -53,8 +54,9 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   env.millCenter.value.x = homeXZ[0]; env.millCenter.value.z = homeXZ[1]; // circle the island
   // ------------------------------------------------------------------ simulations
   const mainSim = createSim({
-    renderer, env, count: N, seabed, cruise: 2.2, minSpeed: 0.9, maxSpeed: 3.6, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
-    homeClear: 0, homeStrength: 0, homeXZ: [0, 0], homeRadius: 99, clusters: 4, clusterRadius: 3.5, seed: 1, main: true,
+    renderer, env, count: N, seabed, cruise: 1.8, minSpeed: 0.8, maxSpeed: 3.2, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
+    homeClear: 0, homeStrength: 0, homeXZ: [0, 0], homeRadius: 99, clusters: 3, clusterRadius: 3.0, seed: 1, main: true,
+    groupCenters: [0, 1, 2].map(k => [homeXZ[0] + Math.cos(k * 2.094) * 12, 6.4, homeXZ[1] + Math.sin(k * 2.094) * 12] as [number, number, number]),
   });
   const angelSim = createSim({
     renderer, env, count: ANGEL_COUNT, seabed, cruise: 1.1, minSpeed: 0.45, maxSpeed: 2.4, millInfluence: 0.25, lureInfluence: 0, fearSensitivity: 0.7,
@@ -68,7 +70,15 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   })();
   void lureInspect;
   const silver = (seed: any) => vec3(1).add(vec3(hash(seed.mul(91)), hash(seed.mul(57)), hash(seed.mul(33))).sub(0.5).mul(0.2));
-  const fishMeshes = createFishMesh(main, 0, 1, instanceFromSim(mainSim.read, 1), MAIN_LENGTH, N, { tint: silver, sparkle: 1, roughness: 0.62, shape: [1.1, 0.82] });
+  // GPU culling + LOD: near fish draw the full-detail mesh, the rest the simplified one, both via drawIndexedIndirect
+  const lod = createLod(renderer, mainSim, N, [main.full!.triCount * 3, main.lods[0].triCount * 3], MAIN_LENGTH * 2.2);
+  main.full!.geometry.setIndirect(lod.args, 0); main.lods[0].geometry.setIndirect(lod.args, 20);
+  const fishLook = { tint: silver, sparkle: 1, roughness: 0.62, shape: [1.1, 0.82] as [number, number] };
+  const fishMeshes = createFishMesh(main, 0, 1, instanceFromSim(mainSim.read, 1, lod.read.list1), MAIN_LENGTH, N, fishLook);
+  const fishNear = createFishMesh(main, -1, null, instanceFromSim(mainSim.read, 1, lod.read.list0), MAIN_LENGTH, N, fishLook);
+  // the shadow proxy is not culled: it needs every fish index
+  if (fishMeshes.shadowMesh) { const sm = createFishMesh(main, 0, 1, instanceFromSim(mainSim.read, 1), MAIN_LENGTH, N, fishLook); fishMeshes.shadowMesh = sm.shadowMesh; }
+  const lodStats = { near: 0, far: 0 };
   const angelMeshes = createFishMesh(angel, 0, 1, instanceFromSim(angelSim.read, 2), ANGEL_LENGTH, ANGEL_COUNT, { tint: silver, sparkle: 0.6, roughness: 0.6 });
 
   // predator: one instance driven by uniforms
@@ -78,7 +88,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   const predMeshes = createFishMesh(big, 0, null, predInst, PREDATOR_LENGTH, 1, { tint: steel, sparkle: 0.15, roughness: 0.4, shape: [1.3, 0.85], procedural: true });
   void instanceIndex;
 
-  const all = [fishMeshes, angelMeshes, predMeshes];
+  const all = [fishMeshes, fishNear, angelMeshes, predMeshes];
   for (const m of all) { scene.add(m.mesh); if (m.shadowMesh) scene.add(m.shadowMesh); }
   predMeshes.mesh.castShadow = false;
 
@@ -118,6 +128,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   function readStats() {
     statsPending = true;
     mainSim.stats();
+    lod.readCounts().then(c => { lodStats.near = c[0]; lodStats.far = c[1]; }).catch(() => {});
     renderer.getArrayBufferAsync(mainSim.statsAttr).then((buf: ArrayBuffer) => {
       const a = new Uint32Array(buf), n = Math.max(1, a[5]);
       stats.nearLure = a[0];
@@ -154,6 +165,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       env.hooked.value = stats.biter === 'hooked' ? 1 : 0;
       env.strike.value = pend.strike; env.land.value = pend.land;
       if (!noSim) mainSim.step(pend.strike > 0);
+      lod.update(ctx.camera);
       if (angelOn()) angelSim.step(false);
       if (pend.strike > 0) pend.strike = 0;
       if (pend.land > 0 && --landFrames <= 0) pend.land = 0;
@@ -189,19 +201,26 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     attT += dt;
     const t = attT;
     // three sub-group attractors: a shared wandering centre plus offsets whose spread breathes, so groups split and merge
-    // the groups sail around the island; their angular spread breathes so they split and merge
-    const thc = t * 0.045 + 0.7, spread = 1.5 * (0.5 + 0.5 * Math.sin(t * 0.07 + 1.0)), lim = WORLD.half - 4;
+    // three sub-schools sail around the island; their angular spread breathes so they separate and merge
+    const lim = WORLD.half - 5, path = (k: number, tt: number, out: number[]) => {
+      const spread = 2.0 * (0.5 + 0.5 * Math.sin(tt * 0.05 + 1.0));
+      const th = tt * 0.11 + 0.7 + (k - 1) * spread + 0.2 * Math.sin(tt * (0.09 + k * 0.03) + k), r = 12 + 2.5 * Math.sin(tt * (0.04 + k * 0.017) + k * 2.0);
+      out[0] = Math.max(-lim, Math.min(lim, homeXZ[0] + Math.cos(th) * r)); out[2] = Math.max(-lim, Math.min(lim, homeXZ[1] + Math.sin(th) * r));
+      out[1] = 6.4 + 1.2 * Math.sin(tt * (0.11 + k * 0.05) + k * 2.1);
+    };
+    const a: number[] = [0, 0, 0], b: number[] = [0, 0, 0];
     for (let k = 0; k < 3; k++) {
-      const th = thc + (k - 1) * spread + 0.25 * Math.sin(t * (0.09 + k * 0.03) + k), r = 11.5 + 3.0 * Math.sin(t * (0.04 + k * 0.017) + k * 2.0);
-      const x = Math.max(-lim, Math.min(lim, homeXZ[0] + Math.cos(th) * r)), z = Math.max(-lim, Math.min(lim, homeXZ[1] + Math.sin(th) * r));
-      env.attractors[k].value.set(x, 6.4 + 1.6 * Math.sin(t * (0.11 + k * 0.05) + k * 2.1) + 0.8 * Math.sin(t * 0.29 + k), z);
+      path(k, t, a); path(k, t + 0.6, b);
+      env.attractors[k].value.set(a[0], a[1], a[2]);
+      const dx = b[0] - a[0], dz = b[2] - a[2], l = Math.hypot(dx, dz) || 1;
+      env.attractDirs[k].value.set(dx / l, 0, dz / l);
     }
   }
   const noSim = query.get('fishNoSim') === '1';
   if (query.has('fishScan')) env.scanCap.value = Number(query.get('fishScan'));
   const follow = query.has('fishFollow'), fd = Number(query.get('fishFollow')) || 1, followOffset = new Vector3(4 * fd, 3.5 * fd, 6 * fd);
   if (query.get('fishNoSurface') === '1') world.surface.visible = false;
-  if (query.get('fishHide') === '1') { fishMeshes.mesh.visible = false; if (fishMeshes.shadowMesh) fishMeshes.shadowMesh.visible = false; }
+  if (query.get('fishHide') === '1') { fishMeshes.mesh.visible = false; fishNear.mesh.visible = false; if (fishMeshes.shadowMesh) fishMeshes.shadowMesh.visible = false; }
 
   function controls(folder: FolderApi) {
     const b = folder.addFolder({ title: 'Behaviours', expanded: true });
@@ -211,6 +230,9 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     b.addButton({ title: 'Flash expansion' }).on('click', () => panic(randomInSchool(), 1));
     b.addBinding(behaviour, 'angel', { label: 'Angel fish' });
     b.addBinding({ count: N }, 'count', { readonly: true, label: 'Fish', format: (v: number) => v.toLocaleString() });
+    b.addBinding(lodStats, 'near', { readonly: true, label: 'Visible LOD0', format: (v: number) => v.toLocaleString() });
+    b.addBinding(lodStats, 'far', { readonly: true, label: 'Visible LOD1', format: (v: number) => v.toLocaleString() });
+    b.addBinding(lod.dist, 'value', { label: 'LOD0 distance', min: 2, max: 20, step: 0.5 });
 
     const f = folder.addFolder({ title: 'Flocking', expanded: false });
     f.addBinding(env.speed, 'value', { label: 'Speed', min: 0.3, max: 2.5, step: 0.05 });

@@ -24,8 +24,8 @@ export const visuals = {
 const causticParams = createCausticsUniforms();
 causticParams.scaleA.value = 3.4; causticParams.intensity.value = 1.35; causticParams.sharpness.value = 14;
 
-export function instanceFromSim(read: { pos: any; vel: any; aux: any }, seed: number): InstanceNodes {
-  const i = instanceIndex, p = read.pos.element(i), v = read.vel.element(i), a = read.aux.element(i);
+export function instanceFromSim(read: { pos: any; vel: any; aux: any }, seed: number, list?: any): InstanceNodes {
+  const i = list ? list.element(instanceIndex) : instanceIndex, p = read.pos.element(i), v = read.vel.element(i), a = read.aux.element(i);
   return { P: p.xyz, V: v.xyz, phase: p.w, size: fishRand(i, seed, 12).mul(0.3).add(0.85), flash: a.x, bank: a.y, hidden: step(2.5, a.w), fear: v.w, seed: fishRand(i, seed, 13) };
 }
 
@@ -70,8 +70,9 @@ export interface FishLook {
   procedural?: boolean;
 }
 
-export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodIndex: number | null, inst: InstanceNodes, worldLength: number, count: number, look: FishLook, inspect?: any) {
-  const lod = asset.lods[lodIndex], scale = worldLength / asset.length;
+export function createFishMesh(asset: FishAsset, lodIndex: number, // -1 = the full-detail LOD
+   shadowLodIndex: number | null, inst: InstanceNodes, worldLength: number, count: number, look: FishLook, inspect?: any) {
+  const lod = lodIndex < 0 ? asset.full! : asset.lods[lodIndex], scale = worldLength / asset.length;
   const v = buildVertex(lod, asset.frames, inst, scale, inspect, look.shape);
   const positionNode = v.world.toVarying('fishPos'), normalW = v.normal.toVarying('fishNormal');
   const flashV = inst.flash.toVarying('fishFlash'), seedV = inst.seed.toVarying('fishSeed'), fearV = inst.fear.toVarying('fishFear');
