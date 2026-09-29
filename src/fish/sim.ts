@@ -28,7 +28,7 @@ export function createEnv() {
     // panic
     panicOrigin: [0, 1, 2, 3].map(() => u(new Vector4(0, 0, 0, -1000))),
     panicStrength: u(new Vector4(0, 0, 0, 0)),
-    panicSpeed: u(14.0), burst: u(15.0), calm: u(0.55), transmission: u(0.93),
+    panicSpeed: u(16.0), burst: u(26.0), calm: u(0.4), transmission: u(0.93),
     // lure
     lurePos: u(new Vector3(0, 5, 0)), lureActive: u(0), curiosity: u(0), curiosityRadius: u(5), inspectors: u(100), hooked: u(0),
     strike: u(0), land: u(0), respawn: u(10),
@@ -289,7 +289,7 @@ export function createSim(o: SimOptions) {
         const e = length(vec3(dot(rel, myDir).div(ax3.x), dot(rel, side).div(ax3.y), rel.y.div(ax3.z)));
         acc.y.addAssign(sin(dot(rel, myDir).mul(0.55).sub(clock.mul(0.9)).add(grp)).mul(0.9)); // vertical undulation along the school
         acc.addAssign(side.mul(sin(dot(rel, myDir).mul(0.4).sub(clock.mul(1.1)))).mul(0.8)); // lateral turning wave
-        acc.addAssign(rel.div(max(length(rel), 0.01)).negate().mul(smoothstep(0.55, 1.0, e)).mul(11.0).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(fear.mul(2.5).add(1)).mul(float(1).sub(strag.mul(0.85))));
+        acc.addAssign(rel.div(max(length(rel), 0.01)).negate().mul(smoothstep(0.55, 1.0, e)).mul(14.0).mul(env.attractW).mul(float(1).sub(millW.mul(0.9))).mul(float(1).sub(smoothstep(0.15, 0.6, fear))).mul(float(1).sub(strag.mul(0.85))));
       }
       acc.addAssign(vec3(sin(P.y.mul(0.6).add(clock.mul(0.6))).add(sin(P.z.mul(0.4).sub(clock.mul(0.4)))), sin(P.x.mul(0.45).add(clock.mul(0.5))).mul(0.4), sin(P.x.mul(0.5).sub(clock.mul(0.55))).add(sin(P.y.mul(0.3).add(clock.mul(0.3))))).mul(0.55));
 
@@ -383,17 +383,17 @@ export function createSim(o: SimOptions) {
       });
 
       // --- integrate (turn rate limited)
-      const accMax = float(14.0).mul(fear.mul(4).add(1)).add(select(millW.greaterThan(0.5), float(3), float(0)));
+      const accMax = float(20.0).mul(fear.mul(5).add(1)).add(select(millW.greaterThan(0.5), float(3), float(0)));
       const al = length(acc);
       acc.mulAssign(min(float(1), accMax.div(max(al, 0.001))));
       V.addAssign(acc.mul(dt));
       const sp2 = length(V);
-      const vmax = spd.mul(o.maxSpeed).mul(float(1).add(fear.mul(3.2))).max(spd.mul(o.cruise).mul(1.1));
+      const vmax = spd.mul(o.maxSpeed).mul(float(1).add(fear.mul(5.5))).max(spd.mul(o.cruise).mul(1.1));
       const vmin = spd.mul(o.minSpeed).mul(float(1).sub(fear.mul(0.8)));
       const sp2c = clamp(sp2, vmin, vmax);
       V.assign(V.mul(sp2c.div(max(sp2, 0.001))));
       // after an explosive burst fish decelerate back toward cruise speed
-      V.mulAssign(float(1).sub(clamp(dt.mul(2.4), 0, 1).mul(step(spd.mul(o.cruise).mul(1.6), sp2c))));
+      V.mulAssign(float(1).sub(clamp(dt.mul(3.0), 0, 1).mul(step(spd.mul(o.cruise).mul(1.6), sp2c)).mul(float(1).sub(smoothstep(0.75, 0.95, fear)))));
       // flatten the pitch when calm
       const pitchLim = mix(float(0.55), float(0.95), clamp(fear.mul(1.5), 0, 1));
       const spN = max(length(V), 0.001);

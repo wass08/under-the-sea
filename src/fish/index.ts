@@ -54,7 +54,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   env.millCenter.value.x = homeXZ[0]; env.millCenter.value.z = homeXZ[1]; // circle the island
   // ------------------------------------------------------------------ simulations
   const mainSim = createSim({
-    renderer, env, count: N, seabed, cruise: 2.2, minSpeed: 1.0, maxSpeed: 4.0, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
+    renderer, env, count: N, seabed, cruise: 3.0, minSpeed: 1.4, maxSpeed: 5.0, millInfluence: 1, lureInfluence: 1, fearSensitivity: 1,
     homeClear: 0, homeStrength: 0, homeXZ: [0, 0], homeRadius: 99, clusters: 3, clusterRadius: 3.0, seed: 1, main: true,
     groupCenters: [0, 1, 2].map(k => [homeXZ[0] + Math.cos(k * 2.094) * 12, 6.4, homeXZ[1] + Math.sin(k * 2.094) * 12] as [number, number, number]),
   });
@@ -154,7 +154,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       const now = performance.now(), realDt = Math.min(0.1, (now - lastReal) / 1000); lastReal = now;
       env.dt.value = dt; env.clock.value += dt; env.frame.value += 1;
       // milling blend
-      const target = behaviour.milling ? 1 : 0;
+      const target = behaviour.milling ? 1 : Math.max(0, autoRing);
       env.millBlend.value += (target - env.millBlend.value) * (1 - Math.exp(-dt / 0.9));
       // predator (CPU, single fish)
       // 'Send predator' with the predator switched off: it appears for one charge, then leaves ~5 s later
@@ -211,6 +211,9 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     addControls(folder: FolderApi) { controls(folder); },
   };
   let landFrames = 0;
+  let autoRing = 0, ballW = 0, splitW = 0, modeT = 0, modeIdx = 0;
+  // mode scheduler (like the reference's ball / tornado / ring / split): the school keeps changing shape, cross-faded
+  const MODES: [string, number][] = [['schools', 26], ['ball', 15], ['schools', 18], ['ring', 20], ['schools', 22], ['split', 16]];
   let tempPred = false, tempPredTimer = -1, tempPredCharges = 0;
   let behaviourFolder: FolderApi | null = null;
   // the lure is a threat when dragged fast through the water (velocity derived from the positions setLure receives)
@@ -234,8 +237,11 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
     attT += dt;
     const t = attT;
     panicEnv *= Math.exp(-dt / 3.2);
+    modeT += dt; if (modeT > MODES[modeIdx][1]) { modeT = 0; modeIdx = (modeIdx + 1) % MODES.length; }
+    const mode = MODES[modeIdx][0], km = 1 - Math.exp(-dt * 0.3);
+    ballW += ((mode === 'ball' ? 1 : 0) - ballW) * km; splitW += ((mode === 'split' ? 1 : 0) - splitW) * km; autoRing += ((mode === 'ring' ? 0.85 : 0) - autoRing) * km;
     // density breathes; after a panic the school contracts defensively, then relaxes
-    env.axesScale.value = (1 + 0.28 * Math.sin(t * 0.35)) * (1 - 0.5 * panicEnv);
+    env.axesScale.value = (1 + 0.28 * Math.sin(t * 0.35)) * (1 + 0.45 * ballW) * (1 - 0.5 * panicEnv);
     env.peel.value = 0.03 + 0.15 * Math.max(0, Math.sin(t * 0.13 + 1));
     // three sub-group attractors: a shared wandering centre plus offsets whose spread breathes, so groups split and merge
     // three sub-schools sail around the island; their angular spread breathes so they separate and merge
@@ -246,7 +252,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
       kick[k] += (kickTarget[k] - kick[k]) * (1 - Math.exp(-dt * 0.6));
     }
     const lim = WORLD.half - 5, path = (k: number, tt: number, out: number[]) => {
-      const spread = 2.0 * (0.5 + 0.5 * Math.sin(tt * 0.05 + 1.0)) + kick[k];
+      const spread = (2.0 * (0.5 + 0.5 * Math.sin(tt * 0.05 + 1.0)) + kick[k]) * (1 - ballW) * (1 + 0.6 * splitW);
       const th = tt * 0.11 + 0.7 + (k - 1) * spread + 0.2 * Math.sin(tt * (0.09 + k * 0.03) + k), r = 12 + 2.5 * Math.sin(tt * (0.04 + k * 0.017) + k * 2.0);
       out[0] = Math.max(-lim, Math.min(lim, homeXZ[0] + Math.cos(th) * r)); out[2] = Math.max(-lim, Math.min(lim, homeXZ[1] + Math.sin(th) * r));
       out[1] = 6.4 + 1.2 * Math.sin(tt * (0.11 + k * 0.05) + k * 2.1);

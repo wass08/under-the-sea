@@ -47,11 +47,16 @@ export async function createWorld({ renderer, scene, camera }: Ctx): Promise<Wor
   const bubbles = createBubbles(scene);
   if (OFF.has('bubbles')) bubbles.mesh.visible = false;
   if (OFF.has('reflect')) water.reflection.target.visible = false;
+  if (OFF.has('water')) { water.surface.visible = false; water.front.visible = false; water.back.visible = false; }
+  if (OFF.has('wtop')) water.surface.visible = false;
+  if (OFF.has('wside')) { water.front.visible = false; water.back.visible = false; }
+  if (OFF.has('terrain')) { terrainMesh.visible = false; slabMesh.visible = false; }
   if (new URLSearchParams(location.search).has('testfish')) addTestFish(scene);
   const heightProbe = new URLSearchParams(location.search).has('testheight') ? addHeightProbes(scene) : null;
   const post = createPost(renderer, scene, camera, heightTexture);
   // One shadow-map render per frame, shared by the main and inset passes.
   sun.shadow.autoUpdate = false; sun.shadow.needsUpdate = true;
+  if (new URLSearchParams(location.search).has('noshadow')) sun.castShadow = false;
   let insetCam: PerspectiveCamera | null = null, insetRect: InsetRect | null = null;
   const size = new Vector2();
   const applyInset = () => {

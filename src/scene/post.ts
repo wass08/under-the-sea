@@ -130,7 +130,7 @@ export function createPost(renderer: WebGPURenderer, scene: Scene, camera: Persp
       rectUniform.value.set(rect.x / cssWidth, rect.y / cssHeight, rect.width / cssWidth, rect.height / cssHeight);
       let rebuilt = false;
       if (insetCamera !== cam) { buildInset(cam); rebuilt = true; }
-      insetPass!.setResolutionScale(Math.min(1, rect.width / cssWidth));
+      insetPass!.setResolutionScale(Number(new URLSearchParams(location.search).get('iscale')) || Math.min(1, rect.width / cssWidth));
       return rebuilt;
     },
     get insetActive() { return insetPass !== null; },

@@ -1,7 +1,7 @@
 /**
  * World dimensions for the floating water diorama. One world unit ≈ 25 cm.
  * The diorama is a 36 × 36 block: an earth slab (strata visible on the sides, flat
- * bottom) with 9 units of water on top and a sandy palm island in the middle,
+ * bottom) with 9 units of water on top and a sandy palm island in the back-left corner,
  * floating above an open ground plane.
  */
 export const WORLD = {
@@ -23,8 +23,14 @@ export const SWIM_BOUNDS = {
   max: [WORLD.half - 0.6, WORLD.surface - 0.35, WORLD.half - 0.6] as const,
 };
 
-/** Boat mooring point on the water (x, z). The fisherman casts from here. */
-export const BOAT = { x: 8.5, z: 9.5, heading: -2.4 } as const;
+/** Palm island centre (x, z): the back-left corner, away from the default camera (+x, +z). */
+export const ISLAND = { x: -9.5, z: -9.5 } as const;
+
+/** Open-water basin centre (x, z): where the school lives by default and mills. */
+export const BASIN = { x: 4, z: 3.5 } as const;
+
+/** Boat mooring point on the water (x, z), near the middle, slightly toward the camera. The fisherman casts from here. */
+export const BOAT = { x: 2.5, z: 6.5, heading: -2.4 } as const;
 
 /** URL switches, read once. */
 const query = new URLSearchParams(location.search);
