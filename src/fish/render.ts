@@ -108,7 +108,7 @@ export function createFishMesh(asset: FishAsset, lodIndex: number, shadowLodInde
 
   const glint = flashV.mul(visuals.flashGain).mul(abs(dot(N, Vw)).mul(0.5).add(0.5)).mul(isBody);
   // silvery cyan flank glint that keeps a hint of the texture (feeds the bloom above 1)
-  const glintColor = mix(vec3(0.45, 0.85, 1.0).mul(1.5), tinted.mul(2.2), 0.3).mul(glint).add(vec3(0.7, 0.95, 1.0).mul(glint.mul(glint).mul(glint).mul(0.9)));
+  const glintColor = mix(vec3(0.45, 0.85, 1.0).mul(1.25), tinted.mul(2.0), 0.3).mul(glint).add(vec3(0.7, 0.95, 1.0).mul(glint.mul(glint).mul(glint).mul(0.9)));
   const dbg = new URLSearchParams(location.search).get('fishLite');
   material.emissiveNode = dbg === '1' ? glintColor : dbg === '2' ? glintColor.add(sheen) : tinted.mul(caustic).mul(0.9).add(sheen).add(glintColor);
 

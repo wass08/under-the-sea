@@ -244,7 +244,7 @@ export async function createSchool(ctx: Ctx, world: World): Promise<School> {
   if (demo === 'fountain') { behaviour.fountain = true; setTimeout(() => predator.send(), 2500); }
   if (demo === 'panic') setTimeout(() => panic(stats.centroid.clone(), 1), 3500);
   if (demo === 'flash') setInterval(() => panic(randomInSchool(), 1), 6000);
-  (window as any).fishDebug = { school, behaviour, env, tris, panic: (x: number, y: number, z: number, s = 1) => panic(new Vector3(x, y, z), s) };
+  (window as any).fishDebug = { school, behaviour, env, tris, visuals, readAux: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.aux.value)), readVel: async () => new Float32Array(await renderer.getArrayBufferAsync(mainSim.vel.value)), panic: (x: number, y: number, z: number, s = 1) => panic(new Vector3(x, y, z), s) };
   void simTime; void Vector4; void SWIM_BOUNDS; void sampleHeight;
 
   return school;

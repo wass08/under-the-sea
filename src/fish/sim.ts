@@ -332,8 +332,11 @@ export function createSim(o: SimOptions) {
       fear.assign(max(fear.sub(env.calm.mul(dt)), 0));
       const target = fearN.mul(env.transmission).mul(o.fearSensitivity);
       fear.assign(mix(fear, max(fear, target), clamp(dt.mul(9), 0, 1)));
-      const crossed = step(fear0.max(0.0), 0.4).mul(step(0.4, fear)).mul(float(1).sub(hitAny));
-      If(crossed.greaterThan(0.5).and(fearN.greaterThan(0.5)), () => {
+      // instant alarm: a calm fish whose neighbours are terrified bursts away (once; own fear then stays high so it cannot re-trigger)
+      // each calm fish reacts after a random delay (~0.2 s per hop), so alarm ripples through the school slower than the spherical front
+      const alarm = step(fear0, 0.25).mul(step(0.55, target)).mul(float(1).sub(hitAny)).mul(step(hash(iF.add(env.frame.mul(7.31))), clamp(dt.mul(5), 0, 1)));
+      If(alarm.greaterThan(0.5), () => {
+        fear.assign(max(fear, target.mul(0.95)));
         const away = normalize(fearDir.add(randDir(7).mul(0.2)).add(dirV.mul(0.5)));
         V.assign(mix(V, away.mul(env.burst).mul(0.75).mul(rB.mul(0.3).add(0.85)), 0.8));
         flash.assign(1);
@@ -378,7 +381,7 @@ export function createSim(o: SimOptions) {
       bank.assign(mix(bank, clamp(lat.mul(0.11), -1.0, 1.0), clamp(dt.mul(7), 0, 1)));
       const ang = length(cross(dirV, dirN)).div(max(dt, 0.0005));
       turnS.assign(mix(turnS, ang, clamp(dt.mul(10), 0, 1)));
-      flash.assign(max(flash.mul(exp(dt.mul(-3.2))), smoothstep(4.0, 11.0, turnS).mul(fear.mul(0.9).add(0.1)).min(1).mul(0.6)));
+      flash.assign(max(flash.mul(exp(dt.mul(-11.0))), smoothstep(4.0, 11.0, turnS).mul(fear.mul(0.9).add(0.1)).min(1).mul(0.4)));
       phaseRate.assign(float(0.9).add(speedNow.mul(0.85)).add(fear.mul(1.2)));
       alive.assign(1);
     });
