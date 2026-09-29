@@ -1,5 +1,5 @@
 import './style.css';
-import { Vector3 } from 'three/webgpu';
+import { Plane, Vector3 } from 'three/webgpu';
 import type { Raycaster } from 'three/webgpu';
 import type { FolderApi } from 'tweakpane';
 import type { Ctx, Fishing, School, World } from '../contracts';
@@ -121,13 +121,16 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
     }
   }
 
+  const waterPlane = new Plane(new Vector3(0, 1, 0), -WORLD.surface);
   function click(raycaster: Raycaster): boolean {
     if (game.phase === 'bite') return game.hook();
-    const hits = raycaster.intersectObject(world.surface, false);
-    if (!hits.length) return false;
+    // The surface mesh is displaced on the GPU, so intersect the resting water plane analytically.
+    const point = raycaster.ray.intersectPlane(waterPlane, new Vector3());
+    if (!point || Math.abs(point.x) > WORLD.half || Math.abs(point.z) > WORLD.half) return false;
+    const distance = raycaster.ray.origin.distanceTo(point);
     const terrain = raycaster.intersectObjects(world.terrain, false);
-    if (terrain.length && terrain[0].distance < hits[0].distance - 1e-3) return false; // island in the way
-    return game.requestCast(hits[0].point);
+    if (terrain.length && terrain[0].distance < distance - 1e-3) return false; // island in the way
+    return game.requestCast(point);
   }
 
   addEventListener('keydown', e => { if (e.code === 'Space' && game.phase === 'bite') { e.preventDefault(); game.hook(); } });
