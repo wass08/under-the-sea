@@ -22,3 +22,4 @@ verify/ui/*.png
 dist-*/
 legacy/verify/**/*.png
 shots/
+.claude/worktrees/
