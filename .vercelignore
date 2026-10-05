@@ -1,0 +1,10 @@
+# Upload only what the Vite build needs.
+legacy/
+shots/
+verify/
+dist/
+dist-*/
+tools/
+.claude/
+node_modules/
+*.log

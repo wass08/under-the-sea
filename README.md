@@ -1,5 +1,9 @@
 # Under the sea — Wawa Sensei
 
+[![Every part has a name — watch the video](docs/cover.jpg)](https://youtu.be/N1rIC35MDjw)
+
+▶ **[Watch the video](https://youtu.be/N1rIC35MDjw)** · 🌊 **[Live demo](https://underthesea.wawasensei.dev)**
+
 *You can't prompt what you can't name*, episode 2: **Boids & GPGPU**.
 
 An open sea at night that runs off into fog: no diorama box and no horizon line. Height fog hides every edge; three rings of mountain silhouettes fade into it at increasing distances, a low moon hangs over the far ridges, and a few distant boats show as warm lantern points with soft halos. Under the water, 9.2 units deep, a sandy floor with reef mounds and fluorescent coral, glowing algae and 4,096 cá chuồn (flying fish) simulated on the GPU. A fisherman sits on a Li River–style bamboo raft under a paper lantern hung from an arching bamboo pole; the lantern lights the boat, glitters on the water and pools warm light on the sand below, while a global network of moon caustics shimmers across the seabed. A procedural night HDRI with the moon supplies the cool blue fill and the moon's highlights on the water, the raft and the fish. Fish range from small juveniles to larger adults, with roughly three times the length between the smallest and largest. They start spread through navigable water and show three collective behaviours: **milling**, the **fountain effect** and **flash expansion**. The fisherman casts a line: the splash scatters the school, calm returns, curious fish inspect the lure, one of them bites, and you click to hook it.
