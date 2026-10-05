@@ -6,7 +6,7 @@ const args = process.argv.slice(2);
 const flag = (name, fallback) => { const i = args.indexOf(name); if (i < 0) return fallback; const v = args[i + 1]; args.splice(i, 2); return v; };
 const evalJs = flag('--eval', null), width = Number(flag('--w', 1600)), height = Number(flag('--h', 900));
 const [url, out = 'shots/shot.png', wait = '4000'] = args;
-const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({ headless: true, args: ['--mute-audio', '--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
 const logs = [];
 page.on('console', m => { if (['error', 'warning'].includes(m.type())) logs.push(`[${m.type()}] ${m.text()}`.slice(0, 600)); });

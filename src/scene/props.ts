@@ -1,12 +1,13 @@
-import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CylinderGeometry, Euler, Float32BufferAttribute, LatheGeometry, Mesh, MeshStandardNodeMaterial, Object3D, Quaternion, Scene, TorusGeometry, TubeGeometry, Vector2, Vector3 } from 'three/webgpu';
+import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CircleGeometry, CylinderGeometry, Euler, Float32BufferAttribute, LatheGeometry, Mesh, MeshStandardNodeMaterial, Object3D, Quaternion, Scene, TorusGeometry, TubeGeometry, Vector2, Vector3 } from 'three/webgpu';
 import type { Node } from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { attribute, color, float, mix, mx_noise_float, normalWorldGeometry, positionLocal, positionWorld, smoothstep, vec3, vertexColor } from 'three/tsl';
+import { attribute, color, float, mix, mx_noise_float, normalWorldGeometry, positionLocal, positionWorld, smoothstep, transformNormalToView, vec3, vertexColor } from 'three/tsl';
 import { BASIN, BOAT, WORLD } from '../config';
 import { simTime } from '../state';
 import { random } from '../lib/random';
 import { emitRipple, oceanHeightCpu } from '../lib/ocean';
 import { underwaterShading } from './materials';
+import { moonOnly } from './lighting';
 
 const c = (hex: string) => color(hex) as unknown as Node<'vec3'>;
 
@@ -25,7 +26,7 @@ function paint(g: BufferGeometry, hex: string, grain: [number, number, number], 
   for (let i = 0; i < n; i++) { col.set([lin(r) * k, lin(gg) * k, lin(b) * k], i * 3); gr.set(grain, i * 3); }
   geo.setAttribute('color', new Float32BufferAttribute(col, 3));
   geo.setAttribute('aGrain', new Float32BufferAttribute(gr, 3));
-  geo.computeVertexNormals();
+  if (!geo.hasAttribute('normal')) geo.computeVertexNormals();
   return geo;
 }
 const place = (g: BufferGeometry, x: number, y: number, z: number, rx = 0, ry = 0, rz = 0) => {
@@ -106,24 +107,48 @@ function barrelGeometry() {
   return mergeGeometries(parts)!;
 }
 
-/** A bleached, bent log with a stub of a branch. */
+/** Water-worn timber: continuous tapered bark, asymmetric forks and exposed end grain. */
 function driftwoodGeometry() {
-  const curve = new CatmullRomCurve3([new Vector3(-1.5, 0, 0), new Vector3(-0.6, 0.12, 0.2), new Vector3(0.4, 0.05, -0.15), new Vector3(1.4, 0.16, 0.05)]);
-  const main = new TubeGeometry(curve, 40, 0.17, 10, false);
-  const p = main.getAttribute('position');
-  for (let i = 0; i < p.count; i++) { const k = 1 + 0.12 * Math.sin(i * 0.37) + 0.08 * Math.sin(i * 1.1); p.setXYZ(i, p.getX(i) * (1 + (k - 1) * 0.3), p.getY(i) * k, p.getZ(i) * k); }
-  const parts = [paint(main, '#b7aa94', [0.6, 14, 14], 0.1, 11)];
-  const stub = new CylinderGeometry(0.06, 0.1, 0.5, 8); stub.rotateZ(-0.9); stub.translate(-0.3, 0.3, 0.1);
-  parts.push(paint(stub, '#a89b86', [0.6, 14, 14], 0.1, 12));
+  const parts: BufferGeometry[] = [];
+  const limb = (points: Vector3[], radius: number, taper: number, seed: number) => {
+    const curve = new CatmullRomCurve3(points), segments = 56, sides = 16;
+    const geometry = new TubeGeometry(curve, segments, 1, sides, false);
+    const p = geometry.getAttribute('position');
+    const thickness = (t: number) => radius * (1 - taper * t) * (1 + 0.1 * Math.sin(t * 14 + seed));
+    for (let ring = 0; ring <= segments; ring++) {
+      const t = ring / segments, centre = curve.getPointAt(t);
+      for (let j = 0; j <= sides; j++) {
+        const i = ring * (sides + 1) + j, a = j / sides * Math.PI * 2;
+        const bark = 1 + 0.065 * Math.sin(a * 7 + t * 11) + 0.025 * Math.sin(a * 13 - t * 27);
+        const offset = new Vector3(p.getX(i), p.getY(i), p.getZ(i)).sub(centre).multiplyScalar(thickness(t) * bark);
+        p.setXYZ(i, centre.x + offset.x, centre.y + offset.y, centre.z + offset.z);
+      }
+    }
+    geometry.computeVertexNormals();
+    parts.push(paint(geometry, '#9e8968', [0.45, 32, 32], 0.05, seed));
+    for (const t of [0, 1]) {
+      const cap = new CircleGeometry(thickness(t), sides);
+      const normal = curve.getTangentAt(t).multiplyScalar(t === 0 ? -1 : 1), centre = curve.getPointAt(t);
+      cap.applyQuaternion(new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), normal));
+      cap.translate(centre.x, centre.y, centre.z);
+      parts.push(paint(cap, '#c4aa80', [5, 5, 5], 0.03, seed + 1));
+    }
+  };
+  limb([new Vector3(-1.6, 0, 0), new Vector3(-0.7, 0.08, 0.1), new Vector3(0.4, 0.02, -0.08), new Vector3(1.6, 0.14, 0.04)], 0.22, 0.5, 11);
+  limb([new Vector3(-0.9, 0.04, 0.03), new Vector3(-0.65, 0.22, 0.3), new Vector3(-0.42, 0.3, 0.65)], 0.1, 0.78, 17);
+  limb([new Vector3(0.3, 0.04, -0.06), new Vector3(0.72, 0.19, -0.3), new Vector3(1.0, 0.27, -0.45)], 0.075, 0.75, 23);
+  limb([new Vector3(-1.45, 0.0, 0), new Vector3(-1.75, -0.02, -0.19), new Vector3(-1.98, 0.09, -0.32)], 0.095, 0.86, 31);
   return mergeGeometries(parts)!;
 }
 
 function propMaterial(gloss: number) {
   const m = new MeshStandardNodeMaterial({ roughness: gloss, metalness: 0 });
+  m.lightsNode = moonOnly(); // the lantern is added by underwaterShading
   const grain = attribute('aGrain', 'vec3') as unknown as Node<'vec3'>;
   const p = positionLocal;
   const fibre = mx_noise_float(p.mul(grain)).mul(0.5).add(0.5), fine = mx_noise_float(p.mul(grain.mul(3.1)).add(4)).mul(0.5).add(0.5);
   const hasGrain = smoothstep(0.1, 0.5, grain.x.add(grain.y).add(grain.z));
+  m.normalNode = transformNormalToView(normalWorldGeometry.add(vec3(0, fibre.sub(0.5), fine.sub(0.5)).mul(0.16).mul(hasGrain)).normalize());
   const base = vertexColor().rgb;
   const weathered = base.mul(mix(float(1), fibre.mul(0.5).add(fine.mul(0.2)).add(0.55), hasGrain));
   // Salt-stained pale top, darker soaked lower part, faint algae right at the waterline.
@@ -146,13 +171,7 @@ export function createFloatingProps(scene: Scene) {
   void metal;
   const rng = random(77);
   const defs: { geo: BufferGeometry; mat: MeshStandardNodeMaterial; at: [number, number]; draft: number; size: number; spread: number; yaw: number }[] = [
-    { geo: crateGeometry(2), mat: wood, at: [-13, 8], draft: 0.34, size: 1, spread: 2.6, yaw: 0.06 },
-    { geo: crateGeometry(5), mat: wood, at: [-10.5, 11.8], draft: 0.4, size: 0.9, spread: 2.2, yaw: -0.05 },
-    { geo: crateGeometry(7), mat: wood, at: [13, -9], draft: 0.36, size: 1.05, spread: 2.8, yaw: 0.04 },
-    { geo: crateGeometry(4), mat: wood, at: [6, -14], draft: 0.38, size: 0.85, spread: 2.4, yaw: -0.07 },
-    { geo: lifebuoyGeometry(), mat: painted, at: [-4, 14], draft: 0.12, size: 1.1, spread: 2.0, yaw: 0.08 },
-    { geo: barrelGeometry(), mat: wood, at: [14.5, 4], draft: 0.55, size: 1, spread: 2.2, yaw: 0.03 },
-    { geo: driftwoodGeometry(), mat: wood, at: [-14.5, -1], draft: 0.08, size: 1.3, spread: 3.0, yaw: 0.05 },
+    { geo: driftwoodGeometry(), mat: wood, at: [-13.5, 7], draft: 0.08, size: 1.3, spread: 1.3, yaw: 0.05 },
   ];
   const props: Prop[] = defs.map((d, i) => {
     const mesh = new Mesh(d.geo, d.mat); mesh.castShadow = true; mesh.receiveShadow = true; mesh.layers.enable(1); mesh.frustumCulled = false; mesh.scale.setScalar(d.size * 1.7);

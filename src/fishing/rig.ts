@@ -1,7 +1,10 @@
-import { BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, DoubleSide, DynamicDrawUsage, Group, Mesh, MeshBasicNodeMaterial, MeshStandardNodeMaterial, PerspectiveCamera, Quaternion, Scene, SphereGeometry, TorusGeometry, Vector3 } from 'three/webgpu';
+import { BoxGeometry, CatmullRomCurve3, TubeGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, DoubleSide, DynamicDrawUsage, Group, Mesh, MeshBasicNodeMaterial, MeshStandardNodeMaterial, PerspectiveCamera, Quaternion, Scene, SphereGeometry, TorusGeometry, Vector3 } from 'three/webgpu';
 import type { World } from '../contracts';
 import { clamp, RIG_SCALE, merge, mk, smoothMaterial } from './build';
 import type { Game } from './game';
+import { cameraPosition, float, mix, positionWorld, smoothstep, vec3 } from 'three/tsl';
+import { lanternPosition, lanternPower, waterLevel } from '../state';
+import { lanternColor } from '../scene/night';
 
 const A = 22; // points tip -> bobber
 const B = 4; // points bobber -> lure
@@ -18,8 +21,15 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
   const index: number[] = [];
   for (let i = 0; i < P - 1; i++) { const a = i * 2; index.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
   geometry.setIndex(index);
-  const lineMat = new MeshBasicNodeMaterial({ color: new Color('#f2fbff'), side: DoubleSide, transparent: true, opacity: 0.9, depthWrite: false });
-  const line = new Mesh(geometry, lineMat); line.frustumCulled = false; line.renderOrder = 2; scene.add(line);
+  // Opaque, so it is part of the opaque pass the water roof samples from below: the line reads as a thin dark thread
+  // dropping from the rod against Snell's window and the lantern pool. Above water it is a dim moonlit thread; both
+  // catch a warm glint from the lantern (softened inverse square).
+  const lineMat = new MeshBasicNodeMaterial({ side: DoubleSide });
+  const toLamp = lanternPosition.sub(positionWorld), lampFall = float(1.4).div(toLamp.dot(toLamp).add(1.4));
+  const camUnder = smoothstep(0, 0.4, waterLevel.sub(cameraPosition.y));
+  lineMat.colorNode = mix(vec3(0.11, 0.13, 0.18), vec3(0.003, 0.004, 0.007), camUnder)
+    .add(lanternColor.mul(lanternPower).mul(lampFall).mul(mix(float(0.35), float(0.18), camUnder)));
+  const line = new Mesh(geometry, lineMat); line.frustumCulled = false; line.renderOrder = 7; scene.add(line);
 
   // ---- bobber ----
   const bobber = new Group(); bobber.name = "Fishing bobber";
@@ -36,16 +46,21 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
   bobberMesh.castShadow = true; bobber.add(bobberMesh); bobber.scale.setScalar(1.15 * RIG_SCALE / 1.35); scene.add(bobber);
 
   // ---- lure (spoon + hook + glint) ----
-  const lure = new Group();
+  const lure = new Group(); lure.name = 'Fishing lure';
   const spoonMat = new MeshStandardNodeMaterial({ color: '#dfeaf0', metalness: 0.95, roughness: 0.18, emissive: new Color('#bfe8ff'), emissiveIntensity: 0.8, flatShading: true });
   const spoon = new Mesh(new SphereGeometry(0.06, 8, 6), spoonMat); spoon.scale.set(0.5, 1.35, 0.2); spoon.position.y = -0.03;
   const hookMat = new MeshStandardNodeMaterial({ color: '#8f99a3', metalness: 1, roughness: 0.3 });
-  const hook = new Mesh(new TorusGeometry(0.03, 0.006, 4, 10, Math.PI * 1.3), hookMat); hook.position.set(0, -0.13, 0); hook.rotation.z = Math.PI * 0.35;
+  const hookTipLocal = new Vector3(0.04, -0.145, 0);
+  const hookCurve = new CatmullRomCurve3([new Vector3(0, -0.10, 0), new Vector3(0, -0.18, 0), new Vector3(0.02, -0.205, 0), new Vector3(0.045, -0.18, 0), hookTipLocal]);
+  const hook = new Mesh(new TubeGeometry(hookCurve, 24, 0.004, 6, false), hookMat);
+  const point = new Mesh(new ConeGeometry(0.0045, 0.018, 6), hookMat);
+  point.position.copy(hookTipLocal).add(new Vector3(0, -0.009, 0));
   const bead = new Mesh(new SphereGeometry(0.018, 6, 4), new MeshStandardNodeMaterial({ color: '#e8433a', emissive: new Color('#ff3020'), emissiveIntensity: 0.5 }));
   bead.position.y = 0.045;
   const glowMat = new MeshBasicNodeMaterial({ color: new Color(1.8, 1.9, 1.6), transparent: true, opacity: 0.3, depthWrite: false });
   const glow = new Mesh(new SphereGeometry(0.045, 8, 6), glowMat);
-  lure.add(spoon, hook, bead, glow); lure.scale.setScalar(1.25 * RIG_SCALE / 1.35); scene.add(lure);
+  glow.renderOrder = 7;
+  lure.add(spoon, hook, point, bead, glow); lure.scale.setScalar(1.25 * RIG_SCALE / 1.35); scene.add(lure);
   spoon.castShadow = true;
 
   // ---- placeholder fish (used only with the mock school) ----
@@ -127,16 +142,19 @@ export function createRig(scene: Scene, world: World, game: Game, camera: Perspe
       const upTo = phase === 'reeling' || phase === 'celebrate' ? tip : game.bobber;
       dir.subVectors(upTo, game.lure);
       if (dir.lengthSq() > 1e-6) { dir.normalize(); q.setFromUnitVectors(UP, dir); lure.quaternion.slerp(q, 0.35); }
-      lure.rotateY(clock * 3);
+      lure.rotateY(Math.sin(clock * 1.25) * 0.08);
       spoonMat.emissiveIntensity = 0.9 + Math.sin(clock * 7.3) * 0.5 + Math.max(0, Math.sin(clock * 2.9)) * 1.4;
       glowMat.opacity = 0.05 + Math.max(0, Math.sin(clock * 2.9 + 0.4)) * 0.22;
+
+      lure.updateMatrixWorld(true);
+      game.hookPoint.copy(hookTipLocal); lure.localToWorld(game.hookPoint);
 
       // fish placeholder
       const fishOn = usingMock && (game.fishVisible || phase === 'bite');
       fish.visible = fishOn;
       if (fishOn) {
         const thrash = Math.sin(clock * 24) * 0.45 * (phase === 'celebrate' ? 0.3 : 1);
-        fish.position.copy(game.lure);
+        fish.position.copy(game.hookPoint);
         tmp.subVectors(game.lure, prevLure);
         fish.rotation.set(0, 0, phase === 'bite' ? thrash * 0.5 : Math.PI / 2 - 0.25 + thrash * 0.5);
         fish.rotateY(clock * 0.0);

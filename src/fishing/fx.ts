@@ -1,126 +1,104 @@
-import { AdditiveBlending, CircleGeometry, Color, CylinderGeometry, DoubleSide, InstancedMesh, Matrix4, Mesh, MeshBasicNodeMaterial, Quaternion, RingGeometry, Scene, SphereGeometry, Vector3 } from 'three/webgpu';
-import type { BufferGeometry } from 'three/webgpu';
+import { DynamicDrawUsage, InstancedBufferAttribute, InstancedMesh, MeshBasicNodeMaterial, PlaneGeometry, Scene, Vector3 } from 'three/webgpu';
+import type { Node } from 'three/webgpu';
+import { float, instanceIndex, instancedBufferAttribute } from 'three/tsl';
 import type { World } from '../contracts';
-import { RIG_SCALE, rand } from './build';
+import { rand } from './build';
+import { WORLD } from '../config';
+import { dropletColor, dropletStreak } from '../lib/droplets';
+import { glowBlending } from '../lib/blending';
 
-/** FX scale relative to the original 1.35 rig. */
-const K = RIG_SCALE / 1.35;
-
-const MAX = 1100, GRAVITY = 11, RINGS = 5, DISCS = 4, CROWNS = 3;
-const UP = new Vector3(0, 1, 0);
+const MAX = 2400;
+/** World units: 1 unit ≈ 25 cm. Gravity is a little gentler than real (39 u/s²), matching the stylised swell. */
+const GRAVITY = 24;
 
 /**
- * Water FX: motion-stretched additive droplets (one instanced mesh, CPU ballistic), an expanding crown sheet,
- * a short-lived foam disc, foam rings and drips that make mini ripples when they land.
+ * Splash spray for the line and lure: real-sized droplets on CPU ballistics with size-dependent air drag, drawn as
+ * motion-blurred glints (src/lib/droplets.ts). The water's own dispersive ripples (src/lib/ocean.ts) provide the rings;
+ * there are no flat ring / disc / crown-sheet sprites any more. A splash has three parts:
+ *  - crown: drops torn off the rim of the crater, thrown outward at 40–70°;
+ *  - spray: fine mist from the impact, steep and fast;
+ *  - jet: for strong impacts, a few heavier drops shot straight up as the crater collapses (~0.15 s later).
  */
 export function createFx(scene: Scene, world: World, onDripHit: (p: Vector3) => void) {
-  const mat = new MeshBasicNodeMaterial({ color: new Color(1.1, 1.35, 1.5), transparent: true, opacity: 0.55, depthWrite: false, blending: AdditiveBlending });
-  const mesh = new InstancedMesh(new SphereGeometry(1, 6, 4), mat, MAX);
-  mesh.frustumCulled = false; mesh.count = MAX; mesh.renderOrder = 3;
+  const P = new Float32Array(MAX * 4), V = new Float32Array(MAX * 4);
+  const pAttr = new InstancedBufferAttribute(P, 4), vAttr = new InstancedBufferAttribute(V, 4);
+  pAttr.setUsage(DynamicDrawUsage); vAttr.setUsage(DynamicDrawUsage);
+  const aP = instancedBufferAttribute(pAttr, 'vec4') as unknown as Node<'vec4'>, aV = instancedBufferAttribute(vAttr, 'vec4') as unknown as Node<'vec4'>;
+  const mat = glowBlending(new MeshBasicNodeMaterial({ transparent: true, depthWrite: false, side: 2 }));
+  mat.fog = false;
+  const streak = dropletStreak(aP.xyz, aV.xyz, aP.w);
+  mat.positionNode = streak.position;
+  mat.colorNode = dropletColor(aP.xyz, streak.coverage, float(instanceIndex), aV.w);
+  const mesh = new InstancedMesh(new PlaneGeometry(1, 1), mat, MAX);
+  mesh.name = 'Splash droplets'; mesh.frustumCulled = false; mesh.renderOrder = 7;
   scene.add(mesh);
+  if (new URLSearchParams(location.search).get('off')?.split(',').includes('splash')) mesh.visible = false;
 
-  const px = new Float32Array(MAX), py = new Float32Array(MAX), pz = new Float32Array(MAX);
-  const vx = new Float32Array(MAX), vy = new Float32Array(MAX), vz = new Float32Array(MAX);
-  const age = new Float32Array(MAX), life = new Float32Array(MAX), size = new Float32Array(MAX), alive = new Uint8Array(MAX);
-  const zero = new Matrix4().makeScale(0, 0, 0), m = new Matrix4(), q = new Quaternion(), dir = new Vector3(), sc = new Vector3(), pos = new Vector3();
-  for (let i = 0; i < MAX; i++) mesh.setMatrixAt(i, zero);
+  const age = new Float32Array(MAX), radius = new Float32Array(MAX), alive = new Uint8Array(MAX);
   let cursor = 0, active = 0, hitCooldown = 0;
   const tmp = new Vector3();
 
-  function spawn(x: number, y: number, z: number, ax: number, ay: number, az: number, s: number, l: number) {
+  /** delay: seconds before the drop appears (the jet rises after the crater collapses). */
+  function spawn(x: number, y: number, z: number, vx: number, vy: number, vz: number, r: number, delay = 0) {
     const i = cursor; cursor = (cursor + 1) % MAX;
     if (!alive[i]) active++;
-    alive[i] = 1; px[i] = x; py[i] = y; pz[i] = z; vx[i] = ax * K; vy[i] = ay * Math.sqrt(K); vz[i] = az * K; age[i] = 0; life[i] = l * Math.sqrt(K); size[i] = s * K;
+    alive[i] = 1; age[i] = -delay; radius[i] = r;
+    P.set([x, y, z, 0], i * 4); V.set([vx, vy, vz, 0], i * 4);
   }
-
-  const glowMat = () => new MeshBasicNodeMaterial({ color: new Color(1.2, 1.5, 1.65), transparent: true, opacity: 0, depthWrite: false, side: DoubleSide, blending: AdditiveBlending });
-  interface Fade { mesh: Mesh; mat: MeshBasicNodeMaterial; t: number; dur: number; radius: number; peak: number; x: number; y: number; z: number }
-  const mkPool = (n: number, geo: BufferGeometry, order: number): Fade[] => Array.from({ length: n }, () => {
-    const mm = glowMat(), mesh2 = new Mesh(geo, mm); mesh2.visible = false; mesh2.renderOrder = order; mesh2.frustumCulled = false; scene.add(mesh2);
-    return { mesh: mesh2, mat: mm, t: 1, dur: 1, radius: 1, peak: 0.6, x: 0, y: 0, z: 0 };
-  });
-  const ringGeo = new RingGeometry(0.72, 1, 40); ringGeo.rotateX(-Math.PI / 2);
-  const rings = mkPool(RINGS, ringGeo, 2);
-  const shockGeo = new RingGeometry(0.94, 1, 64); shockGeo.rotateX(-Math.PI / 2);
-  const shocks = mkPool(2, shockGeo, 2);
-  const discGeo = new CircleGeometry(1, 32); discGeo.rotateX(-Math.PI / 2);
-  const discs = mkPool(DISCS, discGeo, 2);
-  const crownGeo = new CylinderGeometry(1, 0.55, 1, 28, 1, true); crownGeo.translate(0, 0.5, 0);
-  const crowns = mkPool(CROWNS, crownGeo, 3);
-  const cursors = { ring: 0, disc: 0, crown: 0, shock: 0 };
-  const start = (pool: Fade[], key: 'ring' | 'disc' | 'crown' | 'shock', p: Vector3, radius: number, dur: number, peak: number) => {
-    const r = pool[cursors[key]]; cursors[key] = (cursors[key] + 1) % pool.length;
-    r.t = 0; r.dur = dur; r.radius = radius * K; r.peak = peak; r.x = p.x; r.z = p.z; r.y = p.y; r.mesh.visible = true;
-  };
+  /** Mostly tiny drops, a few big ones (a steep power law, as in real splash spectra). */
+  const dropRadius = (min: number, max: number) => min + Math.pow(Math.random(), 3) * (max - min);
 
   return {
-    /** Lure landing splash: crown sheet + stretched spray + foam disc + slow secondary drops. strength ~ 1 */
-    splash(p: Vector3, strength = 1, foam = true) {
-      const s = 0.6 + 0.5 * strength;
-      const n = Math.floor(70 + 150 * strength);
-      for (let i = 0; i < n; i++) {
-        const a = Math.random() * Math.PI * 2, r = (0.3 + Math.random() * 1.6) * s, up = (3.2 + Math.random() * 5.2) * (0.5 + 0.5 * strength);
-        spawn(p.x + Math.cos(a) * 0.06, p.y + 0.02, p.z + Math.sin(a) * 0.06, Math.cos(a) * r, up, Math.sin(a) * r, rand(0.011, 0.03) * (0.7 + 0.5 * strength), rand(0.5, 1.0));
-      }
-      const crown = Math.floor(30 + 24 * strength);
+    /** Impact splash (lure landing, fish breaking the surface). strength ~ 1 for a cast; `foam` is kept for callers. */
+    splash(p: Vector3, strength = 1, _foam = true) {
+      const s = Math.sqrt(strength);
+      const crown = Math.floor(40 + 110 * strength);
       for (let i = 0; i < crown; i++) {
-        const a = (i / crown) * Math.PI * 2 + Math.random() * 0.15, r = (1.5 + Math.random() * 0.7) * s;
-        spawn(p.x + Math.cos(a) * 0.1, p.y + 0.03, p.z + Math.sin(a) * 0.1, Math.cos(a) * r, 2.2 + Math.random() * 1.6, Math.sin(a) * r, rand(0.012, 0.024), rand(0.45, 0.75));
+        const a = (i / crown) * Math.PI * 2 + Math.random() * 0.3, rim = (0.06 + Math.random() * 0.06) * (0.6 + 0.4 * s);
+        const elev = (40 + Math.random() * 30) * Math.PI / 180, speed = (2.0 + Math.random() * 2.4) * s;
+        spawn(p.x + Math.cos(a) * rim, p.y + 0.01, p.z + Math.sin(a) * rim,
+          Math.cos(a) * Math.cos(elev) * speed, Math.sin(elev) * speed, Math.sin(a) * Math.cos(elev) * speed, dropRadius(0.0025, 0.007), Math.random() * 0.04);
       }
-      const drips = Math.floor(8 + 10 * strength);
-      for (let i = 0; i < drips; i++) {
-        const a = Math.random() * Math.PI * 2, r = Math.random() * 0.7 * s;
-        spawn(p.x, p.y + 0.05, p.z, Math.cos(a) * r, 3.5 + Math.random() * 3, Math.sin(a) * r, rand(0.016, 0.028), rand(1.0, 1.6));
+      const spray = Math.floor(30 + 170 * strength);
+      for (let i = 0; i < spray; i++) {
+        const a = Math.random() * Math.PI * 2, elev = (55 + Math.random() * 33) * Math.PI / 180, speed = (2.0 + Math.random() * 5.0) * s;
+        spawn(p.x + (Math.random() - 0.5) * 0.06, p.y + 0.01, p.z + (Math.random() - 0.5) * 0.06,
+          Math.cos(a) * Math.cos(elev) * speed, Math.sin(elev) * speed, Math.sin(a) * Math.cos(elev) * speed, dropRadius(0.0015, 0.005), Math.random() * 0.05);
       }
-      if (foam) {
-        start(crowns, 'crown', p, 0.75 * s, 0.6, 0.34);
-        if (strength > 0.6) { start(shocks, 'shock', p, 9 * s, 1.0, 0.55); start(shocks, 'shock', p, 5 * s, 0.7, 0.7); }
-        start(discs, 'disc', p, 0.9 * s, 0.7, 0.5);
-        start(rings, 'ring', p, 1.5 * s, 1.1, 0.6);
-        start(rings, 'ring', p, 0.8 * s, 0.75, 0.7);
+      if (strength > 0.6) {
+        const jet = 5 + Math.floor(Math.random() * 5);
+        for (let i = 0; i < jet; i++) {
+          spawn(p.x + (Math.random() - 0.5) * 0.02, p.y, p.z + (Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.4, (3.2 + i * 0.35 + Math.random() * 0.4) * s,
+            (Math.random() - 0.5) * 0.4, dropRadius(0.005, 0.01), 0.13 + i * 0.012);
+        }
       }
     },
     /** Smaller splash (fish leaving / entering the water). */
     smallSplash(p: Vector3) { this.splash(p, 0.4); },
-    /** A single falling drip. */
-    drip(p: Vector3) { spawn(p.x + rand(-0.03, 0.03), p.y, p.z + rand(-0.03, 0.03), rand(-0.1, 0.1), rand(-0.3, 0.2), rand(-0.1, 0.1), rand(0.014, 0.026), 2); },
-    ring(p: Vector3, radius: number, dur = 1, peak = 0.6) { start(rings, 'ring', p, radius, dur, peak); },
+    /** A single falling drip (from the lure while it is lifted / reeled). */
+    drip(p: Vector3) { spawn(p.x + rand(-0.02, 0.02), p.y, p.z + rand(-0.02, 0.02), rand(-0.08, 0.08), rand(-0.2, 0.1), rand(-0.08, 0.08), dropRadius(0.003, 0.006)); },
     update(dt: number) {
       hitCooldown -= dt;
-      if (active > 0) {
-        for (let i = 0; i < MAX; i++) {
-          if (!alive[i]) continue;
-          age[i] += dt; vy[i] -= GRAVITY * dt;
-          px[i] += vx[i] * dt; py[i] += vy[i] * dt; pz[i] += vz[i] * dt;
-          const h = world.heightAt(px[i], pz[i]);
-          const dead = age[i] >= life[i] || (vy[i] < 0 && py[i] < h);
-          if (dead) {
-            if (vy[i] < 0 && py[i] < h && hitCooldown <= 0 && size[i] > 0.014 && age[i] > 0.15) { hitCooldown = 0.07; onDripHit(tmp.set(px[i], h, pz[i])); }
-            alive[i] = 0; active--; mesh.setMatrixAt(i, zero); continue;
-          }
-          const k = age[i] / life[i], sz = size[i] * (1 - k * k * k);
-          dir.set(vx[i], vy[i], vz[i]);
-          const speed = dir.length();
-          if (speed > 1e-4) q.setFromUnitVectors(UP, dir.multiplyScalar(1 / speed)); else q.identity();
-          sc.set(sz, sz * (1 + Math.min(speed * 0.9, 6)), sz);
-          m.compose(pos.set(px[i], py[i], pz[i]), q, sc);
-          mesh.setMatrixAt(i, m);
+      if (active <= 0) return;
+      for (let i = 0; i < MAX; i++) {
+        if (!alive[i]) continue;
+        const o = i * 4;
+        age[i] += dt;
+        if (age[i] < 0) { P[o + 3] = 0; continue; }
+        // Air drag grows as drops shrink (Stokes-like): mist slows and drifts, heavy drops fly ballistic.
+        const drag = Math.exp(-dt * 0.012 / radius[i]);
+        V[o] *= drag; V[o + 2] *= drag; V[o + 1] = V[o + 1] * drag - GRAVITY * dt;
+        P[o] += V[o] * dt; P[o + 1] += V[o + 1] * dt; P[o + 2] += V[o + 2] * dt;
+        // The exact wave height (CPU mirror, swell + ripples) is only needed close to the water.
+        const h = V[o + 1] < 0 && P[o + 1] < WORLD.surface + 0.6 ? world.heightAt(P[o], P[o + 2]) : -Infinity;
+        if ((V[o + 1] < 0 && P[o + 1] < h) || age[i] > 3) {
+          if (age[i] < 3 && radius[i] > 0.004 && hitCooldown <= 0) { hitCooldown = 0.07; onDripHit(tmp.set(P[o], h, P[o + 2])); }
+          alive[i] = 0; active--; P[o + 3] = 0; continue;
         }
-        mesh.instanceMatrix.needsUpdate = true;
+        P[o + 3] = radius[i];
+        V[o + 3] = Math.min(1, age[i] * 40); // pop in over the first frames
       }
-      const fade = (r: Fade, apply: (e: number, o: number) => void) => {
-        if (r.t >= 1) return;
-        r.t += dt / r.dur;
-        if (r.t >= 1) { r.mesh.visible = false; r.mat.opacity = 0; return; }
-        apply(1 - Math.pow(1 - r.t, 2.2), Math.pow(1 - r.t, 1.6));
-      };
-      for (const r of rings) fade(r, (e, o) => { const s = 0.12 + r.radius * e; r.mesh.scale.set(s, 1, s); r.mesh.position.set(r.x, world.heightAt(r.x, r.z) + 0.045, r.z); r.mat.opacity = r.peak * o * Math.min(1, r.t * 12); });
-      for (const r of shocks) fade(r, (e, o) => { const s = 0.3 + r.radius * e; r.mesh.scale.set(s, 1, s); r.mesh.position.set(r.x, world.heightAt(r.x, r.z) + 0.05, r.z); r.mat.opacity = r.peak * o * Math.min(1, r.t * 15); });
-      for (const r of discs) fade(r, (e, o) => { const s = 0.1 + r.radius * e; r.mesh.scale.set(s, 1, s); r.mesh.position.set(r.x, world.heightAt(r.x, r.z) + 0.04, r.z); r.mat.opacity = r.peak * o * o * Math.min(1, r.t * 20); });
-      for (const r of crowns) fade(r, (e, o) => {
-        const s = 0.15 + r.radius * e, hgt = r.radius * 1.3 * Math.sin(Math.min(1, r.t * 1.6) * Math.PI * 0.8) * (1 - r.t * 0.4);
-        r.mesh.scale.set(s, Math.max(hgt, 0.001), s); r.mesh.position.set(r.x, world.heightAt(r.x, r.z), r.z); r.mat.opacity = r.peak * o * Math.min(1, r.t * 10);
-      });
+      pAttr.needsUpdate = true; vAttr.needsUpdate = true;
     },
   };
 }

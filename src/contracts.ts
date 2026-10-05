@@ -21,13 +21,12 @@ export interface World {
   sun: DirectionalLight;
   /** The top water surface mesh (raycast target for casting). */
   surface: Mesh;
-  /** Opaque terrain meshes (seabed + island), for raycasts that should block casting. */
+  /** Opaque terrain meshes (seabed + earth slab), for raycasts that should block casting. */
   terrain: Mesh[];
   /**
-   * Terrain height field (seabed + island) for fish obstacle avoidance.
+   * Terrain height field (seabed with its reef mounds) for fish obstacle avoidance.
    * heights[iz * resolution + ix] is the world-space top-of-terrain y at
    * x = -WORLD.half + (ix + .5) / resolution * 2 * WORLD.half (same mapping for z).
-   * Island cells rise above WORLD.surface.
    */
   seabed: { heights: Float32Array; resolution: number };
   /** CPU mirror of the GPU surface displacement (waves + ripples) at world x/z, at the current sim time. */
@@ -35,7 +34,7 @@ export interface World {
   /** CPU surface normal at world x/z. Writes into and returns target. */
   normalAt(x: number, z: number, target: Vector3): Vector3;
   /** Emit a ripple ring at a surface point. strength ≈ 0.2 (drip) … 2 (big splash). */
-  ripple(point: Vector3, strength?: number): void;
+  ripple(point: Vector3, strength?: number, kind?: 'game' | 'ambient' | 'fish', startTime?: number): void;
   /** Advance simulation-driven world state by dt (sim seconds). */
   update(dt: number): void;
   /** Render the frame (owns the post-processing pipeline). */
@@ -48,6 +47,8 @@ export interface World {
   setInset(camera: PerspectiveCamera | null, rect?: InsetRect): void;
   resize(): void;
   addControls(folder: FolderApi): void;
+  /** Volumetric fog (above the water) and underwater light volumes. */
+  addFogControls(folder: FolderApi): void;
 }
 
 export interface SchoolStats {
@@ -55,6 +56,8 @@ export interface SchoolStats {
   nearLure: number;
   /** Bite lifecycle driven by strike()/land(). */
   biter: 'none' | 'approaching' | 'hooked';
+  /** Weight in grams of the fish picked for the current/last bite (0 when unknown), from its real per-fish size. */
+  biterGrams: number;
   /** Mean school position (async readback). */
   centroid: Vector3;
   /** Mean fear 0..1 (async readback). */
@@ -76,6 +79,8 @@ export interface School {
   /** Resolve a hooked fish: caught → it leaves the school with the line (respawns later); otherwise it escapes in fear. */
   land(caught: boolean): void;
   readonly stats: SchoolStats;
+  /** Simulate `seconds` ahead before the first frame (GPU compute only), so the schools start settled. */
+  prewarm?(seconds: number): void;
   /** Behaviour switches driven by the on-screen dock (src/ui.ts). */
   setMilling(on: boolean): void;
   setMillingDirection(direction: 1 | -1): void;

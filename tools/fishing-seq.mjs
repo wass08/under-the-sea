@@ -7,7 +7,7 @@ const flag = (name, fallback) => { const i = args.indexOf(name); if (i < 0) retu
 const bool = name => { const i = args.indexOf(name); if (i < 0) return false; args.splice(i, 1); return true; };
 const pre = flag('--eval', null), txArg = flag('--tx', null), tzArg = flag('--tz', null), width = Number(flag('--w', 1600)), height = Number(flag('--h', 900)), miss = bool('--miss');
 const [url, prefix = 'shots/fishing-seq'] = args;
-const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({ headless: true, args: ['--mute-audio', '--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
 const logs = [];
 page.on('console', m => { if (['error', 'warning'].includes(m.type())) logs.push(`[${m.type()}] ${m.text()}`.slice(0, 500)); });

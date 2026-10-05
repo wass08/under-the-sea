@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#04070f" />
+    <title>Fish inspector · School</title>
+    <style>
+      :root { color-scheme: dark; font-family: 'DM Sans', system-ui, sans-serif; color: #e6eef5; }
+      body { margin: 0; overflow: hidden; background: #04070f; }
+      #app { position: fixed; inset: 0; }
+      canvas { display: block; touch-action: none; }
+      #pane { position: fixed; top: 16px; right: 16px; width: 300px; max-height: calc(100vh - 32px); overflow: auto; z-index: 2; }
+      .info { position: fixed; left: 20px; top: 18px; z-index: 2; font-size: 12px; line-height: 1.7; color: #9fb0c8; max-width: 360px; }
+      .info h1 { margin: 0 0 6px; font-weight: 400; font-size: 20px; color: #e6eef5; letter-spacing: -.02em; }
+      .info a { color: #8fd3ff; }
+      .legend { display: grid; grid-template-columns: 12px auto; gap: 4px 8px; align-items: center; margin-top: 10px; }
+      .legend i { width: 12px; height: 12px; border-radius: 3px; display: block; }
+      #status { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 2; font-size: 12px; color: #cfe0ee; background: #0a1a2bcc; padding: 8px 14px; border-radius: 999px; }
+      #status:empty { display: none; }
+      @media (max-width: 700px) { .info { display: none; } #pane { left: 12px; right: 12px; width: auto; top: auto; bottom: 12px; max-height: 50vh; } }
+    </style>
+  </head>
+  <body>
+    <main id="app" aria-label="Single fish inspector"></main>
+    <div class="info">
+      <h1>Fish inspector</h1>
+      One cá chuồn (flying fish) from the school, rendered with the school's real shader, meshes and night lighting. Drag to orbit, scroll to zoom.
+      <div class="legend" aria-label="Parts view legend">
+        <i style="background:#59667f"></i><span>Body (flank / back)</span>
+        <i style="background:#d94040"></i><span>Belly (silver-white)</span>
+        <i style="background:#33ccff"></i><span>Lateral line (low on the flank)</span>
+        <i style="background:#bf59ff"></i><span>Pectoral wings (front pair)</span>
+        <i style="background:#4df280"></i><span>Pelvic wings (rear pair)</span>
+        <i style="background:#ffa626"></i><span>Fins: tail lobes, dorsal, anal</span>
+        <i style="background:#f2f2f2"></i><span>Eye (silver ring / dark pupil)</span>
+      </div>
+      <p><a href="./">← Back to the scene</a></p>
+    </div>
+    <div id="pane"></div>
+    <div id="status" role="status">Loading the fish…</div>
+    <script type="module" src="/src/fish-viewer.ts"></script>
+  </body>
+</html>

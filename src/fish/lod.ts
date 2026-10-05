@@ -17,7 +17,7 @@ export function createLod(renderer: WebGPURenderer, sim: Sim, count: number, ind
   const list0 = instancedArray(count, 'uint'), list1 = instancedArray(count, 'uint');
   const planes = [0, 1, 2, 3, 4, 5].map(() => uniform(new Vector4()));
   const planes2 = [0, 1, 2, 3, 4, 5].map(() => uniform(new Vector4()));
-  const camPos = uniform(new Vector3()), camPos2 = uniform(new Vector3()), inset = uniform(0), dist = uniform(8), r = float(radius);
+  const camPos = uniform(new Vector3()), camPos2 = uniform(new Vector3()), inset = uniform(0), dist = uniform(2.8), r = float(radius);
 
   const reset = Fn(() => { atomicStore(argsAtomic.element(1), uint(0)); atomicStore(argsAtomic.element(6), uint(0)); })().compute(1).setName('fishLodReset');
   const cull = Fn(() => {
@@ -36,6 +36,7 @@ export function createLod(renderer: WebGPURenderer, sim: Sim, count: number, ind
     });
   })().compute(count).setName('fishCull');
 
+  const passes = [reset, cull];
   const frustum = new Frustum(), m = new Matrix4();
   return {
     args, dist,
@@ -52,7 +53,7 @@ export function createLod(renderer: WebGPURenderer, sim: Sim, count: number, ind
       set(camera, planes, camPos);
       inset.value = insetCamera ? 1 : 0;
       if (insetCamera) set(insetCamera, planes2, camPos2);
-      renderer.compute(reset); renderer.compute(cull);
+      renderer.compute(passes);
     },
     async readCounts(): Promise<[number, number]> {
       const a = new Uint32Array(await renderer.getArrayBufferAsync(args));

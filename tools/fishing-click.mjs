@@ -1,7 +1,7 @@
 // Usage: node tools/fishing-click.mjs "<url>"  -- clicks the canvas like a user (cast, recast, island/boat rejection) and logs state.
 import { chromium } from 'playwright';
 const [url = 'http://localhost:5193/'] = process.argv.slice(2);
-const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({ headless: true, args: ['--mute-audio', '--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
 const logs = [];
 page.on('console', m => { if (['error', 'warning'].includes(m.type())) logs.push(m.text().slice(0, 300)); });

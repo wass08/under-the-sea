@@ -3,6 +3,15 @@ import type { FolderApi } from 'tweakpane';
 import { state } from './state';
 import type { Fishing, School } from './contracts';
 
+/** Keyboard-only framing for screenshots and recordings. */
+export function createCleanFrame() {
+  if (new URLSearchParams(location.search).has('clean')) document.body.classList.add('clean-view');
+  addEventListener('keydown', e => {
+    if (e.code !== 'KeyH' || e.repeat || e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).closest?.('input, textarea, .tp-dfwv')) return;
+    document.body.classList.toggle('clean-view');
+  });
+}
+
 /** Tuning panel (collapsed by default: the dock below is the primary control surface). */
 export function createPanel() {
   const pane = new Pane({ title: 'Tuning', expanded: false });
@@ -43,8 +52,12 @@ export function createDock(school: School, fishing: Fishing) {
     '<span class="dock-sep" aria-hidden="true"></span>',
     button('slow', 'Slow-mo', 'T', icons.slow, 'Slow motion'),
     button('auto', 'Auto-fish', 'A', icons.auto, 'Let the fisherman fish by himself'),
+    '<span class="dock-sep" aria-hidden="true"></span>',
   ].join('');
   document.body.appendChild(dock);
+  // The fishing audio owns its toggle (state, icon, aria labels); it lives at the end of the dock.
+  const sound = document.querySelector<HTMLButtonElement>('#dock-sound');
+  if (sound) dock.appendChild(sound); else dock.lastElementChild?.remove();
   const $ = (id: string) => dock.querySelector<HTMLButtonElement>(`#dock-${id}`)!;
   const pulse = (el: HTMLElement) => { el.classList.remove('fired'); void el.offsetWidth; el.classList.add('fired'); };
 

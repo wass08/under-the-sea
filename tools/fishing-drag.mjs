@@ -1,7 +1,7 @@
 // Usage: node tools/fishing-drag.mjs "<url>" <outPrefix>  -- cast, then recast elsewhere and capture the underwater drag (retrieving) + lure cam.
 import { chromium } from 'playwright';
 const [url = 'http://localhost:5190/', prefix = 'shots/fishing-drag'] = process.argv.slice(2);
-const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({ headless: true, args: ['--mute-audio', '--enable-unsafe-webgpu', '--enable-features=Vulkan,UseSkiaRenderer', '--use-angle=metal', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
 const logs = []; page.on('console', m => { if (['error'].includes(m.type())) logs.push(m.text().slice(0, 300)); }); page.on('pageerror', e => logs.push(e.message));
 await page.goto(url);

@@ -1,34 +1,45 @@
 import type { Node } from 'three/webgpu';
-import { AdditiveBlending, InstancedBufferAttribute, InstancedMesh, MeshBasicNodeMaterial, PointsNodeMaterial, Scene, Sprite, SphereGeometry } from 'three/webgpu';
-import { float, hash, instanceIndex, instancedBufferAttribute, mix, mx_noise_float, normalWorld, cameraPosition, positionWorld, positionLocal, sin, smoothstep, uv, vec3, color, fract } from 'three/tsl';
+import { AdditiveBlending, DataTexture, InstancedBufferAttribute, InstancedMesh, MeshBasicNodeMaterial, PointsNodeMaterial, Scene, Sprite, SphereGeometry } from 'three/webgpu';
+import { float, hash, instanceIndex, instancedBufferAttribute, mix, normalWorld, cameraPosition, positionWorld, positionLocal, sin, smoothstep, texture, uv, vec3, color, fract, reflect } from 'three/tsl';
 import { WORLD } from '../config';
 import { simTime, waterLevel } from '../state';
 import { random } from '../lib/random';
-import { godRayStrength, sunSurfacePoint } from './lighting';
+import { godRayStrength } from './lighting';
+import { lanternLight } from './night';
+import { surfaceShaft, waterSun } from './rays';
 import { terrainHeight } from './field';
-import { emitRipple } from '../lib/ocean';
+import { emitRipple, oceanField } from '../lib/ocean';
+import { skyColor } from './atmosphere';
 
 const R = WORLD.half;
 
-/** Plankton / dust motes drifting in the water, catching the sun beams. Fully GPU-driven. */
-export function createPlankton(scene: Scene, count = 3000) {
+/** Bioluminescent plankton drifting in the water: dim motes, a few flaring cyan, warm near the lantern. Fully GPU-driven. */
+export function createPlankton(scene: Scene, heightTexture: DataTexture, count = 6000) {
   const id = float(instanceIndex);
-  const r = (k: number) => hash(id.add(k));
+  const r = (k: number) => hash(id.mul(1 + k * 17.13).add(k * 71.7));
   const phase = r(1).mul(6.283);
   const t = simTime;
-  const x = r(2).sub(0.5).mul(2 * R - 0.6).add(sin(t.mul(0.09).add(phase)).mul(0.6));
+  const x = r(2).sub(0.5).mul(2 * R - 1.5).add(sin(t.mul(0.09).add(phase)).mul(0.5));
   const y = r(3).pow(0.8).mul(WORLD.surface - WORLD.bed - 0.6).add(WORLD.bed + 0.35).add(sin(t.mul(0.13).add(phase.mul(1.3))).mul(0.2));
-  const z = r(4).sub(0.5).mul(2 * R - 0.6).add(sin(t.mul(0.11).add(phase.mul(0.7))).mul(0.6));
+  const z = r(4).sub(0.5).mul(2 * R - 1.5).add(sin(t.mul(0.11).add(phase.mul(0.7))).mul(0.5));
   const position = vec3(x, y, z);
   const material = new PointsNodeMaterial({ transparent: true, depthWrite: false, blending: AdditiveBlending, sizeAttenuation: false });
   material.positionNode = position;
-  material.sizeNode = r(5).mul(2.2).add(1.4);
-  const s = sunSurfacePoint(position);
-  const beam = smoothstep(0.35, 0.85, mx_noise_float(vec3(s.mul(0.19), t.mul(0.16))).mul(0.5).add(0.5));
-  const twinkle = sin(t.mul(r(6).mul(1.5).add(0.4)).add(phase)).mul(0.5).add(0.5);
+  // Mostly fine suspended silt with a few larger motes; grow gently in close views.
+  material.sizeNode = r(5).pow(3).mul(2.8).add(1.1).mul(float(48).div(cameraPosition.sub(position).length().clamp(14, 90)));
+  const under = waterLevel.sub(y).max(0);
+  const s = position.xz.add(waterSun.xz.mul(under.div(waterSun.y)));
+  const beam = surfaceShaft(s, under).mul(2.4).clamp();
+  const twinkle = sin(t.mul(r(6).mul(0.35).add(0.15)).add(phase)).mul(0.5).add(0.5);
   const depthFade = waterLevel.sub(y).mul(-0.06).exp();
-  material.colorNode = mix(color('#8fd8d0'), color('#fff1cf'), beam.mul(0.8)).mul(beam.mul(godRayStrength).mul(1.6).add(0.35)).mul(depthFade);
-  material.opacityNode = smoothstep(0.5, 0.05, uv().sub(0.5).length()).mul(twinkle.mul(0.6).add(0.4)).mul(0.55).mul(smoothstep(0.0, 0.35, waterLevel.sub(y)));
+  // A third of the motes are dinoflagellates: they flare cyan-green now and then, the rest only catch light.
+  const flare = smoothstep(0.93, 1.0, sin(t.mul(r(6).mul(0.9).add(0.3)).add(phase.mul(3))).mul(0.5).add(0.5)).mul(r(7).greaterThan(0.66).toFloat());
+  const lamp = lanternLight(position, vec3(0, 1, 0), 1.0);
+  material.colorNode = color('#2a4a66').mul(beam.mul(godRayStrength).mul(0.8).add(0.35)).mul(depthFade)
+    .add(color('#5dffd8').mul(flare.mul(2.2))).add(lamp.mul(0.35));
+  const ground = texture(heightTexture, position.xz.div(R * 2).add(0.5)).level(float(0)).r;
+  const wet = smoothstep(0.08, 0.35, y.sub(ground)).mul(smoothstep(0.15, 0.5, waterLevel.sub(y)));
+  material.opacityNode = uv().sub(0.5).length().pow(2).mul(-20).exp().mul(twinkle.mul(0.35).add(0.65)).mul(0.42).mul(wet);
   const points = new Sprite(material); points.count = count; points.frustumCulled = false; points.renderOrder = 9; points.name = 'Plankton';
   scene.add(points);
   return points;
@@ -36,37 +47,45 @@ export function createPlankton(scene: Scene, count = 3000) {
 
 /** A few bubble streams rising from the seabed; each pops on the surface with a tiny ripple. */
 export function createBubbles(scene: Scene) {
-  const vents = [[-13, 9], [14, -8], [5, -15], [12, 13], [-3, 14]].map(([x, z]) => ({ x, z, y: terrainHeight(x, z) }));
-  const perVent = 22, count = vents.length * perVent, rng = random(77);
+  const vents = [[-9, 7], [6, -3]].map(([x, z]) => ({ x, z, y: terrainHeight(x, z) }));
+  const perVent = 12, count = vents.length * perVent, rng = random(77);
   const origin = new Float32Array(count * 3), params = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     const v = vents[i % vents.length];
     origin.set([v.x + (rng() - 0.5) * 0.12, v.y + 0.02, v.z + (rng() - 0.5) * 0.12], i * 3);
-    params.set([0.05 + Math.pow(rng(), 1.8) * 0.11, rng(), 0.16 + rng() * 0.14], i * 3); // radius, phase, cycles per second
+    params.set([0.035 + Math.pow(rng(), 1.8) * 0.095, rng(), 0.10 + rng() * 0.09], i * 3); // radius, phase, cycles per second
   }
   const o = instancedBufferAttribute(new InstancedBufferAttribute(origin, 3), 'vec3') as unknown as Node<'vec3'>, p = instancedBufferAttribute(new InstancedBufferAttribute(params, 3), 'vec3') as unknown as Node<'vec3'>;
   const material = new MeshBasicNodeMaterial({ transparent: true, depthWrite: false });
   const age = fract(simTime.mul(p.z).add(p.y));
-  const rise = waterLevel.sub(o.y).mul(age.pow(0.92));
-  const wiggle = sin(age.mul(11).add(p.y.mul(20))).mul(age.mul(0.05).add(0.02));
-  const pop = float(1).sub(smoothstep(0.965, 1.0, age));
+  const top = waterLevel.add(oceanField(o.xz, simTime).h);
+  const rise = top.sub(o.y).mul(age.pow(0.92));
+  const wiggle = sin(age.mul(11).add(p.y.mul(20))).mul(age.mul(0.10).add(0.02));
+  const pop = smoothstep(0.0, 0.025, age).mul(float(1).sub(smoothstep(0.985, 1.0, age)));
   const radius = p.x.mul(age.mul(0.7).add(0.75)).mul(pop);
-  material.positionNode = positionLocal.mul(radius).add(vec3(o.x.add(wiggle), o.y.add(rise), o.z.add(wiggle.mul(0.7))));
+  const wobble = sin(simTime.mul(3).add(p.y.mul(31))).mul(0.045);
+  material.positionNode = positionLocal.mul(vec3(wobble.add(1), float(0.96).sub(wobble), float(1).sub(wobble.mul(0.6)))).mul(radius).add(vec3(o.x.add(wiggle), o.y.add(rise), o.z.add(wiggle.mul(0.7))));
   const view = cameraPosition.sub(positionWorld).normalize();
-  const rim = float(1).sub(normalWorld.dot(view).abs().clamp()).pow(2.2);
-  material.colorNode = mix(color('#cffaf2'), color('#ffffff'), rim);
-  material.opacityNode = rim.mul(0.85).add(0.08).mul(waterLevel.sub(o.y.add(rise)).mul(-0.08).exp());
-  const mesh = new InstancedMesh(new SphereGeometry(1, 10, 8), material, count);
+  const rim = float(1).sub(normalWorld.dot(view).abs().clamp()).pow(3.5);
+  const glint = normalWorld.dot(waterSun.add(view).normalize()).max(0).pow(100);
+  const reflected = skyColor(reflect(view.negate(), normalWorld)).min(1.3);
+  material.colorNode = mix(reflected, color('#eefaff'), rim.mul(0.6)).add(glint.mul(1.4));
+  material.opacityNode = rim.mul(0.32).add(glint.mul(0.4)).add(0.012).mul(waterLevel.sub(o.y.add(rise)).max(0).mul(-0.055).exp());
+  const mesh = new InstancedMesh(new SphereGeometry(1, 32, 24), material, count);
   mesh.frustumCulled = false; mesh.renderOrder = 8; mesh.name = 'Bubbles';
   scene.add(mesh);
-  const timers = vents.map((_, i) => i * 0.31);
+  const cycles = Array.from({ length: count }, (_, i) => Math.floor(simTime.value * params[i * 3 + 2] + params[i * 3 + 1]));
   return {
     mesh,
-    update(dt: number) {
-      vents.forEach((v, i) => {
-        timers[i] -= dt;
-        if (timers[i] <= 0) { timers[i] = 0.9 + Math.random() * 0.8; emitRipple(v.x + (Math.random() - 0.5) * 0.2, v.z + (Math.random() - 0.5) * 0.2, 0.12, true); }
-      });
+    update(_dt: number) {
+      for (let i = 0; i < count; i++) {
+        const cycle = Math.floor(simTime.value * params[i * 3 + 2] + params[i * 3 + 1]);
+        if (cycle > cycles[i]) {
+          const wiggle = Math.sin(11 + params[i * 3 + 1] * 20) * 0.12;
+          emitRipple(origin[i * 3] + wiggle, origin[i * 3 + 2] + wiggle * 0.7, params[i * 3] * 0.5, true);
+        }
+        cycles[i] = cycle;
+      }
     },
   };
 }

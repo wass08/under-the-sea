@@ -36,7 +36,7 @@ export function buildTerrain() {
 
   const points: Point2[] = [];
   const sides: { t: number; index: number }[][] = [[], [], [], []];
-  const boundaryCount = 96;
+  const boundaryCount = 192;
   for (let i = 0; i < boundaryCount; i++) {
     const t = -R + size * i / boundaryCount;
     sides[0].push({ t, index: points.length }); points.push([t, -R]);
@@ -90,32 +90,32 @@ export function edgeHeight(profile: EdgeProfile, t: number) {
   return profile[profile.length - 1].h;
 }
 
-/** Earth block: four strata side faces following the terrain profile, and a flat bottom. */
-export function buildSlab(edges: Edges) {
-  const positions: number[] = [], normals: number[] = [], tops: number[] = [];
-  const ab = new Vector3(), ac = new Vector3(), nn = new Vector3();
-  const tri = (p: Vector3[], expected: Vector3, top: number[]) => {
-    ab.subVectors(p[1], p[0]); ac.subVectors(p[2], p[0]); nn.crossVectors(ab, ac);
-    if (nn.dot(expected) < 0) { p = [p[0], p[2], p[1]]; top = [top[0], top[2], top[1]]; }
-    p.forEach((v, i) => { positions.push(v.x, v.y, v.z); normals.push(expected.x, expected.y, expected.z); tops.push(top[i]); });
-  };
-  const outward = [new Vector3(0, 0, -1), new Vector3(1, 0, 0), new Vector3(0, 0, 1), new Vector3(-1, 0, 0)];
-  const at = (side: number, t: number, y: number) => side === 0 ? new Vector3(t, y, -R) : side === 1 ? new Vector3(R, y, t) : side === 2 ? new Vector3(t, y, R) : new Vector3(-R, y, t);
-  edges.forEach((profile, side) => {
-    for (let i = 0; i + 1 < profile.length; i++) {
-      const p0 = profile[i], p1 = profile[i + 1];
-      tri([at(side, p0.t, 0), at(side, p1.t, 0), at(side, p0.t, p0.h)], outward[side], [p0.h, p1.h, p0.h]);
-      tri([at(side, p1.t, 0), at(side, p1.t, p1.h), at(side, p0.t, p0.h)], outward[side], [p1.h, p1.h, p0.h]);
-    }
-  });
-  const down = new Vector3(0, -1, 0);
-  const corners = [new Vector3(-R, 0, -R), new Vector3(R, 0, -R), new Vector3(R, 0, R), new Vector3(-R, 0, R)];
-  tri([corners[0], corners[1], corners[2]], down, [0, 0, 0]);
-  tri([corners[0], corners[2], corners[3]], down, [0, 0, 0]);
+/**
+ * Open-sea seabed beyond the detailed terrain: one grid whose cells are 1 unit up to a few units past the old block
+ * and then widen geometrically out to `far`, sampling the same analytic height field. Vertices strictly inside the
+ * detailed square are pushed under it so the two never fight; every vertex on or outside ±R is exact.
+ */
+export function buildOuterSeabed(far = 150) {
+  const axis: number[] = [];
+  for (let x = -R - 8; x <= R + 8; x++) axis.push(x);
+  for (let x = R + 8, step = 1.4; x < far; step *= 1.22) { x = Math.min(far, x + step); axis.push(x); axis.unshift(-x); }
+  const n = axis.length, positions = new Float32Array(n * n * 3), normals = new Float32Array(n * n * 3), index: number[] = [];
+  const e = 0.2;
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+    const x = axis[i], z = axis[j], k = (j * n + i) * 3, inside = Math.abs(x) < R - 1e-6 && Math.abs(z) < R - 1e-6;
+    positions.set([x, terrainHeight(x, z) - (inside ? 0.6 : 0), z], k);
+    const dx = (terrainHeight(x + e, z) - terrainHeight(x - e, z)) / (2 * e), dz = (terrainHeight(x, z + e) - terrainHeight(x, z - e)) / (2 * e);
+    const inv = 1 / Math.hypot(dx, 1, dz);
+    normals.set([-dx * inv, inv, -dz * inv], k);
+  }
+  for (let j = 0; j < n - 1; j++) for (let i = 0; i < n - 1; i++) {
+    const a = j * n + i, b = a + 1, c = a + n, d = c + 1;
+    index.push(a, c, b, b, c, d);
+  }
   const geometry = new BufferGeometry();
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
   geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
-  geometry.setAttribute('topY', new Float32BufferAttribute(tops, 1));
+  geometry.setIndex(new Uint32BufferAttribute(new Uint32Array(index), 1));
   geometry.computeBoundingSphere();
   return geometry;
 }

@@ -13,6 +13,7 @@ import { createHud } from './hud';
 import { createMockSchool } from './mock-school';
 import { createRig } from './rig';
 import { createInset } from './inset';
+import { createAudio } from './audio';
 
 /**
  * Boat + fisherman + rod/line/bobber/lure + splash FX + game state machine + HUD.
@@ -55,8 +56,10 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   const rig = createRig(scene, world, game, camera);
   rig.setMock(usingMock);
   const rippleThrottle = { t: 0 };
-  const fx = createFx(scene, world, p => { if (rippleThrottle.t <= 0) { rippleThrottle.t = 0.1; world.ripple(p, 0.22); fx.ring(p, 0.22, 0.6, 0.35); } });
-  const hud = createHud();
+  // Bigger drops falling back make their own little ripples (the water draws the rings; no sprite rings).
+  const fx = createFx(scene, world, p => { if (rippleThrottle.t <= 0) { rippleThrottle.t = 0.1; world.ripple(p, 0.22); } });
+  const audio = createAudio(camera);
+  const hud = createHud(() => game.hook());
   const inset = createInset(ctx, world, school, game, boat, (x, z) => env.seabedAt(x, z));
   if (query.has('insetForce') || query.get('fishingCam') === 'inset') inset.force(true);
 
@@ -72,18 +75,21 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   const surface = new Vector3();
   function ripple(p: Vector3, s: number) { surface.set(p.x, world.heightAt(p.x, p.z), p.z); world.ripple(surface, s); }
 
+  /** Weight of the fish on the line (from the school's per-fish size), shown when it lands in the creel. */
+  let hookedGrams = 0;
   function handleEvents() {
     for (const e of game.events) {
+      audio.event(e);
       switch (e.type) {
         case 'release': boat.kick(0.5, 0.25); break;
         case 'splash': ripple(e.pos, 2.6); fx.splash(surfacePoint(e.pos), 1); boat.kick(-0.15); break;
-        case 'nibble': ripple(e.pos, 0.28); fx.ring(surfacePoint(e.pos), 0.3, 0.7, 0.4); break;
-        case 'bite': ripple(e.pos, 0.5); fx.ring(surfacePoint(e.pos), 0.5, 0.9, 0.5); break;
-        case 'hook': boat.kick(0.8, 0.3); ripple(e.pos, 0.6); break;
+        case 'nibble': ripple(e.pos, 0.28); break;
+        case 'bite': ripple(e.pos, 0.5); break;
+        case 'hook': boat.kick(0.8, 0.3); ripple(e.pos, 0.6); hookedGrams = school.stats.biterGrams || hookedGrams; break;
         case 'surface': ripple(e.pos, 0.9); fx.smallSplash(surfacePoint(e.pos)); break;
         case 'liftout': ripple(e.pos, 0.7); fx.smallSplash(surfacePoint(e.pos)); break;
         case 'drop': fx.splash(e.pos, 0.12, false); boat.kick(-0.3); break;
-        case 'catch': boat.kick(0.2); break;
+        case 'catch': boat.kick(0.2); hud.addCatch(hookedGrams || 60); hookedGrams = 0; break;
         case 'miss': ripple(e.pos, 0.4); break;
       }
     }
@@ -96,7 +102,9 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   let dripT = 0;
   const lureAir = new Vector3();
 
+  let previousReal = performance.now();
   function update(dt: number) {
+    const now = performance.now(), realDt = Math.min(0.1, (now - previousReal) / 1000); previousReal = now;
     mock?.update(dt);
     rippleThrottle.t -= dt;
     boat.update(dt);
@@ -105,11 +113,13 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
     game.update(dt);
     handleEvents();
     const ph = game.phase;
+    audio.update(realDt, ph);
     let aimAt: Vector3 | null = null;
     if (ph === 'casting') aimAt = game.target;
     else if (game.inWater && ph !== 'retrieving') aimAt = aim.copy(game.bobber);
     fisherman.update(dt, aimAt);
     rig.update(dt, fisherman.tipWorld);
+    if (game.inWater || ph === 'reeling' || ph === 'celebrate') school.setLure(game.hookPoint);
     // drips off the fish while it is in the air
     if ((ph === 'reeling' || ph === 'celebrate') && game.fishVisible && game.lure.y > world.heightAt(game.lure.x, game.lure.z) + 0.05) {
       dripT -= dt;
@@ -118,7 +128,7 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
     fx.update(dt);
     proj.copy(game.bobber).project(camera);
     inset.update(dt);
-    hud.update(game, { x: (proj.x * 0.5 + 0.5) * innerWidth, y: (-proj.y * 0.5 + 0.5) * innerHeight }, inset.rect());
+    hud.update(game, { x: (proj.x * 0.5 + 0.5) * innerWidth, y: (-proj.y * 0.5 + 0.5) * innerHeight });
     if (cam === 'inset') { camera.position.copy(inset.camera.position); camera.quaternion.copy(inset.camera.quaternion); }
     if (camOverride) {
       // relative presets are in the boat frame (x = bow, z = starboard), so they follow the hull's heading
@@ -147,7 +157,7 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   function addControls(folder: FolderApi) {
     autoBinding = folder.addBinding(settings, 'auto', { label: 'auto-fish' });
     folder.addBinding(settings, 'autoSuccess', { min: 0, max: 1, step: 0.05, label: 'auto hook %' });
-    folder.addBinding(settings, 'lureDepth', { min: 0.5, max: 3, step: 0.05, label: 'lure depth' });
+    folder.addBinding(settings, 'lureDepth', { min: 0.5, max: 8, step: 0.05, label: 'lure depth' });
     folder.addBinding(settings, 'biteMin', { min: 0.5, max: 12, step: 0.25, label: 'bite min s' });
     folder.addBinding(settings, 'biteMax', { min: 0.5, max: 20, step: 0.25, label: 'bite max s' });
     folder.addBinding(settings, 'hookWindow', { min: 0.5, max: 4, step: 0.1, label: 'hook window' });
@@ -161,7 +171,7 @@ export async function createFishing(ctx: Ctx, world: World, realSchool: School):
   Object.defineProperty(window, 'fishing', {
     configurable: true,
     get: () => ({
-      game, settings, boat, mock: usingMock,
+      game, settings, boat, audio, mock: usingMock,
       get state() { return { phase: game.phase, t: +game.t.toFixed(2), caught: game.caught, hint: game.hint, tension: +game.tension.toFixed(2), lure: game.lure.toArray().map(v => +v.toFixed(2)), bobber: game.bobber.toArray().map(v => +v.toFixed(2)), biter: school.stats.biter, nearLure: school.stats.nearLure }; },
       cast: (x: number, z: number) => game.requestCast(new Vector3(x, world.heightAt(x, z), z)),
       hook: () => game.hook(),

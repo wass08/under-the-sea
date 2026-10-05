@@ -17,6 +17,8 @@ import { MeshoptSimplifier } from 'meshoptimizer';
 export interface FishLod {
   geometry: BufferGeometry;
   vertexCount: number;
+  /** VAT vertex at the nose: used to pin the animated mouth to the metal hook. */
+  mouthVertex: number;
   triCount: number;
   /** F * V * 2 vec4: for frame f, vertex v: [(f*V+v)*2] = position.xyz, [(f*V+v)*2+1] = normal.xyz. */
   vat: Float32Array;
@@ -24,7 +26,7 @@ export interface FishLod {
 
 export interface FishAsset {
   lods: FishLod[];
-  /** Unsimplified near LOD (only when requested). */
+  /** Detailed near LOD (only when requested). */
   full?: FishLod;
   textures: [Texture, Texture];
   /** Model length along +X in model units (used to normalise to 1). */
@@ -45,8 +47,8 @@ export interface AssetOptions {
   body: number; fins: number; eye: number;
   /** Extra proxy LODs (total triangles), built from the merged mesh. */
   proxies: number[];
-  /** Also build an unsimplified body+fins LOD (near-camera) with this many triangles per eye layer. */
-  full?: { eye: number };
+  /** Also build a detailed near-camera LOD with bounded body, fin and eye budgets. */
+  full?: { body: number; fins: number; eye: number };
 }
 
 const loader = new GLTFLoader();
@@ -160,7 +162,12 @@ function makeLod(m: Mesh3, weights: Float32Array[]): FishLod {
   geometry.setAttribute('uv', new Float32BufferAttribute(m.uv, 2));
   geometry.setAttribute('matId', new Float32BufferAttribute(m.mat, 1));
   geometry.setIndex(new Uint32BufferAttribute(m.index, 1));
-  return { geometry, vertexCount: m.pos.length / 3, triCount: m.index.length / 3, vat: bakeVat(m, weights) };
+  let mouthVertex = 0, best = -Infinity;
+  for (let i = 0; i < m.pos.length / 3; i++) {
+    // The nose is the furthest +X body vertex. Eyes cannot win this selection.
+    if (m.mat[i] === 0 && m.pos[i * 3] > best) { best = m.pos[i * 3]; mouthVertex = i; }
+  }
+  return { geometry, mouthVertex, vertexCount: m.pos.length / 3, triCount: m.index.length / 3, vat: bakeVat(m, weights) };
 }
 
 export async function loadFishAsset(url: string, o: AssetOptions): Promise<FishAsset> {
@@ -214,7 +221,11 @@ export async function loadFishAsset(url: string, o: AssetOptions): Promise<FishA
   let full: FishLod | undefined;
   if (o.full) {
     const fp: Mesh3[] = [];
-    for (const r of raw) fp.push(r.kind === 'tex' ? compact(r.mesh) : simplifyMesh(r.mesh, o.full.eye, poses, length));
+    let tex = 0;
+    for (const r of raw) {
+      const budget = r.kind === 'tex' ? (tex++ === 0 ? o.full.body : o.full.fins) : o.full.eye;
+      fp.push(simplifyMesh(r.mesh, budget, poses, length));
+    }
     full = makeLod(merge(fp), weights);
   }
   return { lods, full, textures: [textured[0], textured[1] ?? textured[0]], length, period: clip.duration, frames: o.frames };

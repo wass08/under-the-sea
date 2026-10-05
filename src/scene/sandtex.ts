@@ -3,12 +3,15 @@ import { random } from '../lib/random';
 
 /** World size (units) covered by one repeat of the sand texture. */
 export const SAND_TILE = 12;
+const sandTextures = new Map<number, { texture: DataTexture; maxSlope: number }>();
 
 /**
  * Baked tiling sand detail, generated once at load: R,G = ripple/grain surface slope (x,z), B = albedo
  * variation, A = fine speckle. Replaces per-pixel noise in the terrain shader.
  */
-export function createSandTexture(size = 512) {
+export function createSandTexture(size = 512): { texture: DataTexture; maxSlope: number } {
+  const cached = sandTextures.get(size);
+  if (cached) return cached;
   const TAU = Math.PI * 2, rng = random(2024);
   const grain = new Float32Array(size * size);
   for (let i = 0; i < grain.length; i++) grain[i] = rng();
@@ -53,5 +56,7 @@ export function createSandTexture(size = 512) {
   texture.wrapS = texture.wrapT = RepeatWrapping;
   texture.magFilter = LinearFilter; texture.minFilter = LinearMipmapLinearFilter; texture.generateMipmaps = true; texture.anisotropy = 8;
   texture.needsUpdate = true;
-  return { texture, maxSlope };
+  const result = { texture, maxSlope };
+  sandTextures.set(size, result);
+  return result;
 }

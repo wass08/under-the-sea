@@ -1,6 +1,7 @@
 import { PerspectiveCamera, Vector3 } from 'three/webgpu';
 import type { Ctx, InsetRect, School, World } from '../contracts';
 import { WORLD } from '../config';
+import { lanternPosition } from '../state';
 import type { Boat } from './boat';
 import { clamp, damp, smooth } from './build';
 import type { Game, Phase } from './game';
@@ -38,24 +39,31 @@ export function createInset(ctx: Ctx, world: World, school: School, game: Game, 
     const mobile = innerWidth <= 650;
     const w = mobile ? Math.min(210, innerWidth * 0.52) : clamp(innerWidth * 0.3, 260, 560), h = (w * 9) / 16;
     const m = mobile ? 12 : 24;
-    return { x: m, y: mobile ? 112 : innerHeight - m - h, width: w, height: h };
+    return { x: m, y: mobile ? 196 : innerHeight - m - h, width: w, height: h };
   }
   /** Rect currently occupied on screen (used by the HUD to keep the hook prompt clear). */
   function rect(): InsetRect | null { return shown; }
 
-  const under = () => WORLD.surface - 0.35;
+  /** Highest camera height underwater: a safe margin below the (calm) waves so the near plane never crosses them. */
+  const under = (x: number, z: number) => Math.min(WORLD.surface - 0.65, world.heightAt(x, z) - 0.6);
+
+  // Field of view: wider for the upward "hero" framing (lure + school below, raft / lantern glow above), tighter elsewhere.
+  const BASE_FOV = 48, HERO_FOV = 58;
+  let fovTarget = BASE_FOV;
+  const sky = new Vector3(), away = new Vector3();
 
   /** Desired camera position / look target for the current phase. */
   function direct(dt: number) {
     const L = game.lure, B = game.bobber, T = game.target, boatP = boat.group.position, ph = game.phase, t = game.t;
     const surf = WORLD.surface;
     let underwater = false;
+    fovTarget = BASE_FOV;
     switch (ph) {
       case 'retrieving':
         if (game.inWater) { // the underwater drag: watch the school split around the lure
           underwater = true;
           side.set(-game.lure.z + boat.group.position.z, 0, game.lure.x - boat.group.position.x).normalize();
-          dPos.copy(L).addScaledVector(side, 2.6); dPos.y = L.y + 0.5; dLook.copy(L);
+          dPos.copy(L).addScaledVector(side, 2.6); dPos.y = L.y - 0.35; dLook.copy(L); dLook.y += 0.2;
           break;
         }
         // fallthrough
@@ -85,25 +93,25 @@ export function createInset(ctx: Ctx, world: World, school: School, game: Game, 
         if (t < 0.9) { // watch the splash from just above the surface, side-on
           dPos.copy(T).addScaledVector(dir, -3.4).addScaledVector(side, 2.2); dPos.y = surf + 1.3;
           dLook.set(T.x, surf + 0.5, T.z);
-        } else {
-          underwater = true; schoolShot(L, 2.6);
+        } else { // dive in: below the sinking lure, tilted up at the raft and the lantern's glow
+          underwater = true; orbit += dt * 0.2; heroShot(L, 2.6, Math.sin(orbit) * 0.35);
         }
         break;
       }
-      case 'calm': underwater = true; schoolShot(L, 2.4); break;
+      case 'calm': underwater = true; orbit += dt * 0.2; heroShot(L, 2.8, Math.sin(orbit) * 0.4); break;
       case 'curious': case 'approaching': {
         underwater = true; orbit += dt * 0.28;
-        const r = ph === 'approaching' ? 1.6 : 2.0;
-        dPos.set(L.x + Math.cos(orbit) * r, L.y + 0.25 + Math.sin(orbit * 0.7) * 0.15, L.z + Math.sin(orbit) * r);
-        dLook.copy(L);
+        heroShot(L, ph === 'approaching' ? 2.3 : 2.7, Math.sin(orbit) * 0.55);
         break;
       }
-      case 'bite': {
-        underwater = true; orbit += dt * 0.6;
-        const r = 0.8, k = 0.03;
-        dPos.set(L.x + Math.cos(orbit) * r, L.y + 0.1, L.z + Math.sin(orbit) * r);
+      case 'bite': { // close-up on the fish at the hook, from slightly below so the light backs it
+        underwater = true; orbit += dt * 0.12;
+        const H = game.hookPoint;
+        const r = 1.15, k = 0.004;
+        lightAway(H, Math.sin(orbit) * 0.8);
+        dPos.copy(H).addScaledVector(away, r); dPos.y = H.y - 0.32;
         dPos.x += Math.sin(clock * 47) * k; dPos.y += Math.sin(clock * 39) * k; dPos.z += Math.cos(clock * 43) * k; // shake
-        dLook.copy(L);
+        dLook.copy(H); dLook.y += 0.1;
         break;
       }
       case 'reeling': {
@@ -111,8 +119,8 @@ export function createInset(ctx: Ctx, world: World, school: School, game: Game, 
         side.set(-reelDir.z, 0, reelDir.x);
         if (L.y < surf - 0.15) { // follow it up from below/side
           underwater = true;
-          dPos.copy(L).addScaledVector(side, 1.5).addScaledVector(reelDir, -0.6); dPos.y = L.y - 0.3;
-          dLook.copy(L); dLook.y += 0.25;
+          dPos.copy(L).addScaledVector(side, 1.5).addScaledVector(reelDir, -0.6); dPos.y = L.y - 0.55;
+          dLook.copy(L); dLook.y += 0.3;
         } else { // it breaks the surface: watch it fly to the boat from the side
           dPos.copy(L).addScaledVector(side, 3.0).addScaledVector(reelDir, -1.2); dPos.y = Math.max(L.y - 0.2, surf + 0.4);
           dLook.copy(L);
@@ -127,33 +135,67 @@ export function createInset(ctx: Ctx, world: World, school: School, game: Game, 
       }
       case 'missed': {
         underwater = true; orbit += dt * 0.15;
-        dPos.set(L.x + Math.cos(orbit) * 3.6, L.y + 0.6, L.z + Math.sin(orbit) * 3.6);
-        dLook.copy(L);
+        heroShot(L, 3.4, Math.sin(orbit) * 0.6);
         break;
       }
     }
     return underwater;
   }
 
-  /** Underwater shot on the lure with the school behind it (camera on the far side of the lure from the school). */
-  function schoolShot(L: Vector3, r: number) {
-    const c = school.stats.centroid;
-    tmp.set(c.x - L.x, 0, c.z - L.z);
-    if (!(school.count > 0) || !Number.isFinite(c.x) || tmp.lengthSq() < 1) { orbit += 0.004; tmp.set(-Math.cos(orbit), 0, -Math.sin(orbit)); }
-    tmp.normalize();
-    dPos.copy(L).addScaledVector(tmp, -r); dPos.y = L.y + 0.4;
-    dLook.copy(L).addScaledVector(tmp, 0.6);
+  /**
+   * `away` = horizontal unit vector from the raft / lantern "sky anchor" towards `P`, swung by `swing` radians.
+   * Placing the camera along it keeps the light behind the subject. Also sets `sky` (anchor on the surface).
+   */
+  function lightAway(P: Vector3, swing: number) {
+    const lp = lanternPosition.value, bp = boat.group.position;
+    sky.set(lp.x * 0.7 + bp.x * 0.3, WORLD.surface, lp.z * 0.7 + bp.z * 0.3);
+    if (!Number.isFinite(sky.x + sky.z)) sky.set(bp.x, WORLD.surface, bp.z);
+    away.set(P.x - sky.x, 0, P.z - sky.z);
+    if (away.lengthSq() < 0.25) { // lure right under the light: back off along the boat -> lure line (or keep the last heading)
+      tmp2.set(P.x - bp.x, 0, P.z - bp.z);
+      if (tmp2.lengthSq() > 0.04) away.lerp(tmp2.normalize(), 1 - away.length() / 0.5);
+      if (away.lengthSq() < 1e-4) away.set(1, 0, 0);
+    }
+    away.normalize();
+    const c = Math.cos(swing), s = Math.sin(swing);
+    away.set(away.x * c - away.z * s, 0, away.x * s + away.z * c);
+  }
+
+  /**
+   * Underwater hero framing: camera below and beyond the lure (away from the light), tilted up so the raft
+   * silhouette and the lantern's glow / rays sit in the top of the frame and the lure + school in the lower-middle.
+   * The deeper the lure, the further back and lower the camera goes so both still fit.
+   */
+  function heroShot(L: Vector3, r: number, swing: number) {
+    fovTarget = HERO_FOV;
+    lightAway(L, swing);
+    const depth = clamp(WORLD.surface - L.y, 0, 9);
+    const R = r + depth * 0.2, drop = 0.7 + depth * 0.14;
+    dPos.copy(L).addScaledVector(away, R); dPos.y = L.y - drop;
+    dPos.y = clamp(dPos.y, seabedAt(dPos.x, dPos.z) + 0.55, under(dPos.x, dPos.z));
+    // pitch: lure in the lower-middle, light anchor (just above the lantern's waterline) near the top edge
+    const half = (HERO_FOV * Math.PI) / 360;
+    tmp.subVectors(L, dPos); const hL = Math.hypot(tmp.x, tmp.z), aL = Math.atan2(tmp.y, hL), dist = tmp.length();
+    tmp2.subVectors(sky, dPos); const aS = Math.atan2(tmp2.y, Math.hypot(tmp2.x, tmp2.z));
+    const pitch = clamp(clamp(aS - 0.55 * half, aL + 0.25 * half, aL + 0.52 * half), -0.2, 1.15);
+    // yaw: mostly at the lure, leaning a little towards the light
+    const yl = Math.atan2(tmp.z, tmp.x); let ys = Math.atan2(tmp2.z, tmp2.x) - yl;
+    ys = Math.atan2(Math.sin(ys), Math.cos(ys));
+    const yaw = yl + clamp(ys, -0.5, 0.5) * 0.3;
+    const cp = Math.cos(pitch);
+    dLook.set(dPos.x + Math.cos(yaw) * cp * dist, dPos.y + Math.sin(pitch) * dist, dPos.z + Math.sin(yaw) * cp * dist);
   }
 
   /** Keep the camera out of terrain / the boat / on the right side of the surface. */
   function constrain(underwater: boolean, anchor: Vector3) {
     if (underwater) {
-      pos.y = Math.min(pos.y, under());
+      pos.y = Math.min(pos.y, under(pos.x, pos.z));
       for (let i = 0; i < 8; i++) {
         if (seabedAt(pos.x, pos.z) + 0.45 <= pos.y) break;
-        pos.x += (anchor.x - pos.x) * 0.3; pos.z += (anchor.z - pos.z) * 0.3; pos.y = Math.min(pos.y, under());
+        pos.x += (anchor.x - pos.x) * 0.3; pos.z += (anchor.z - pos.z) * 0.3; pos.y = Math.min(pos.y, under(pos.x, pos.z));
       }
       pos.y = Math.max(pos.y, seabedAt(pos.x, pos.z) + 0.4);
+      pos.y = Math.min(pos.y, under(pos.x, pos.z)); // the surface margin wins over the seabed margin (shallows)
       pos.x = clamp(pos.x, -WORLD.half + 0.4, WORLD.half - 0.4); pos.z = clamp(pos.z, -WORLD.half + 0.4, WORLD.half - 0.4);
     } else {
       pos.y = Math.max(pos.y, WORLD.surface + 0.35);
@@ -193,6 +235,7 @@ export function createInset(ctx: Ctx, world: World, school: School, game: Game, 
     const r: InsetRect = { x: full.x, y: full.y + full.height - h, width: w, height: h };
     if (innerWidth <= 650) r.y = full.y;
     shown = r;
+    cam.fov = damp(cam.fov, fovTarget, 2.2, dt);
     cam.aspect = w / h; cam.updateProjectionMatrix();
     world.setInset(cam, r);
     school.setInsetCamera(cam);

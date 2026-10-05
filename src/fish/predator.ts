@@ -16,14 +16,19 @@ export class Predator {
   /** Incremented every time a charge finishes. */
   chargesDone = 0;
   private timer = 6; private chargeTime = 0; private chargeDir = new Vector3(); private orbit = 0; private forced = false;
-  private v = new Vector3(); private want = new Vector3(); private target = new Vector3(); private speedNow = 1.5;
+  private v = new Vector3(); private want = new Vector3(); private target = new Vector3(); private aim = new Vector3(); private speedNow = 1.5;
+  private exitPast = 10; private locked = false;
 
   constructor(private seabed: { heights: Float32Array; resolution: number }) {}
 
   /** Start a charge as soon as possible. */
   send() { this.timer = 0; this.mode = 'cruise'; this.forced = true; }
 
-  update(dt: number, centroid: Vector3, enabled: boolean) {
+  /**
+   * `ring`: while the school mills it is a torus with an empty middle, so its centroid is in the hollow. The predator
+   * then prowls outside the ring and charges through the band of fish instead of across the empty centre.
+   */
+  update(dt: number, centroid: Vector3, enabled: boolean, ring: { center: Vector3; radius: number } | null = null) {
     // fade in / out (scale is the size multiplier)
     this.scale += ((enabled ? 1 : 0) - this.scale) * Math.min(1, dt * 1.5);
     this.active = enabled && this.scale > 0.6;
@@ -32,7 +37,7 @@ export class Predator {
     if (this.mode === 'cruise') {
       this.timer -= dt;
       // prowl around the OUTSIDE of the school (target clamped inside the tank walls)
-      const rel = this.v.set(this.pos.x - c.x, 0, this.pos.z - c.z), ang = Math.atan2(rel.z, rel.x) + 0.5, R = 11.0;
+      const rel = this.v.set(this.pos.x - c.x, 0, this.pos.z - c.z), ang = Math.atan2(rel.z, rel.x) + 0.5, R = ring ? ring.radius + 7 : 11.0;
       this.orbit += dt * 0.4;
       const lim = WORLD.half - 3;
       this.target.set(clamp(c.x + Math.cos(ang) * R, -lim, lim), clamp(c.y + Math.sin(this.orbit) * 1.5, 4.5, 8.5), clamp(c.z + Math.sin(ang) * R, -lim, lim));
@@ -41,18 +46,29 @@ export class Predator {
       this.steer(dt, 1.3);
       if (this.timer <= 0 && (this.pos.distanceTo(c) > 7 || this.forced)) {
         this.mode = 'charge'; this.chargeTime = 0; this.forced = false;
-        this.chargeDir.copy(c).sub(this.pos); this.chargeDir.y *= 0.5;
+        // Pierce straight through: aim at the centre (of the milling ring, or the school), run through it and out the far
+        // side. While milling it crosses the near wall of fish, the empty hollow, then the far wall.
+        if (ring) this.aim.copy(ring.center); else this.aim.copy(c);
+        this.exitPast = (ring ? ring.radius : 4) + 6; this.locked = false;
+        this.chargeDir.copy(this.aim).sub(this.pos); this.chargeDir.y *= 0.5;
         if (this.chargeDir.lengthSq() < 0.01) this.chargeDir.set(1, 0, 0);
         this.chargeDir.normalize();
       }
     } else {
       this.chargeTime += dt;
-      this.target.copy(c).addScaledVector(this.chargeDir, 12);
+      // Home in on the centre until it is close or already passed, then lock the heading: a straight run, no curving.
+      if (!this.locked) {
+        this.chargeDir.copy(this.aim).sub(this.pos); this.chargeDir.y *= 0.5;
+        const d = this.chargeDir.length();
+        if (d < 3.5 || this.v.copy(this.dir).dot(this.chargeDir) < 0) this.locked = true;
+        if (d > 1e-3) this.chargeDir.divideScalar(d); else this.chargeDir.copy(this.dir);
+      }
+      this.target.copy(this.pos).addScaledVector(this.chargeDir, 10);
       this.want.copy(this.target).sub(this.pos);
       this.speedNow += (this.speed - this.speedNow) * Math.min(1, dt * 3.5);
-      this.steer(dt, 1.0);
-      const past = this.v.copy(this.pos).sub(c).dot(this.chargeDir);
-      if (past > 9 || this.chargeTime > 9) { this.mode = 'cruise'; this.chargesDone++; this.timer = this.interval * (0.7 + Math.random() * 0.6); }
+      this.steer(dt, this.locked ? 6 : 3.2);
+      const past = this.v.copy(this.pos).sub(this.aim).dot(this.chargeDir);
+      if ((this.locked && past > this.exitPast) || this.chargeTime > 12) { this.mode = 'cruise'; this.chargesDone++; this.timer = this.interval * (0.7 + Math.random() * 0.6); }
     }
     this.phase = (this.phase + dt * (1.1 + this.speedNow * 0.6)) % 1; // fast, sweeping tail beat
     this.avoid();

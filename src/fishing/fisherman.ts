@@ -1,6 +1,6 @@
-import { BufferGeometry, CapsuleGeometry, CylinderGeometry, Group, LatheGeometry, Mesh, Object3D, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3 } from 'three/webgpu';
+import { BufferGeometry, CylinderGeometry, Group, LatheGeometry, Matrix4, Mesh, Object3D, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3 } from 'three/webgpu';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import type { Boat } from './boat';
+import { SEAT, type Boat } from './boat';
 import type { Game } from './game';
 import { clamp, damp, merge, mk, smoothMaterial } from './build';
 import { fabricTexture, strawTexture } from './textures';
@@ -41,23 +41,33 @@ const POSES = {
 type PoseName = keyof typeof POSES;
 
 export function createFisherman(boat: Boat, game: Game) {
-  // palette: yellow oilskin, navy trousers, green rubber boots, ruddy skin, white beard, straw hat
-  const skin = '#e3ab86', jacket = '#e3a72f', jacketDark = '#bf861f', pants = '#3f5670', pantsCuff = '#6f86a3', boot = '#2f4a35', hair = '#e7e3da';
+  // Sun-weathered skin, faded indigo cotton, charcoal trousers and sparse silver hair.
+  const skin = '#c99770', jacket = '#496079', jacketDark = '#35495e', pants = '#353b43', pantsCuff = '#555c64', hair = '#a9a69a';
   const S = (r: number) => new SphereGeometry(r, 24, 16);
-  const cap = (r: number, len: number, rs = 16) => new CapsuleGeometry(r, len, 8, rs);
   const cylG = (r0: number, r1: number, h: number, rs = 20) => new CylinderGeometry(r0, r1, h, rs);
   const tor = (R: number, r: number, arc = Math.PI * 2, rs = 24) => new TorusGeometry(R, r, 10, rs, arc);
   const rbox = (w: number, h: number, d: number, r = 0.01) => new RoundedBoxGeometry(w, h, d, 3, r);
 
+  // Small bevels and sparse radial sections keep the silhouette tailored, not inflated.
+  const bevel = (w: number, h: number, d: number, r = 0.006) => new RoundedBoxGeometry(w, h, d, 1, r);
+  const lathe = (points: number[][], segments = 12) => new LatheGeometry(points.map(p => new Vector2(p[0], p[1])), segments);
+  const strand = (a: [number, number, number], b: [number, number, number], radius: number, color: string, endRadius = radius) => {
+    const start = new Vector3(...a), end = new Vector3(...b), delta = end.clone().sub(start);
+    const g = new CylinderGeometry(endRadius, radius, delta.length(), 5);
+    g.applyQuaternion(new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), delta.normalize()));
+    g.translate(...start.add(end).multiplyScalar(0.5).toArray());
+    return mk(g, color);
+  };
+
   const fabric = fabricTexture(), straw = strawTexture();
   fabric.repeat.set(5, 5);
   const cloth = smoothMaterial({ roughness: 0.88, map: fabric });
-  const skinMat = smoothMaterial({ roughness: 0.5 });
+  const skinMat = smoothMaterial({ roughness: 0.82 });
   const strawMat = smoothMaterial({ roughness: 0.92, map: straw });
 
   const rig = new Group();
   boat.group.add(rig);
-  rig.position.set(-0.12, 0.105, 0);
+  rig.position.set(SEAT.x, SEAT.rigY, 0);
 
   /** cloth + skin geometry lists -> a group with one mesh per material. */
   const body = (clothParts: BufferGeometry[], skinParts: BufferGeometry[]) => {
@@ -69,76 +79,134 @@ export function createFisherman(boat: Boat, game: Game) {
     return g;
   };
 
-  // ---- legs (static): pelvis, thighs, knees, shins, rolled cuffs, rubber boots ----
-  const legCloth: BufferGeometry[] = [mk(S(1), pants, [0, -0.01, 0], [0, 0, 0], [0.13, 0.08, 0.165])];
+  // ---- legs (static): the seat is y=-0.075 and sandal soles rest at y=-0.265 ----
+  const legCloth: BufferGeometry[] = [mk(lathe([[0, -0.075], [0.095, -0.075], [0.137, -0.06], [0.146, -0.025], [0.146, 0.025], [0.1, 0.055], [0, 0.055]], 16), pants, [0, 0, 0], [0, 0, 0], [0.82, 1, 1.08])];
   const legSkin: BufferGeometry[] = [];
   for (const s of [-1, 1]) {
-    const z = s * 0.08;
-    legCloth.push(mk(cap(0.06, 0.17), pants, [0.15, 0, z], [0, 0, Math.PI / 2]));
-    legCloth.push(mk(S(0.062), pants, [0.29, 0, z]));
-    legCloth.push(mk(cap(0.05, 0.06), pants, [0.29, -0.115, z]));
-    legCloth.push(mk(tor(0.056, 0.02), pantsCuff, [0.29, -0.16, z], [Math.PI / 2, 0, 0]));
-    legSkin.push(mk(cylG(0.056, 0.06, 0.105), boot, [0.29, -0.205, z]));
-    legSkin.push(mk(cap(0.054, 0.1), boot, [0.33, -0.21, z], [0, 0, Math.PI / 2], [1, 1, 0.98]));
-    legSkin.push(mk(rbox(0.23, 0.02, 0.112, 0.008), '#1d1d1d', [0.335, -0.255, z]));
+    const z = s * 0.082;
+    legCloth.push(mk(lathe([[0, -0.145], [0.052, -0.145], [0.065, -0.12], [0.068, 0.08], [0.058, 0.135], [0, 0.14]]), pants, [0.145, -0.005, z], [0, 0, -Math.PI / 2]));
+    legCloth.push(mk(lathe([[0, -0.14], [0.046, -0.14], [0.052, -0.08], [0.06, 0.015], [0.044, 0.04], [0, 0.04]]), pants, [0.28, -0.005, z]));
+    legCloth.push(mk(cylG(0.05, 0.049, 0.025, 10), pantsCuff, [0.28, -0.132, z]));
+    legSkin.push(mk(cylG(0.035, 0.024, 0.09, 10), skin, [0.28, -0.182, z]));
+    legSkin.push(mk(bevel(0.15, 0.034, 0.071, 0.009), skin, [0.32, -0.235, z]));
+    legCloth.push(mk(bevel(0.175, 0.012, 0.085, 0.008), '#39352f', [0.324, -0.259, z]));
+    legCloth.push(mk(bevel(0.028, 0.008, 0.079, 0.003), '#5a5141', [0.335, -0.215, z], [0, 0, -0.12]));
+    // Two shallow toe creases, visible only in close views.
+    for (const dz of [-0.014, 0.008]) legSkin.push(strand([0.371, -0.217, z + dz], [0.386, -0.219, z + dz], 0.0008, '#866248'));
   }
   rig.add(body(legCloth, legSkin));
 
   const torsoYaw = new Group(); torsoYaw.position.set(0, 0.03, 0); rig.add(torsoYaw);
   const torsoLean = new Group(); torsoYaw.add(torsoLean);
-  const oval: [number, number, number] = [0.82, 1, 1.12];
-  const torsoProfile = [[0.001, -0.02], [0.1, -0.015], [0.135, 0.02], [0.145, 0.08], [0.138, 0.15], [0.15, 0.24], [0.162, 0.32], [0.155, 0.37], [0.11, 0.415], [0.06, 0.44], [0.001, 0.452]].map(p => new Vector2(p[0], p[1]));
+  const oval: [number, number, number] = [0.78, 1, 1.12];
+  const torsoProfile = [[0.001, -0.02], [0.135, -0.02], [0.146, 0.01], [0.139, 0.12], [0.15, 0.27], [0.158, 0.35], [0.139, 0.39], [0.054, 0.43], [0.001, 0.43]];
   const torsoCloth: BufferGeometry[] = [
-    mk(new LatheGeometry(torsoProfile, 40), jacket, [0, 0, 0], [0, 0, 0], oval),
-    mk(tor(0.146, 0.016), '#5a3b22', [0, 0.07, 0], [Math.PI / 2, 0, 0], [0.82, 1.12, 1]),
-    mk(rbox(0.018, 0.03, 0.05, 0.006), '#c9a24b', [0.121, 0.07, 0]),
-    mk(tor(0.108, 0.03), jacketDark, [0, 0.415, 0], [Math.PI / 2, 0, 0], [0.82, 1.12, 1]),
+    mk(lathe(torsoProfile, 16), jacket, [0, 0, 0], [0, 0, 0], oval),
+    mk(lathe([[0.14, 0.028], [0.144, 0.033], [0.143, 0.063], [0.14, 0.068]], 16), '#525863', [0, 0, 0], [0, 0, 0], oval),
+    mk(bevel(0.018, 0.09, 0.035, 0.003), '#525863', [0.112, 0.019, 0.08], [0.08, 0, -0.1]),
+    // A low neckline binding leaves only a short, natural length of neck visible.
+    mk(lathe([[0.053, 0.426], [0.054, 0.437], [0.059, 0.435], [0.06, 0.424]], 16), jacketDark, [0, 0, 0], [0, 0, 0], oval),
+    mk(bevel(0.012, 0.275, 0.022, 0.002), jacketDark, [0.114, 0.245, 0], [0, 0, -0.055]),
   ];
-  for (const [y, x] of [[0.14, 0.113], [0.21, 0.12], [0.28, 0.13], [0.34, 0.132]] as const) torsoCloth.push(mk(S(0.011), '#4a3a22', [x, y, 0], [0, 0, 0], [0.7, 1, 1]));
-  for (const s of [-1, 1]) torsoCloth.push(mk(rbox(0.024, 0.07, 0.1, 0.01), jacketDark, [0.1, 0.13, s * 0.085], [0, s * -0.55, 0]));
-  torsoCloth.push(mk(rbox(0.012, 0.3, 0.05, 0.005), jacketDark, [0.122, 0.235, 0]));
-  torsoLean.add(body(torsoCloth, [mk(cylG(0.046, 0.05, 0.09), skin, [0, 0.46, 0])]));
+  for (const [y, x] of [[0.14, 0.116], [0.21, 0.121], [0.28, 0.127], [0.35, 0.13]] as const) {
+    torsoCloth.push(mk(bevel(0.006, 0.006, 0.018, 0.002), '#969b9d', [x, y, 0]));
+  }
+  for (const s of [-1, 1]) torsoCloth.push(mk(bevel(0.009, 0.072, 0.063, 0.003), jacketDark, [0.105, 0.145, s * 0.08], [0, s * -0.5, 0]));
+  torsoLean.add(body(torsoCloth, [mk(cylG(0.037, 0.044, 0.061, 12), skin, [0, 0.44, 0])]));
 
-  // ---- head: skull, nose, ears, brows, eyes, moustache & beard, straw hat with a woven texture ----
-  const head = new Group(); head.position.set(0, 0.5, 0); torsoLean.add(head);
+  // ---- head: narrower jaw, quiet lids, small nose, weathered lines and sparse facial hair ----
+  const head = new Group(); head.position.set(0, 0.462, 0); torsoLean.add(head);
   const headYaw = new Group(); head.add(headYaw);
   const headPitch = new Group(); headYaw.add(headPitch);
   const headSkin: BufferGeometry[] = [
-    mk(S(1), skin, [0, 0.1, 0], [0, 0, 0], [0.095, 0.105, 0.09]),
-    mk(S(1), '#e9a184', [0.07, 0.083, 0.052], [0, 0, 0], [0.03, 0.03, 0.03]),
-    mk(S(1), '#e9a184', [0.07, 0.083, -0.052], [0, 0, 0], [0.03, 0.03, 0.03]),
-    mk(S(1), '#e9a184', [0.094, 0.09, 0], [0, 0, 0], [0.025, 0.03, 0.023]),
-    mk(S(1), skin, [-0.005, 0.1, 0.092], [0, 0, 0], [0.015, 0.03, 0.02]),
-    mk(S(1), skin, [-0.005, 0.1, -0.092], [0, 0, 0], [0.015, 0.03, 0.02]),
-    mk(S(1), '#f4f1ea', [0.078, 0.117, 0.036], [0, 0, 0], [0.012, 0.014, 0.014]),
-    mk(S(1), '#f4f1ea', [0.078, 0.117, -0.036], [0, 0, 0], [0.012, 0.014, 0.014]),
-    mk(S(1), '#2b4a63', [0.088, 0.117, 0.036], [0, 0, 0], [0.007, 0.009, 0.009]),
-    mk(S(1), '#2b4a63', [0.088, 0.117, -0.036], [0, 0, 0], [0.007, 0.009, 0.009]),
-    mk(cap(0.0085, 0.03), '#cfcabf', [0.083, 0.143, 0.038], [Math.PI / 2, 0, 0.12]),
-    mk(cap(0.0085, 0.03), '#cfcabf', [0.083, 0.143, -0.038], [Math.PI / 2, 0, -0.12]),
-    mk(cap(0.011, 0.034), hair, [0.09, 0.066, 0.024], [Math.PI / 2, 0, 0.25]),
-    mk(cap(0.011, 0.034), hair, [0.09, 0.066, -0.024], [Math.PI / 2, 0, -0.25]),
-    mk(S(1), hair, [0.03, 0.028, 0], [0, 0, 0], [0.072, 0.055, 0.078]),
-    mk(S(1), hair, [0.06, -0.012, 0], [0, 0, 0], [0.04, 0.05, 0.045]),
-    mk(S(1), hair, [-0.03, 0.13, 0.084], [0, 0, 0], [0.032, 0.036, 0.03]),
-    mk(S(1), hair, [-0.03, 0.13, -0.084], [0, 0, 0], [0.032, 0.036, 0.03]),
-    mk(S(1), hair, [-0.075, 0.115, 0], [0, 0, 0], [0.04, 0.05, 0.06]),
+    mk(lathe([[0, 0], [0.041, 0.007], [0.06, 0.028], [0.079, 0.072], [0.081, 0.13], [0.071, 0.167], [0.044, 0.188], [0, 0.195]], 16), skin, [0, 0, 0], [0, Math.PI / 16, 0], [1, 1, 0.92]),
+    mk(bevel(0.021, 0.031, 0.019, 0.006), skin, [0.079, 0.096, 0], [0, 0, -0.18]),
+    mk(bevel(0.018, 0.012, 0.023, 0.004), '#bc8964', [0.09, 0.084, 0]),
+    mk(bevel(0.005, 0.002, 0.027, 0.0008), '#765448', [0.069, 0.053, 0]),
   ];
-  headPitch.add(body([mk(tor(0.108, 0.013), '#c8493d', [0, 0.198, 0], [Math.PI / 2, 0, 0])], headSkin));
-  const hatProfile = [[0.001, 0.292], [0.05, 0.29], [0.088, 0.278], [0.104, 0.245], [0.108, 0.2], [0.14, 0.192], [0.19, 0.192], [0.232, 0.202], [0.245, 0.218], [0.24, 0.212], [0.23, 0.192], [0.19, 0.181], [0.14, 0.181], [0.106, 0.185]].map(p => new Vector2(p[0], p[1]));
-  const hat = new Mesh(merge([mk(new LatheGeometry(hatProfile, 48), '#ffffff', [0, 0, 0], [0, 0, 0], [1, 1, 1], [8, 3])]), strawMat);
+  for (const s of [-1, 1]) {
+    headSkin.push(
+      mk(bevel(0.022, 0.036, 0.014, 0.006), skin, [-0.009, 0.099, s * 0.073], [s * 0.1, 0, -0.13]),
+      mk(bevel(0.012, 0.02, 0.003, 0.003), '#a87658', [-0.006, 0.1, s * 0.08]),
+      // Shallow facets catch the lantern across the cheekbones and brow ridge.
+      mk(bevel(0.017, 0.025, 0.033, 0.005), skin, [0.063, 0.091, s * 0.041], [0, s * 0.48, -0.12]),
+      mk(bevel(0.012, 0.012, 0.031, 0.003), skin, [0.071, 0.13, s * 0.032], [0, s * 0.37, 0]),
+      // Almost horizontal eyes, inset beneath soft upper lids; no protruding eyeballs.
+      mk(bevel(0.005, 0.003, 0.023, 0.001), '#383331', [0.073, 0.117, s * 0.032], [0, s * 0.37, 0]),
+      mk(bevel(0.006, 0.004, 0.027, 0.0015), '#b38260', [0.072, 0.121, s * 0.032], [0, s * 0.37, 0]),
+      mk(bevel(0.004, 0.003, 0.026, 0.001), '#77766e', [0.071, 0.134, s * 0.033], [0, s * 0.36, 0]),
+      mk(bevel(0.025, 0.045, 0.007, 0.002), '#646761', [-0.033, 0.125, s * 0.065], [0, s * -0.25, 0]),
+      strand([0.067, 0.106, s * 0.043], [0.06, 0.102, s * 0.05], 0.0009, '#9b7156'),
+      strand([0.082, 0.075, s * 0.012], [0.073, 0.058, s * 0.024], 0.0008, '#9b7156'),
+    );
+    for (let i = 0; i < 3; i++) headSkin.push(strand([0.08, 0.068 - i * 0.002, s * 0.003], [0.073, 0.06 - i * 0.002, s * (0.025 + i * 0.002)], 0.0012, hair, 0.0004));
+  }
+  // A few separate tapering whiskers let the skin show through the goatee.
+  for (let i = -3; i <= 3; i++) headSkin.push(strand([0.054, 0.026, i * 0.0035], [0.053 + Math.abs(i) * 0.002, -0.021 + Math.abs(i) * 0.004, i * 0.002], 0.0014, hair, 0.00035));
+  const headCloth: BufferGeometry[] = [
+    // This inner bamboo band overlaps the crown and meets the inside of the cone.
+    mk(lathe([[0.065, 0.172], [0.069, 0.176], [0.068, 0.201], [0.063, 0.208], [0.06, 0.204], [0.063, 0.175], [0.065, 0.172]], 20), '#9d8255'),
+  ];
+  for (const s of [-1, 1]) {
+    headCloth.push(strand([-0.01, 0.173, s * 0.079], [0.012, 0.051, s * 0.072], 0.0022, '#716b51'));
+    headCloth.push(strand([0.012, 0.051, s * 0.072], [0.036, 0.007, s * 0.006], 0.0022, '#716b51'));
+    headCloth.push(strand([0.036, 0.007, 0], [0.025, -0.018, s * 0.011], 0.0018, '#716b51'));
+  }
+  headCloth.push(mk(bevel(0.008, 0.007, 0.01, 0.002), '#716b51', [0.036, 0.007, 0]));
+  headPitch.add(body(headCloth, headSkin));
+  // Retain the broad woven nón lá profile, lowering it onto the crown support.
+  const hatProfile = [[0.001, 0.372], [0.03, 0.352], [0.09, 0.3], [0.16, 0.248], [0.225, 0.205], [0.262, 0.186], [0.268, 0.18], [0.258, 0.178], [0.2, 0.2], [0.12, 0.236], [0.06, 0.262], [0.001, 0.27]].map(p => new Vector2(p[0], p[1]));
+  const hat = new Mesh(merge([mk(new LatheGeometry(hatProfile, 48), '#ffffff', [0.024, -0.054, 0], [0, 0, 0.1], [1, 1, 1], [8, 3])]), strawMat);
   hat.castShadow = hat.receiveShadow = true; headPitch.add(hat);
 
-  // ---- arms: sleeve + rolled cuff + hand (thumb + fist) ----
-  interface Arm { shoulder: Group; elbow: Group; side: number }
+  // ---- arms: loose tapered sleeves, flat rolled cuffs, exposed wrists and small gripping hands ----
+  interface Arm { shoulder: Group; elbow: Group; hand: Group; side: number }
   const arms: Arm[] = [];
   for (const side of [1, -1]) {
     const shoulder = new Group(); shoulder.position.set(0, SHOULDER_Y, side * SHOULDER_Z); torsoLean.add(shoulder);
-    shoulder.add(body([mk(S(0.058), jacket), mk(cap(0.047, 0.13), jacket, [0, -0.112, 0])], []));
+    shoulder.add(body([mk(lathe([[0, 0.035], [0.037, 0.035], [0.056, 0.011], [0.058, -0.04], [0.046, -L1], [0, -L1]], 12), jacket)], []));
     const elbow = new Group(); elbow.position.set(0, -L1, 0); shoulder.add(elbow);
-    elbow.add(body([mk(S(0.045), jacket), mk(cap(0.039, 0.115), jacket, [0, -0.105, 0]), mk(tor(0.043, 0.016), jacketDark, [0, -0.19, 0], [Math.PI / 2, 0, 0])],
-      [mk(S(1), skin, [0, -L2 - 0.004, 0], [0, 0, 0], [0.04, 0.05, 0.036]), mk(cap(0.012, 0.03), skin, [0.03, -L2 + 0.02, 0], [0, 0, -0.6]), mk(S(1), skin, [0.006, -L2 - 0.03, 0], [0, 0, 0], [0.034, 0.028, 0.03])]));
-    arms.push({ shoulder, elbow, side });
+    elbow.add(body([
+      mk(lathe([[0, 0.022], [0.039, 0.022], [0.045, 0], [0.041, -0.075], [0.035, -0.135], [0, -0.135]], 12), jacket),
+      mk(cylG(0.042, 0.039, 0.025, 12), jacketDark, [0, -0.127, 0]),
+      mk(cylG(0.0425, 0.0415, 0.008, 12), jacket, [0, -0.118, 0]),
+    ], [
+      mk(cylG(0.029, 0.023, 0.088, 10), skin, [0, -0.178, 0]),
+    ]));
+    // Hand-local x follows the handle; +y is the back of the palm, toward the wrist.
+    // Leave an actual opening between the palm and fingertips for the grip/knob.
+    const radius = side === 1 ? 0.031 : 0.017;
+    const palm = bevel(0.071, 0.021, 0.055, 0.005);
+    const positions = palm.getAttribute('position');
+    for (let i = 0; i < positions.count; i++) {
+      const taper = 0.86 - positions.getZ(i) * 5;
+      positions.setX(i, positions.getX(i) * taper);
+    }
+    palm.computeVertexNormals();
+    const handSkin = [mk(palm, skin, [0, radius + 0.006, 0])];
+    for (let i = 0; i < 4; i++) {
+      const x = (i - 1.5) * 0.017;
+      const r = radius + 0.007 - (i === 0 ? 0.002 : 0);
+      const joints: [number, number, number][] = [
+        [x, radius + 0.007, -0.018],
+        [x, r * 0.42, -r * 0.94],
+        [x, -r * 0.62, -r * 0.81],
+        [x, -r, 0.001],
+        [x, -r * 0.72, r * 0.47],
+      ];
+      for (let j = 0; j < joints.length - 1; j++) {
+        handSkin.push(strand(joints[j], joints[j + 1], 0.0075 - j * 0.0005, skin, 0.007 - j * 0.0005));
+      }
+      // A tiny knuckle plane keeps the four fingers legible at boat-camera distance.
+      handSkin.push(mk(bevel(0.013, 0.012, 0.013, 0.002), '#d0a07a', joints[1]));
+    }
+    handSkin.push(
+      strand([side * 0.023, radius + 0.006, 0.017], [side * 0.041, radius * 0.48, 0.029], 0.012, skin, 0.011),
+      strand([side * 0.041, radius * 0.48, 0.029], [side * 0.025, -radius * 0.32, 0.029], 0.011, skin, 0.009),
+      strand([side * 0.025, -radius * 0.32, 0.029], [side * 0.012, -radius * 0.55, 0.023], 0.009, skin, 0.007),
+    );
+    const hand = body([], handSkin); hand.position.set(0, -L2, 0); elbow.add(hand);
+    arms.push({ shoulder, elbow, hand, side });
   }
   const [armR, armL] = arms;
 
@@ -187,6 +255,22 @@ export function createFisherman(boat: Boat, game: Game) {
   const tipWorld = new Vector3(), tmpA = new Vector3(), tmpB = new Vector3(), tmpC = new Vector3(), tmpQ = new Quaternion();
   const targetR = new Vector3(), targetL = new Vector3();
   const rodQuat = new Quaternion();
+  const wristBasis = new Matrix4(), forearmQuat = new Quaternion();
+  const handX = new Vector3(), handY = new Vector3(), handZ = new Vector3();
+
+  function orientHand(arm: Arm, crankWeight: number) {
+    // Rotate only the wrist geometry; the existing two-bone solve and targets stay intact.
+    forearmQuat.multiplyQuaternions(arm.shoulder.quaternion, arm.elbow.quaternion);
+    handX.set(1 - crankWeight, 0, crankWeight).normalize().applyQuaternion(rodQuat);
+    handY.set(0, 1, 0).applyQuaternion(forearmQuat);
+    handY.addScaledVector(handX, -handY.dot(handX));
+    if (handY.lengthSq() < 1e-6) handY.set(0, 1, 0).applyQuaternion(rodQuat);
+    handY.normalize();
+    handZ.crossVectors(handX, handY).normalize();
+    handY.crossVectors(handZ, handX);
+    arm.hand.quaternion.setFromRotationMatrix(wristBasis.makeBasis(handX, handY, handZ));
+    arm.hand.quaternion.premultiply(forearmQuat.invert());
+  }
 
   function solveArm(arm: Arm, target: Vector3, pole: Vector3) {
     const v = tmpA.copy(target).sub(arm.shoulder.position);
@@ -300,6 +384,8 @@ export function createFisherman(boat: Boat, game: Game) {
         .multiplyScalar(1 / wTot);
       solveArm(armR, targetR, poleR);
       solveArm(armL, targetL, poleL);
+      orientHand(armR, 0);
+      orientHand(armL, cur.wCrank / wTot);
 
       // ---- hull recoil on the whip ----
       // (handled by game events in index)

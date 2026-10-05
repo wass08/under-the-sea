@@ -32,12 +32,12 @@ export interface GameEvent { type: 'cast' | 'release' | 'splash' | 'bite' | 'nib
 export const settings = {
   auto: false,
   autoSuccess: 0.8,
-  lureDepth: 1.8,
+  lureDepth: 5.2,
   minRange: 2,
-  maxRange: 16,
+  maxRange: 12,
   biteMin: 2,
   biteMax: 6,
-  hookWindow: 1.5,
+  hookWindow: 3.25,
   castSpeed: 1,
   curiosityRamp: 3,
   scaredMin: 2,
@@ -54,6 +54,8 @@ export class Game {
   caught = 0;
   readonly target = new Vector3();
   readonly lure = new Vector3();
+  /** Exact metal hook tip, updated by the rig after its transform is applied. */
+  readonly hookPoint = new Vector3();
   readonly bobber = new Vector3();
   tension = 0;
   dip = 0;
@@ -83,6 +85,7 @@ export class Game {
   get castWind() { return 0.6 / settings.castSpeed; }
   private flightT = 0.9;
   get castFlight() { return this.flightT / settings.castSpeed; }
+  get hookWindow() { return settings.hookWindow; }
   get jerkTime() { return JERK; }
   get celebrateHold() { return HOLD; }
   get auto() { return settings.auto; }
@@ -246,7 +249,7 @@ export class Game {
         this.nibbleT -= dt;
         if (this.nibbleT <= 0) { this.nibbleT = rand(0.35, 0.8); this.nibbleV = rand(0.3, 0.6); }
         if (stats.biter === 'hooked') {
-          this.enter('bite'); this.emit('bite', this.bobber); this.rippleT = 0;
+          this.enter('bite'); this.hookLeft = 1; this.emit('bite', this.bobber); this.rippleT = 0;
           this.autoReact = rand(0.25, 0.9); this.autoHook = Math.random() < settings.autoSuccess;
         } else if ((stats.biter === 'none' && this.t > 0.6) || this.t > 8) { this.enter('curious'); this.beginWait(); }
         break;
@@ -284,7 +287,7 @@ export class Game {
           this.lure.lerpVectors(this.rel0, this.S, e);
           this.lure.x += Math.sin(t * 19) * amp; this.lure.z += Math.cos(t * 23) * amp;
           this.bobber.lerpVectors(this.bob0, this.tmp.lerpVectors(env.tip, this.S, 0.35), e * 0.8);
-          this.school.setLure(this.lure);
+          this.school.setLure(this.hookPoint);
         } else if (t < JERK + PULL + OUT) {
           const e = smooth((t - JERK - PULL) / OUT);
           this.lure.lerpVectors(this.S, this.H, e); this.lure.y += 0.8 * K * Math.sin(Math.PI * e) * (1 - e * 0.4);
@@ -293,7 +296,7 @@ export class Game {
         } else { this.enter('celebrate'); }
         if (this.phase === 'reeling') {
           if (t >= JERK + PULL && !this.surfaced) { this.surfaced = true; this.emit('surface', this.S); }
-          this.school.setLure(this.lure);
+          this.school.setLure(this.hookPoint);
         }
         break;
       }
@@ -305,12 +308,12 @@ export class Game {
         if (t < HOLD) {
           this.lure.copy(this.H); this.lure.y += Math.sin(t * 11) * 0.03; this.lure.x += Math.sin(t * 15) * 0.02;
           this.bobber.lerpVectors(env.tip, this.H, 0.3);
-          this.school.setLure(this.lure);
+          this.school.setLure(this.hookPoint);
         } else if (t < HOLD + DROP) {
           const e = (t - HOLD) / DROP;
           this.lure.lerpVectors(this.H, bucketTop, e * e);
           this.bobber.lerpVectors(env.tip, this.H, 0.3);
-          this.school.setLure(this.lure);
+          this.school.setLure(this.hookPoint);
         } else {
           this.emit('drop', bucketTop);
           this.school.land(true); this.school.setLure(null); this.school.setCuriosity(0);
@@ -329,7 +332,7 @@ export class Game {
           this.lure.set(this.rel0.x + this.dragDir.x * travel, this.rel0.y, this.rel0.z + this.dragDir.z * travel);
           const h = env.heightAt(this.lure.x, this.lure.z);
           this.bobber.set(this.lure.x - this.dragDir.x * 0.3, h + 0.02, this.lure.z - this.dragDir.z * 0.3);
-          this.school.setLure(this.lure);
+          this.school.setLure(this.hookPoint);
           this.inWater = true;
           if (this.t + dt >= this.dragDur) { this.liftFrom.copy(this.lure); this.liftBob.copy(this.bobber); }
         } else {
@@ -356,7 +359,7 @@ export class Game {
     this.nibbleV *= Math.exp(-5 * dt);
     this.dip = Math.max(this.dip, this.nibbleV);
 
-    if (['scared', 'calm', 'curious', 'approaching', 'bite', 'missed'].includes(this.phase)) this.school.setLure(this.lure);
+    if (['scared', 'calm', 'curious', 'approaching', 'bite', 'missed'].includes(this.phase)) this.school.setLure(this.hookPoint);
     this.school.setCuriosity(curiosity);
   }
 
@@ -368,7 +371,7 @@ export class Game {
     const x = this.target.x, z = this.target.z, env = this.env;
     const h = env.heightAt(x, z);
     const room = Math.max(0.5, h - env.seabedAt(x, z) - 0.35);
-    const depth = Math.min(settings.lureDepth, room) * (1 - Math.pow(1 - clamp(this.sinkT / 1.0, 0, 1), 2));
+    const depth = Math.min(settings.lureDepth, room) * (1 - Math.pow(1 - clamp(this.sinkT / 2.2, 0, 1), 2));
     const dipY = this.dip * 0.26;
     this.bobber.set(x, h + Math.sin(this.clock * 2.3) * 0.012 - dipY, z);
     this.lure.set(x + Math.sin(this.clock * 0.9) * 0.05, h - depth + Math.sin(this.clock * 1.7) * 0.02 - dipY * 0.5, z + Math.cos(this.clock * 0.8) * 0.05);
