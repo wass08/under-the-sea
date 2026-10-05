@@ -23,3 +23,5 @@ dist-*/
 legacy/verify/**/*.png
 shots/
 .claude/worktrees/
+.vercel
+.env*
